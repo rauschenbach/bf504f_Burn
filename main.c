@@ -29,16 +29,16 @@
 
 
 /***********************************************************************************************
- * 	Дефиниции
+ * 	Р”РµС„РёРЅРёС†РёРё
  ***********************************************************************************************/
-#define 	POWER_DROP_COUNT		10	/* За xxx минут подсчитаем. КАК НЕ ДЕЛАТЬ ДЕФИНИЦИЕЙ!!!  */
+#define 	POWER_DROP_COUNT		10	/* Р—Р° xxx РјРёРЅСѓС‚ РїРѕРґСЃС‡РёС‚Р°РµРј. РљРђРљ РќР• Р”Р•Р›РђРўР¬ Р”Р•Р¤РРќРР¦РР•Р™!!!  */
 
 
-/* Биты запросов */
+/* Р‘РёС‚С‹ Р·Р°РїСЂРѕСЃРѕРІ */
 #define		LOCK_NONE_REQ			0x00
 #define		LOCK_POWER_OFF_REQ		0x01
 
-/* Бит Lock */
+/* Р‘РёС‚ Lock */
 #define		MODE_SLEEP_LOCK			0x0100
 #define		MODE_REG_LOCK			0x0200
 #define		MODE_FIN_LOCK			0x0400
@@ -53,15 +53,15 @@
 
 
 /**
- * 	Статические функции - видны тока здесь
+ * 	РЎС‚Р°С‚РёС‡РµСЃРєРёРµ С„СѓРЅРєС†РёРё - РІРёРґРЅС‹ С‚РѕРєР° Р·РґРµСЃСЊ
  */
 static void timer1_callback_func(u32);
 static int begin_reg(void);
 static void shift_gns_time_after_burn(void);
 static void finish_reg(void);
 static s16 filt_reg_power(s16);
-static void get_atmega_data(DEV_STATE_ENUM *);	/* Передается указатель - можно сменить состояние */
-static void count_work_time(DEV_STATE_ENUM);	/* Время работы прибора - должно накапливаться и сбрасываться на flash или eeprom */
+static void get_atmega_data(DEV_STATE_ENUM *);	/* РџРµСЂРµРґР°РµС‚СЃСЏ СѓРєР°Р·Р°С‚РµР»СЊ - РјРѕР¶РЅРѕ СЃРјРµРЅРёС‚СЊ СЃРѕСЃС‚РѕСЏРЅРёРµ */
+static void count_work_time(DEV_STATE_ENUM);	/* Р’СЂРµРјСЏ СЂР°Р±РѕС‚С‹ РїСЂРёР±РѕСЂР° - РґРѕР»Р¶РЅРѕ РЅР°РєР°РїР»РёРІР°С‚СЊСЃСЏ Рё СЃР±СЂР°СЃС‹РІР°С‚СЊСЃСЏ РЅР° flash РёР»Рё eeprom */
 #if QUARTZ_CLK_FREQ==(19200000)
 static void quartz4_tune(DEV_STATE_ENUM);
 #endif
@@ -72,10 +72,10 @@ static void check_magnet_request(DEV_STATE_ENUM *);
 static void wait_burn_time(DEV_STATE_ENUM state);
 
 /**
- * 	Статические функции, кот. описывают состояние КА
+ * 	РЎС‚Р°С‚РёС‡РµСЃРєРёРµ С„СѓРЅРєС†РёРё, РєРѕС‚. РѕРїРёСЃС‹РІР°СЋС‚ СЃРѕСЃС‚РѕСЏРЅРёРµ РљРђ
  */
 static int OnPoweronState(void);
-static int OnChooseModeState(void);	/* + тестирование модулей  */
+static int OnChooseModeState(void);	/* + С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ РјРѕРґСѓР»РµР№  */
 static int OnInitState(void);
 static int OnTuneQ19State(void);
 static int OnTuneWithoutGPS(void);
@@ -91,18 +91,18 @@ static int OnCommandModeState(void);
 static int OnEmergencyModeState(void);
 
 /**
- * 	Статические структуры и переменные
+ * 	РЎС‚Р°С‚РёС‡РµСЃРєРёРµ СЃС‚СЂСѓРєС‚СѓСЂС‹ Рё РїРµСЂРµРјРµРЅРЅС‹Рµ
  */
-static DEV_STATE_ENUM dev_state = DEV_POWER_ON_STATE;	/* Состояние автомата изначально */
-static DEV_STATUS_STRUCT dev_status;	/* Статус ошибок устроства + параметры среды и напряжения */
-static DEV_ADDR_STRUCT dev_addr;	/* Адрес устройства  */
-static DEV_DAC_STRUCT dac_data;	/* Для подачи на ЦАПы  */
-static DEV_UART_CMD uart_cmd;	/* Внешняя команда пришла с UART */
-static DEV_WORK_TIME_STRUCT dwt;	/* Время работы устроства */
-static GNS110_PARAM_STRUCT gns110_param;	/* Параметры запуска прибора заполняются в LOG.C и сохраняются здесь */
+static DEV_STATE_ENUM dev_state = DEV_POWER_ON_STATE;	/* РЎРѕСЃС‚РѕСЏРЅРёРµ Р°РІС‚РѕРјР°С‚Р° РёР·РЅР°С‡Р°Р»СЊРЅРѕ */
+static DEV_STATUS_STRUCT dev_status;	/* РЎС‚Р°С‚СѓСЃ РѕС€РёР±РѕРє СѓСЃС‚СЂРѕСЃС‚РІР° + РїР°СЂР°РјРµС‚СЂС‹ СЃСЂРµРґС‹ Рё РЅР°РїСЂСЏР¶РµРЅРёСЏ */
+static DEV_ADDR_STRUCT dev_addr;	/* РђРґСЂРµСЃ СѓСЃС‚СЂРѕР№СЃС‚РІР°  */
+static DEV_DAC_STRUCT dac_data;	/* Р”Р»СЏ РїРѕРґР°С‡Рё РЅР° Р¦РђРџС‹  */
+static DEV_UART_CMD uart_cmd;	/* Р’РЅРµС€РЅСЏСЏ РєРѕРјР°РЅРґР° РїСЂРёС€Р»Р° СЃ UART */
+static DEV_WORK_TIME_STRUCT dwt;	/* Р’СЂРµРјСЏ СЂР°Р±РѕС‚С‹ СѓСЃС‚СЂРѕСЃС‚РІР° */
+static GNS110_PARAM_STRUCT gns110_param;	/* РџР°СЂР°РјРµС‚СЂС‹ Р·Р°РїСѓСЃРєР° РїСЂРёР±РѕСЂР° Р·Р°РїРѕР»РЅСЏСЋС‚СЃСЏ РІ LOG.C Рё СЃРѕС…СЂР°РЅСЏСЋС‚СЃСЏ Р·РґРµСЃСЊ */
 
 
-/* Для фильтра скользящего среднего 20 байт + 4 байта */
+/* Р”Р»СЏ С„РёР»СЊС‚СЂР° СЃРєРѕР»СЊР·СЏС‰РµРіРѕ СЃСЂРµРґРЅРµРіРѕ 20 Р±Р°Р№С‚ + 4 Р±Р°Р№С‚Р° */
 static struct {
     s16 volts[POWER_DROP_COUNT];
     s16 count;
@@ -110,7 +110,7 @@ static struct {
 } xVoltArray;
 
 
-/* Включение модема  */
+/* Р’РєР»СЋС‡РµРЅРёРµ РјРѕРґРµРјР°  */
 static struct {
     long lTime0;
     bool bEnter;
@@ -118,7 +118,7 @@ static struct {
     u16 rsvd;
 } xShiftModemTime;
 
-/* Включение GPS */
+/* Р’РєР»СЋС‡РµРЅРёРµ GPS */
 static struct {
     long lTime0;
     bool bEnter;
@@ -126,19 +126,19 @@ static struct {
 } xNmeaSet;
 
 /**
- * Время RTC - снимать не чаще чем раз в секунду  
+ * Р’СЂРµРјСЏ RTC - СЃРЅРёРјР°С‚СЊ РЅРµ С‡Р°С‰Рµ С‡РµРј СЂР°Р· РІ СЃРµРєСѓРЅРґСѓ  
  */
 static struct {
     s32 iTime0;
     s32 iTime1;
     s32 iSec;
-    s32 iLabel;			/* Здесь подсчитаем насколько убегает генератор */
+    s32 iLabel;			/* Р—РґРµСЃСЊ РїРѕРґСЃС‡РёС‚Р°РµРј РЅР°СЃРєРѕР»СЊРєРѕ СѓР±РµРіР°РµС‚ РіРµРЅРµСЂР°С‚РѕСЂ */
     s32 iWasDrift;
 
     union {
 	struct {
-	    c8 cStatus;		/* Статус часов RTC - какое у нас время, точное или нет */
-	    c8 cPackCnt;	/* Счетчик достоверных приемов NMEA  */
+	    c8 cStatus;		/* РЎС‚Р°С‚СѓСЃ С‡Р°СЃРѕРІ RTC - РєР°РєРѕРµ Сѓ РЅР°СЃ РІСЂРµРјСЏ, С‚РѕС‡РЅРѕРµ РёР»Рё РЅРµС‚ */
+	    c8 cPackCnt;	/* РЎС‡РµС‚С‡РёРє РґРѕСЃС‚РѕРІРµСЂРЅС‹С… РїСЂРёРµРјРѕРІ NMEA  */
 	    c8 cCheck;
 	    c8 cLock;
 	} xRtcCheck;
@@ -149,36 +149,36 @@ static struct {
 
 
 /**
- * Пришли внешние запросы: на пережиг или выключение или переключение режимов 
- * Начало и окончание записи  
- * Ожидание подключения по WUSB или плохой сброс!
- * или Выключение питания при отсутсвии связи ~10 минут
+ * РџСЂРёС€Р»Рё РІРЅРµС€РЅРёРµ Р·Р°РїСЂРѕСЃС‹: РЅР° РїРµСЂРµР¶РёРі РёР»Рё РІС‹РєР»СЋС‡РµРЅРёРµ РёР»Рё РїРµСЂРµРєР»СЋС‡РµРЅРёРµ СЂРµР¶РёРјРѕРІ 
+ * РќР°С‡Р°Р»Рѕ Рё РѕРєРѕРЅС‡Р°РЅРёРµ Р·Р°РїРёСЃРё  
+ * РћР¶РёРґР°РЅРёРµ РїРѕРґРєР»СЋС‡РµРЅРёСЏ РїРѕ WUSB РёР»Рё РїР»РѕС…РѕР№ СЃР±СЂРѕСЃ!
+ * РёР»Рё Р’С‹РєР»СЋС‡РµРЅРёРµ РїРёС‚Р°РЅРёСЏ РїСЂРё РѕС‚СЃСѓС‚СЃРІРёРё СЃРІСЏР·Рё ~10 РјРёРЅСѓС‚
  */
 static struct {
-    int time;			/* Время  */
-    int reset;			/* Причина сброса или выключения */
-    u32 mode;			/* Режимы работы, чтобы не плодить static  */
+    int time;			/* Р’СЂРµРјСЏ  */
+    int reset;			/* РџСЂРёС‡РёРЅР° СЃР±СЂРѕСЃР° РёР»Рё РІС‹РєР»СЋС‡РµРЅРёСЏ */
+    u32 mode;			/* Р РµР¶РёРјС‹ СЂР°Р±РѕС‚С‹, С‡С‚РѕР±С‹ РЅРµ РїР»РѕРґРёС‚СЊ static  */
 
     struct {
-	int ExtBurnDur;		/* Продолжительность пережига */
-	u8 cBurnCnt;		/* Счетчик пережигов */
+	int ExtBurnDur;		/* РџСЂРѕРґРѕР»Р¶РёС‚РµР»СЊРЅРѕСЃС‚СЊ РїРµСЂРµР¶РёРіР° */
+	u8 cBurnCnt;		/* РЎС‡РµС‚С‡РёРє РїРµСЂРµР¶РёРіРѕРІ */
 	bool bBurnLock;
 	u16 rsvd;
     } burn_time;
 
-    /* Команды на переключение магнитом  */
+    /* РљРѕРјР°РЅРґС‹ РЅР° РїРµСЂРµРєР»СЋС‡РµРЅРёРµ РјР°РіРЅРёС‚РѕРј  */
     union {
 	struct {
-	    bool bPowerOff;	/* Флаг на выключение магнитом */
-	    bool bExternBurn;	/* Флаг внешнего пережига  */
-	    u8 bInnerBurnOn:4;	/* Флаг внутреннего пережига ВКЛ */
-	    u8 bInnerBurnOff:4;	/* Флаг внутреннего пережига  ВЫКЛ */
-	    bool bInitCmd;	/* Переключиться в командный режим из ожидания */
+	    bool bPowerOff;	/* Р¤Р»Р°Рі РЅР° РІС‹РєР»СЋС‡РµРЅРёРµ РјР°РіРЅРёС‚РѕРј */
+	    bool bExternBurn;	/* Р¤Р»Р°Рі РІРЅРµС€РЅРµРіРѕ РїРµСЂРµР¶РёРіР°  */
+	    u8 bInnerBurnOn:4;	/* Р¤Р»Р°Рі РІРЅСѓС‚СЂРµРЅРЅРµРіРѕ РїРµСЂРµР¶РёРіР° Р’РљР› */
+	    u8 bInnerBurnOff:4;	/* Р¤Р»Р°Рі РІРЅСѓС‚СЂРµРЅРЅРµРіРѕ РїРµСЂРµР¶РёРіР°  Р’Р«РљР› */
+	    bool bInitCmd;	/* РџРµСЂРµРєР»СЋС‡РёС‚СЊСЃСЏ РІ РєРѕРјР°РЅРґРЅС‹Р№ СЂРµР¶РёРј РёР· РѕР¶РёРґР°РЅРёСЏ */
 	} xCtrlBurn;
 	u32 ctrl;
     } u_burn;
 
-    /* Флаги во время регистрации */
+    /* Р¤Р»Р°РіРё РІРѕ РІСЂРµРјСЏ СЂРµРіРёСЃС‚СЂР°С†РёРё */
     union {
 	struct {
 	    u8 cLock;
@@ -189,11 +189,11 @@ static struct {
 	u32 ctrl;
     } u_reg;
 
-    /* Ожидание режима */
+    /* РћР¶РёРґР°РЅРёРµ СЂРµР¶РёРјР° */
     union {
 	struct {
-	    u8 bResult;		/* Результат монтирования  */
-	    u8 bState;		/* Состояние КА */
+	    u8 bResult;		/* Р РµР·СѓР»СЊС‚Р°С‚ РјРѕРЅС‚РёСЂРѕРІР°РЅРёСЏ  */
+	    u8 bState;		/* РЎРѕСЃС‚РѕСЏРЅРёРµ РљРђ */
 	    bool bWusb;
 	    bool bSync;
 	} xCtrlMode;
@@ -202,26 +202,26 @@ static struct {
 } xShooseMode;
 
 
-/* Ф-ция main()  */
+/* Р¤-С†РёСЏ main()  */
 #pragma section("L1_code")
 int main(void)
 {
     int res;
 
-    /* Иниц. PLL от кварца 19.2 МГц с самого начала! */
+    /* РРЅРёС†. PLL РѕС‚ РєРІР°СЂС†Р° 19.2 РњР“С† СЃ СЃР°РјРѕРіРѕ РЅР°С‡Р°Р»Р°! */
     PLL_init();
 
-    /* Настройка FLASH на нашу частоту переферии */
+    /* РќР°СЃС‚СЂРѕР№РєР° FLASH РЅР° РЅР°С€Сѓ С‡Р°СЃС‚РѕС‚Сѓ РїРµСЂРµС„РµСЂРёРё */
     FLASH_init();
 
     dev_state = DEV_POWER_ON_STATE;
 
-    /* Основной цыкл - Здесь все круyтица */
+    /* РћСЃРЅРѕРІРЅРѕР№ С†С‹РєР» - Р—РґРµСЃСЊ РІСЃРµ РєСЂСѓyС‚РёС†Р° */
     while (1) {
 
 	switch (dev_state) {
 
-	    /* Включение питания и инициализация всех портов */
+	    /* Р’РєР»СЋС‡РµРЅРёРµ РїРёС‚Р°РЅРёСЏ Рё РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РІСЃРµС… РїРѕСЂС‚РѕРІ */
 	case DEV_POWER_ON_STATE:
 	    res = OnPoweronState();
 	    if (res == 0) {
@@ -233,7 +233,7 @@ int main(void)
 	    }
 	    break;
 
-	    /* Тестирование и ожидание команды от COM порта */
+	    /* РўРµСЃС‚РёСЂРѕРІР°РЅРёРµ Рё РѕР¶РёРґР°РЅРёРµ РєРѕРјР°РЅРґС‹ РѕС‚ COM РїРѕСЂС‚Р° */
 	case DEV_CHOOSE_MODE_STATE:
 	    res = OnChooseModeState();
 	    if (res == 1) {
@@ -245,54 +245,54 @@ int main(void)
 	    }
 	    break;
 
-	    /* Инициализация всех устройств + проверка, лампочки - все часто */
+	    /* РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РІСЃРµС… СѓСЃС‚СЂРѕР№СЃС‚РІ + РїСЂРѕРІРµСЂРєР°, Р»Р°РјРїРѕС‡РєРё - РІСЃРµ С‡Р°СЃС‚Рѕ */
 	case DEV_INIT_STATE:
 	    res = OnInitState();
-	    if (res == 0) {	/* Все OK? */
-		dev_state = DEV_GET_3DFIX_STATE;	/* Если все нормально - изменим состояние устройства на прием NMEA */
+	    if (res == 0) {	/* Р’СЃРµ OK? */
+		dev_state = DEV_GET_3DFIX_STATE;	/* Р•СЃР»Рё РІСЃРµ РЅРѕСЂРјР°Р»СЊРЅРѕ - РёР·РјРµРЅРёРј СЃРѕСЃС‚РѕСЏРЅРёРµ СѓСЃС‚СЂРѕР№СЃС‚РІР° РЅР° РїСЂРёРµРј NMEA */
 	    } else if (res == 1) {
 		dev_state = DEV_TUNE_WITHOUT_GPS_STATE;
 	    } else if (res < 0) {
-		dev_state = DEV_ERROR_STATE;	/* Ошибка */
+		dev_state = DEV_ERROR_STATE;	/* РћС€РёР±РєР° */
 	    }
 	    break;
 
 
-	    /* Запускаем таймер без подстройки */
+	    /* Р—Р°РїСѓСЃРєР°РµРј С‚Р°Р№РјРµСЂ Р±РµР· РїРѕРґСЃС‚СЂРѕР№РєРё */
 	case DEV_TUNE_WITHOUT_GPS_STATE:
 	    res = OnTuneWithoutGPS();
-	    if (res == 0) {	// Все OK
+	    if (res == 0) {	// Р’СЃРµ OK
 		dev_state = DEV_SLEEP_AND_DIVE_STATE;
 	    } else if (res < 0) {
-		dev_state = DEV_ERROR_STATE;	/* Не смогли поймать Запустить таймер 1 */
+		dev_state = DEV_ERROR_STATE;	/* РќРµ СЃРјРѕРіР»Рё РїРѕР№РјР°С‚СЊ Р—Р°РїСѓСЃС‚РёС‚СЊ С‚Р°Р№РјРµСЂ 1 */
 	    }
 	    break;
 
-	    /* Ожидание GPS 1 час. Лампочки - синяя редко. Если получили - то изменим состояние КА */
+	    /* РћР¶РёРґР°РЅРёРµ GPS 1 С‡Р°СЃ. Р›Р°РјРїРѕС‡РєРё - СЃРёРЅСЏСЏ СЂРµРґРєРѕ. Р•СЃР»Рё РїРѕР»СѓС‡РёР»Рё - С‚Рѕ РёР·РјРµРЅРёРј СЃРѕСЃС‚РѕСЏРЅРёРµ РљРђ */
 	case DEV_GET_3DFIX_STATE:
 	    res = OnGet3DFixState();
 	    if (res > 0) {
-		dev_state = DEV_TUNE_Q19_STATE;	/* Получили 3d Fix!!! */
+		dev_state = DEV_TUNE_Q19_STATE;	/* РџРѕР»СѓС‡РёР»Рё 3d Fix!!! */
 	    } else if (res == -1) {
-		dev_state = DEV_ERROR_STATE;	/* Не смогли поймать Запустить таймер 1 */
+		dev_state = DEV_ERROR_STATE;	/* РќРµ СЃРјРѕРіР»Рё РїРѕР№РјР°С‚СЊ Р—Р°РїСѓСЃС‚РёС‚СЊ С‚Р°Р№РјРµСЂ 1 */
 	    }
 	    break;
 
-	    /* Подстройка кварца 19.2 МГц и синхронизация двух таймеров.  Лампочки - зеленая редко */
+	    /* РџРѕРґСЃС‚СЂРѕР№РєР° РєРІР°СЂС†Р° 19.2 РњР“С† Рё СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ РґРІСѓС… С‚Р°Р№РјРµСЂРѕРІ.  Р›Р°РјРїРѕС‡РєРё - Р·РµР»РµРЅР°СЏ СЂРµРґРєРѕ */
 	case DEV_TUNE_Q19_STATE:
 	    res = OnTuneQ19State();
-	    if (res == 0)	/* Все в порядке - настроили! */
-		dev_state = DEV_SLEEP_AND_DIVE_STATE;	/* Изменяем состояние на SLEEP */
-	    else if (res == 1)	/* нет спутников - вернуться на предыдущий щаг */
+	    if (res == 0)	/* Р’СЃРµ РІ РїРѕСЂСЏРґРєРµ - РЅР°СЃС‚СЂРѕРёР»Рё! */
+		dev_state = DEV_SLEEP_AND_DIVE_STATE;	/* РР·РјРµРЅСЏРµРј СЃРѕСЃС‚РѕСЏРЅРёРµ РЅР° SLEEP */
+	    else if (res == 1)	/* РЅРµС‚ СЃРїСѓС‚РЅРёРєРѕРІ - РІРµСЂРЅСѓС‚СЊСЃСЏ РЅР° РїСЂРµРґС‹РґСѓС‰РёР№ С‰Р°Рі */
 		dev_state = DEV_GET_3DFIX_STATE;
 	    else
-		dev_state = DEV_ERROR_STATE;	/* Ошибочка вышла! */
+		dev_state = DEV_ERROR_STATE;	/* РћС€РёР±РѕС‡РєР° РІС‹С€Р»Р°! */
 	    break;
 
 
-	    /* Установим CallBack для таймера 1 и изменим режим PLL. Лампочки - зеленая редко
-	     * при достижении времени начала регистрации минус ~2 минуты
-	     * переходим в режим регистрации, переход состояние WAKEUP в функции callback PRTC (timer1) */
+	    /* РЈСЃС‚Р°РЅРѕРІРёРј CallBack РґР»СЏ С‚Р°Р№РјРµСЂР° 1 Рё РёР·РјРµРЅРёРј СЂРµР¶РёРј PLL. Р›Р°РјРїРѕС‡РєРё - Р·РµР»РµРЅР°СЏ СЂРµРґРєРѕ
+	     * РїСЂРё РґРѕСЃС‚РёР¶РµРЅРёРё РІСЂРµРјРµРЅРё РЅР°С‡Р°Р»Р° СЂРµРіРёСЃС‚СЂР°С†РёРё РјРёРЅСѓСЃ ~2 РјРёРЅСѓС‚С‹
+	     * РїРµСЂРµС…РѕРґРёРј РІ СЂРµР¶РёРј СЂРµРіРёСЃС‚СЂР°С†РёРё, РїРµСЂРµС…РѕРґ СЃРѕСЃС‚РѕСЏРЅРёРµ WAKEUP РІ С„СѓРЅРєС†РёРё callback PRTC (timer1) */
 	case DEV_SLEEP_AND_DIVE_STATE:
 	    res = OnSleepAndDiveState();
 	    if (res > 0) {
@@ -302,18 +302,18 @@ int main(void)
 	    }
 	    break;
 
-	    /* Просыпаемся примерно за две минуты и делаем первичную настройку кварца 4 МГц */
+	    /* РџСЂРѕСЃС‹РїР°РµРјСЃСЏ РїСЂРёРјРµСЂРЅРѕ Р·Р° РґРІРµ РјРёРЅСѓС‚С‹ Рё РґРµР»Р°РµРј РїРµСЂРІРёС‡РЅСѓСЋ РЅР°СЃС‚СЂРѕР№РєСѓ РєРІР°СЂС†Р° 4 РњР“С† */
 	case DEV_WAKEUP_STATE:
 	    res = OnWakeupState();
 	    if (res == 0) {
-		dev_state = DEV_REG_STATE;	/* Перехрдим на начало регистрации  */
+		dev_state = DEV_REG_STATE;	/* РџРµСЂРµС…СЂРґРёРј РЅР° РЅР°С‡Р°Р»Рѕ СЂРµРіРёСЃС‚СЂР°С†РёРё  */
 	    } else {
 		dev_state = DEV_ERROR_STATE;
 	    }
 	    break;
 
 
-	    /* Начинаем подстраивать АЦП и подаем SYNC на них. Лампочки - зеленая редко */
+	    /* РќР°С‡РёРЅР°РµРј РїРѕРґСЃС‚СЂР°РёРІР°С‚СЊ РђР¦Рџ Рё РїРѕРґР°РµРј SYNC РЅР° РЅРёС…. Р›Р°РјРїРѕС‡РєРё - Р·РµР»РµРЅР°СЏ СЂРµРґРєРѕ */
 	case DEV_REG_STATE:
 	    res = OnRegState();
 	    if (res != 0) {
@@ -321,7 +321,7 @@ int main(void)
 	    }
 	    break;
 
-	    /* Окончание регистрации - в это состояние попадаем из таймера 1. Выключаем все оборудование и впадаем в спячку */
+	    /* РћРєРѕРЅС‡Р°РЅРёРµ СЂРµРіРёСЃС‚СЂР°С†РёРё - РІ СЌС‚Рѕ СЃРѕСЃС‚РѕСЏРЅРёРµ РїРѕРїР°РґР°РµРј РёР· С‚Р°Р№РјРµСЂР° 1. Р’С‹РєР»СЋС‡Р°РµРј РІСЃРµ РѕР±РѕСЂСѓРґРѕРІР°РЅРёРµ Рё РІРїР°РґР°РµРј РІ СЃРїСЏС‡РєСѓ */
 	case DEV_FINISH_REG_STATE:
 	    res = OnFinishRegState();
 	    if (res != 0) {
@@ -329,48 +329,48 @@ int main(void)
 	    }
 	    break;
 
-	    /* Ожидаем GPS и получаем дрифт - сделать как в ожидании NMEA - 1 час */
+	    /* РћР¶РёРґР°РµРј GPS Рё РїРѕР»СѓС‡Р°РµРј РґСЂРёС„С‚ - СЃРґРµР»Р°С‚СЊ РєР°Рє РІ РѕР¶РёРґР°РЅРёРё NMEA - 1 С‡Р°СЃ */
 	case DEV_WAIT_GPS_STATE:
 	    res = OnGet3DFixState();
-	    if (res > 0) {	/* Все нормально  */
-		dev_state = DEV_HALT_STATE;	/* Выключаем  */
+	    if (res > 0) {	/* Р’СЃРµ РЅРѕСЂРјР°Р»СЊРЅРѕ  */
+		dev_state = DEV_HALT_STATE;	/* Р’С‹РєР»СЋС‡Р°РµРј  */
 	    } else if (res == -1) {
 		log_write_log_file("Error: Can't get 3d fix for % seconds\n", WAIT_3DFIX_TIME);
-		dev_state = DEV_EMERGENCY_WAIT_STATE;	/* Ошибка  */
+		dev_state = DEV_EMERGENCY_WAIT_STATE;	/* РћС€РёР±РєР°  */
 	    }
 	    break;
 
 
-	    /* Останов - ожидание поднятия на палубу */
+	    /* РћСЃС‚Р°РЅРѕРІ - РѕР¶РёРґР°РЅРёРµ РїРѕРґРЅСЏС‚РёСЏ РЅР° РїР°Р»СѓР±Сѓ */
 	case DEV_HALT_STATE:
 	    res = OnHaltState();
 	    if (res != 0) {
-		dev_state = DEV_EMERGENCY_WAIT_STATE;	/* Тогда на ошибку!  */
+		dev_state = DEV_EMERGENCY_WAIT_STATE;	/* РўРѕРіРґР° РЅР° РѕС€РёР±РєСѓ!  */
 	    }
 	    if (xShooseMode.u_burn.xCtrlBurn.bPowerOff) {
 		dev_state = DEV_POWER_OFF_STATE;
 	    }
 	    break;
 
-	    /* В этом состоянии просто выключаем питание  */
+	    /* Р’ СЌС‚РѕРј СЃРѕСЃС‚РѕСЏРЅРёРё РїСЂРѕСЃС‚Рѕ РІС‹РєР»СЋС‡Р°РµРј РїРёС‚Р°РЅРёРµ  */
 	case DEV_POWER_OFF_STATE:
 	    OnPowerOffState();
 	    break;
 
-	    /* Управление от компьютера - все лампы моргают раз в 2 секунды */
+	    /* РЈРїСЂР°РІР»РµРЅРёРµ РѕС‚ РєРѕРјРїСЊСЋС‚РµСЂР° - РІСЃРµ Р»Р°РјРїС‹ РјРѕСЂРіР°СЋС‚ СЂР°Р· РІ 2 СЃРµРєСѓРЅРґС‹ */
 	case DEV_COMMAND_MODE_STATE:
 	    res = OnCommandModeState();
 	    if (res != 0) {
-		dev_state = DEV_ERROR_STATE;	/* Тогда на ошибку во всех прочих случаях */
+		dev_state = DEV_ERROR_STATE;	/* РўРѕРіРґР° РЅР° РѕС€РёР±РєСѓ РІРѕ РІСЃРµС… РїСЂРѕС‡РёС… СЃР»СѓС‡Р°СЏС… */
 	    }
 	    break;
 
-	    /* Аварийное ожидание  */
+	    /* РђРІР°СЂРёР№РЅРѕРµ РѕР¶РёРґР°РЅРёРµ  */
 	case DEV_EMERGENCY_WAIT_STATE:
 	    res = OnEmergencyModeState();
 	    break;
 
-	    /* Ошибка! Красная часто */
+	    /* РћС€РёР±РєР°! РљСЂР°СЃРЅР°СЏ С‡Р°СЃС‚Рѕ */
 	case DEV_ERROR_STATE:
 	    res = OnErrorState();
 	    if (res != 0) {
@@ -381,68 +381,68 @@ int main(void)
 	default:
 	    break;
 	}
-	/* Всегда во всех состояниях */
+	/* Р’СЃРµРіРґР° РІРѕ РІСЃРµС… СЃРѕСЃС‚РѕСЏРЅРёСЏС… */
 #if QUARTZ_CLK_FREQ==(19200000)
-	quartz4_tune(dev_state);	/* Подстройка кварца раз в секунду всегда */
+	quartz4_tune(dev_state);	/* РџРѕРґСЃС‚СЂРѕР№РєР° РєРІР°СЂС†Р° СЂР°Р· РІ СЃРµРєСѓРЅРґСѓ РІСЃРµРіРґР° */
 #endif
-	get_atmega_data(&dev_state);	/* Получить параметры АЦП с атмеги. Во всех состояниях следим за проволкой. Если модем разрешен! */
-	check_magnet_request(&dev_state);	/* Следить за магнитом */
-	wait_burn_time(dev_state);	/* Следить за пережигом */
-	exec_uart_cmd(&dev_state);	/* Выполнить команду, если в режиме PC */
-	count_work_time(dev_state);	/* Считать время работы */
-	blink_all_leds(dev_state);	/* Моргать лампами в зависимости от режима */
-	PLL_sleep(dev_state);	/* Не спать в командном режиме */
+	get_atmega_data(&dev_state);	/* РџРѕР»СѓС‡РёС‚СЊ РїР°СЂР°РјРµС‚СЂС‹ РђР¦Рџ СЃ Р°С‚РјРµРіРё. Р’Рѕ РІСЃРµС… СЃРѕСЃС‚РѕСЏРЅРёСЏС… СЃР»РµРґРёРј Р·Р° РїСЂРѕРІРѕР»РєРѕР№. Р•СЃР»Рё РјРѕРґРµРј СЂР°Р·СЂРµС€РµРЅ! */
+	check_magnet_request(&dev_state);	/* РЎР»РµРґРёС‚СЊ Р·Р° РјР°РіРЅРёС‚РѕРј */
+	wait_burn_time(dev_state);	/* РЎР»РµРґРёС‚СЊ Р·Р° РїРµСЂРµР¶РёРіРѕРј */
+	exec_uart_cmd(&dev_state);	/* Р’С‹РїРѕР»РЅРёС‚СЊ РєРѕРјР°РЅРґСѓ, РµСЃР»Рё РІ СЂРµР¶РёРјРµ PC */
+	count_work_time(dev_state);	/* РЎС‡РёС‚Р°С‚СЊ РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ */
+	blink_all_leds(dev_state);	/* РњРѕСЂРіР°С‚СЊ Р»Р°РјРїР°РјРё РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ СЂРµР¶РёРјР° */
+	PLL_sleep(dev_state);	/* РќРµ СЃРїР°С‚СЊ РІ РєРѕРјР°РЅРґРЅРѕРј СЂРµР¶РёРјРµ */
     }
     return 0;
 }
 
 
 /**
- * Включение питания и инициализация всех портов, определение версии программы или прошивки
+ * Р’РєР»СЋС‡РµРЅРёРµ РїРёС‚Р°РЅРёСЏ Рё РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РІСЃРµС… РїРѕСЂС‚РѕРІ, РѕРїСЂРµРґРµР»РµРЅРёРµ РІРµСЂСЃРёРё РїСЂРѕРіСЂР°РјРјС‹ РёР»Рё РїСЂРѕС€РёРІРєРё
  */
 #pragma section("FLASH_code")
 static int OnPoweronState(void)
 {
-    init_bf_ports();		/* Ставим порты BF */
-    init_atmega_ports();	/* После таймера конфигурируем все порты на Атмеге */
+    init_bf_ports();		/* РЎС‚Р°РІРёРј РїРѕСЂС‚С‹ BF */
+    init_atmega_ports();	/* РџРѕСЃР»Рµ С‚Р°Р№РјРµСЂР° РєРѕРЅС„РёРіСѓСЂРёСЂСѓРµРј РІСЃРµ РїРѕСЂС‚С‹ РЅР° РђС‚РјРµРіРµ */
 
-    /* Затересть структуру */
+    /* Р—Р°С‚РµСЂРµСЃС‚СЊ СЃС‚СЂСѓРєС‚СѓСЂСѓ */
     memset(&xShooseMode, 0, sizeof(xShooseMode));
 
-    dev_status.st_main |= 0x02;	/*  нет модема или ошиька модема */
-    dev_status.st_test0 |= 0x7F;	/* Ставим байт - потом его снимем если нет проблем */
-    dev_status.st_test1 = 0xF0;	/* Ставим доп. байт - потом его снимем если нет проблем */
+    dev_status.st_main |= 0x02;	/*  РЅРµС‚ РјРѕРґРµРјР° РёР»Рё РѕС€РёСЊРєР° РјРѕРґРµРјР° */
+    dev_status.st_test0 |= 0x7F;	/* РЎС‚Р°РІРёРј Р±Р°Р№С‚ - РїРѕС‚РѕРј РµРіРѕ СЃРЅРёРјРµРј РµСЃР»Рё РЅРµС‚ РїСЂРѕР±Р»РµРј */
+    dev_status.st_test1 = 0xF0;	/* РЎС‚Р°РІРёРј РґРѕРї. Р±Р°Р№С‚ - РїРѕС‚РѕРј РµРіРѕ СЃРЅРёРјРµРј РµСЃР»Рё РЅРµС‚ РїСЂРѕР±Р»РµРј */
     dev_status.quartz = QUARTZ_CLK_FREQ;
     dev_status.sclk = SCLK_VALUE / TIMER_US_DIVIDER;
     dev_status.cclk = SCLK_VALUE * (PLLDIV_VALUE & 0x000F) / (1 << ((PLLDIV_VALUE >> 4) & 0x000F)) / TIMER_US_DIVIDER;
 
 
-    if (eeprom_init()) {	/* Инициализация псевдо-eeprom и flash - Нужна И для eeprom И для сохранения буфера при ошибке SD */
-	dev_status.st_test0 |= 0x20;	/* Ошибка инициализации EEPROM */
+    if (eeprom_init()) {	/* РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РїСЃРµРІРґРѕ-eeprom Рё flash - РќСѓР¶РЅР° Р РґР»СЏ eeprom Р РґР»СЏ СЃРѕС…СЂР°РЅРµРЅРёСЏ Р±СѓС„РµСЂР° РїСЂРё РѕС€РёР±РєРµ SD */
+	dev_status.st_test0 |= 0x20;	/* РћС€РёР±РєР° РёРЅРёС†РёР°Р»РёР·Р°С†РёРё EEPROM */
     } else {
-	dev_status.st_test0 &= ~0x20;	/* Снимаем ошибку */
+	dev_status.st_test0 &= ~0x20;	/* РЎРЅРёРјР°РµРј РѕС€РёР±РєСѓ */
     }
 
 
-    /* Модуль включения - выключения, включаем питание по алгоритму */
+    /* РњРѕРґСѓР»СЊ РІРєР»СЋС‡РµРЅРёСЏ - РІС‹РєР»СЋС‡РµРЅРёСЏ, РІРєР»СЋС‡Р°РµРј РїРёС‚Р°РЅРёРµ РїРѕ Р°Р»РіРѕСЂРёС‚РјСѓ */
     xShooseMode.reset = POWER_on();
-    get_dev_params(&dev_addr, &dwt);	/* Прочитаем адрес устройства и время работы */
+    get_dev_params(&dev_addr, &dwt);	/* РџСЂРѕС‡РёС‚Р°РµРј Р°РґСЂРµСЃ СѓСЃС‚СЂРѕР№СЃС‚РІР° Рё РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ */
 
-    LED_on(LED_GREEN);		/* Зажгем лампу */
+    LED_on(LED_GREEN);		/* Р—Р°Р¶РіРµРј Р»Р°РјРїСѓ */
 
     POWER_init();
 
 
     if (xShooseMode.reset == CAUSE_WDT_RESET) {
-	return 1;		/* Причина сброса по WDT - на работу без подстройки */
+	return 1;		/* РџСЂРёС‡РёРЅР° СЃР±СЂРѕСЃР° РїРѕ WDT - РЅР° СЂР°Р±РѕС‚Сѓ Р±РµР· РїРѕРґСЃС‚СЂРѕР№РєРё */
     } else {
-	return 0;		/* На тестирование */
+	return 0;		/* РќР° С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ */
     }
 }
 
 
 /**
- * Ожидание команды от порта для смены режима работы
+ * РћР¶РёРґР°РЅРёРµ РєРѕРјР°РЅРґС‹ РѕС‚ РїРѕСЂС‚Р° РґР»СЏ СЃРјРµРЅС‹ СЂРµР¶РёРјР° СЂР°Р±РѕС‚С‹
  */
 #pragma section("FLASH_code")
 static int OnChooseModeState(void)
@@ -450,7 +450,7 @@ static int OnChooseModeState(void)
     long t0;
     int i, j;
 
-    /* начальное состояние-монтируем карту  */
+    /* РЅР°С‡Р°Р»СЊРЅРѕРµ СЃРѕСЃС‚РѕСЏРЅРёРµ-РјРѕРЅС‚РёСЂСѓРµРј РєР°СЂС‚Сѓ  */
     if (xShooseMode.u_mode.xCtrlMode.bState == 0) {
 	xShooseMode.u_mode.xCtrlMode.bState = 1;
 
@@ -462,86 +462,86 @@ static int OnChooseModeState(void)
 	xShooseMode.burn_time.ExtBurnDur = 0;
 	xShooseMode.burn_time.bBurnLock = false;
 
-	LED_set_state(LED_QUICK_STATE, LED_QUICK_STATE, LED_QUICK_STATE, LED_OFF_STATE);	/* Огоньки, все быстро моргают кроме синей */
+	LED_set_state(LED_QUICK_STATE, LED_QUICK_STATE, LED_QUICK_STATE, LED_OFF_STATE);	/* РћРіРѕРЅСЊРєРё, РІСЃРµ Р±С‹СЃС‚СЂРѕ РјРѕСЂРіР°СЋС‚ РєСЂРѕРјРµ СЃРёРЅРµР№ */
 
 	memset(&xRtcTicks, 0, sizeof(xRtcTicks));
-	xRtcTicks.u_check.xRtcCheck.cStatus = CLOCK_NO_TIME;	/* Пока у нас нету часов  */
+	xRtcTicks.u_check.xRtcCheck.cStatus = CLOCK_NO_TIME;	/* РџРѕРєР° Сѓ РЅР°СЃ РЅРµС‚Сѓ С‡Р°СЃРѕРІ  */
 
 
-	xShooseMode.u_mode.xCtrlMode.bResult = 1;	/* Ошибка монтирования - поставим заранее чтобы не ставить при ошибке */
-	dev_status.st_test0 |= 0x40;	/* Ошибка карты */
-	dev_status.st_main |= 0x08;	/* Нет файла регистрации */
+	xShooseMode.u_mode.xCtrlMode.bResult = 1;	/* РћС€РёР±РєР° РјРѕРЅС‚РёСЂРѕРІР°РЅРёСЏ - РїРѕСЃС‚Р°РІРёРј Р·Р°СЂР°РЅРµРµ С‡С‚РѕР±С‹ РЅРµ СЃС‚Р°РІРёС‚СЊ РїСЂРё РѕС€РёР±РєРµ */
+	dev_status.st_test0 |= 0x40;	/* РћС€РёР±РєР° РєР°СЂС‚С‹ */
+	dev_status.st_main |= 0x08;	/* РќРµС‚ С„Р°Р№Р»Р° СЂРµРіРёСЃС‚СЂР°С†РёРё */
 
 
-	i = log_mount_fs();	/* Подключим SD карту к BF и монтируем ФС  */
+	i = log_mount_fs();	/* РџРѕРґРєР»СЋС‡РёРј SD РєР°СЂС‚Сѓ Рє BF Рё РјРѕРЅС‚РёСЂСѓРµРј Р¤РЎ  */
 	if (i == RES_NO_ERROR) {
-	    dev_status.st_test0 &= ~0x40;	/* Если монтировали - снимаем ошибку карты и выходим */
+	    dev_status.st_test0 &= ~0x40;	/* Р•СЃР»Рё РјРѕРЅС‚РёСЂРѕРІР°Р»Рё - СЃРЅРёРјР°РµРј РѕС€РёР±РєСѓ РєР°СЂС‚С‹ Рё РІС‹С…РѕРґРёРј */
 
-	    i = log_check_lock_file();	/* Проблем нету, смотрим, есть ли у нас лок файл  */
-	    j = log_check_reg_file();	/* Нет файла регистрации */
+	    i = log_check_lock_file();	/* РџСЂРѕР±Р»РµРј РЅРµС‚Сѓ, СЃРјРѕС‚СЂРёРј, РµСЃС‚СЊ Р»Рё Сѓ РЅР°СЃ Р»РѕРє С„Р°Р№Р»  */
+	    j = log_check_reg_file();	/* РќРµС‚ С„Р°Р№Р»Р° СЂРµРіРёСЃС‚СЂР°С†РёРё */
 
 
-	    /* Есть лок и есть param - переходим в автономный режим */
+	    /* Р•СЃС‚СЊ Р»РѕРє Рё РµСЃС‚СЊ param - РїРµСЂРµС…РѕРґРёРј РІ Р°РІС‚РѕРЅРѕРјРЅС‹Р№ СЂРµР¶РёРј */
 	    if (i == RES_NO_ERROR && j == RES_NO_ERROR) {
-		dev_status.st_main &= ~0x08;	/* Снимает бит "нет файла регистрации" */
+		dev_status.st_main &= ~0x08;	/* РЎРЅРёРјР°РµС‚ Р±РёС‚ "РЅРµС‚ С„Р°Р№Р»Р° СЂРµРіРёСЃС‚СЂР°С†РёРё" */
 		xShooseMode.u_mode.xCtrlMode.bResult = 0;
-		LED_set_state(LED_OFF_STATE, LED_OFF_STATE, LED_OFF_STATE, LED_SLOW_STATE);	/* Синяя лампа чтобы отличить */
-		return 2;	// На выход
+		LED_set_state(LED_OFF_STATE, LED_OFF_STATE, LED_OFF_STATE, LED_SLOW_STATE);	/* РЎРёРЅСЏСЏ Р»Р°РјРїР° С‡С‚РѕР±С‹ РѕС‚Р»РёС‡РёС‚СЊ */
+		return 2;	// РќР° РІС‹С…РѕРґ
 
-		// Выходим с ошибкой - у нас или нет файла параметров
+		// Р’С‹С…РѕРґРёРј СЃ РѕС€РёР±РєРѕР№ - Сѓ РЅР°СЃ РёР»Рё РЅРµС‚ С„Р°Р№Р»Р° РїР°СЂР°РјРµС‚СЂРѕРІ
 	    } else if (j < 0) {
 
-		// нет лок файла но есть param
+		// РЅРµС‚ Р»РѕРє С„Р°Р№Р»Р° РЅРѕ РµСЃС‚СЊ param
 	    } else {
-		dev_status.st_main &= ~0x08;	/* Снимает бит "нет файла регистрации" */
+		dev_status.st_main &= ~0x08;	/* РЎРЅРёРјР°РµС‚ Р±РёС‚ "РЅРµС‚ С„Р°Р№Р»Р° СЂРµРіРёСЃС‚СЂР°С†РёРё" */
 	    }
 	}
 
 
-	/* Подключить WUSB если ошибка или нет файла */
+	/* РџРѕРґРєР»СЋС‡РёС‚СЊ WUSB РµСЃР»Рё РѕС€РёР±РєР° РёР»Рё РЅРµС‚ С„Р°Р№Р»Р° */
 	if (xShooseMode.u_mode.xCtrlMode.bResult) {
-	    xShooseMode.u_mode.xCtrlMode.bWusb = wusb_on();	/* если 1 - подключено по WUSB */
+	    xShooseMode.u_mode.xCtrlMode.bWusb = wusb_on();	/* РµСЃР»Рё 1 - РїРѕРґРєР»СЋС‡РµРЅРѕ РїРѕ WUSB */
 
 	    if (xShooseMode.u_mode.xCtrlMode.bWusb) {
-		LED_set_state(LED_QUICK_STATE, LED_QUICK_STATE, LED_QUICK_STATE, LED_QUICK_STATE);	// Состояние ламп - все мигают
+		LED_set_state(LED_QUICK_STATE, LED_QUICK_STATE, LED_QUICK_STATE, LED_QUICK_STATE);	// РЎРѕСЃС‚РѕСЏРЅРёРµ Р»Р°РјРї - РІСЃРµ РјРёРіР°СЋС‚
 	    }
 	}
-	xShooseMode.time = get_sec_ticks();	/* Получаем метку времени  */
+	xShooseMode.time = get_sec_ticks();	/* РџРѕР»СѓС‡Р°РµРј РјРµС‚РєСѓ РІСЂРµРјРµРЅРё  */
     }
 
     t0 = get_sec_ticks();
 
 
-    /* Открываем UART для отладки если нет файла или ошибка карты */
+    /* РћС‚РєСЂС‹РІР°РµРј UART РґР»СЏ РѕС‚Р»Р°РґРєРё РµСЃР»Рё РЅРµС‚ С„Р°Р№Р»Р° РёР»Рё РѕС€РёР±РєР° РєР°СЂС‚С‹ */
     if (xShooseMode.u_mode.xCtrlMode.bState == 1 && xShooseMode.u_mode.xCtrlMode.bResult == 1) {
-	xShooseMode.u_mode.xCtrlMode.bState = 2;	// меняем состояние
+	xShooseMode.u_mode.xCtrlMode.bState = 2;	// РјРµРЅСЏРµРј СЃРѕСЃС‚РѕСЏРЅРёРµ
 
 	if (comport_init() < 0) {
 	    return -1;
 	}
-	select_sdcard_to_cr();	/* Подключим SD к CR */
-	xShooseMode.time = get_sec_ticks();	/* Получаем время  */
+	select_sdcard_to_cr();	/* РџРѕРґРєР»СЋС‡РёРј SD Рє CR */
+	xShooseMode.time = get_sec_ticks();	/* РџРѕР»СѓС‡Р°РµРј РІСЂРµРјСЏ  */
     }
 
 
-    /* В этом месте ждем, пока не будет получена команда перехода в режим обмена с PC */
+    /* Р’ СЌС‚РѕРј РјРµСЃС‚Рµ Р¶РґРµРј, РїРѕРєР° РЅРµ Р±СѓРґРµС‚ РїРѕР»СѓС‡РµРЅР° РєРѕРјР°РЅРґР° РїРµСЂРµС…РѕРґР° РІ СЂРµР¶РёРј РѕР±РјРµРЅР° СЃ PC */
     if (xShooseMode.u_mode.xCtrlMode.bState == 2 && xShooseMode.u_mode.xCtrlMode.bResult == 1 && t0 - xShooseMode.time < WAIT_PC_TIME) {
 
-	/* В режим работы от PC не выключая WUSB */
+	/* Р’ СЂРµР¶РёРј СЂР°Р±РѕС‚С‹ РѕС‚ PC РЅРµ РІС‹РєР»СЋС‡Р°СЏ WUSB */
 	if (comport_get_command() == UART_CMD_COMMAND_PC)
 	    return 1;
 
-	/* Перейти в режим работы если провели магнитом */
+	/* РџРµСЂРµР№С‚Рё РІ СЂРµР¶РёРј СЂР°Р±РѕС‚С‹ РµСЃР»Рё РїСЂРѕРІРµР»Рё РјР°РіРЅРёС‚РѕРј */
 	if (xShooseMode.u_burn.xCtrlBurn.bInitCmd)
 	    xShooseMode.u_mode.xCtrlMode.bResult = 0;
     }
 
-    /* нормальный режим работы если нет файла или вышло время ожидания или переключили магнитом */
+    /* РЅРѕСЂРјР°Р»СЊРЅС‹Р№ СЂРµР¶РёРј СЂР°Р±РѕС‚С‹ РµСЃР»Рё РЅРµС‚ С„Р°Р№Р»Р° РёР»Рё РІС‹С€Р»Рѕ РІСЂРµРјСЏ РѕР¶РёРґР°РЅРёСЏ РёР»Рё РїРµСЂРµРєР»СЋС‡РёР»Рё РјР°РіРЅРёС‚РѕРј */
     if (t0 - xShooseMode.time > WAIT_PC_TIME || xShooseMode.u_burn.xCtrlBurn.bInitCmd) {
-	wusb_off();		/* Выключить WUSB */
-	select_sdcard_to_bf();	/* Подключили к BF  */
-	comport_close();	/* Выключить отладочный порт */
-	unselect_debug_uart();	/* Отключили UART */
+	wusb_off();		/* Р’С‹РєР»СЋС‡РёС‚СЊ WUSB */
+	select_sdcard_to_bf();	/* РџРѕРґРєР»СЋС‡РёР»Рё Рє BF  */
+	comport_close();	/* Р’С‹РєР»СЋС‡РёС‚СЊ РѕС‚Р»Р°РґРѕС‡РЅС‹Р№ РїРѕСЂС‚ */
+	unselect_debug_uart();	/* РћС‚РєР»СЋС‡РёР»Рё UART */
 	return 2;
     }
 
@@ -550,7 +550,7 @@ static int OnChooseModeState(void)
 
 
 /**
- * Инициализация устройств, тестирование модулей, уже ПОСЛЕ ТОГО КАК ВЫЖДАЛИ 2 МИНУТЫ ОЖДИДАНИЯ PC 
+ * РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СѓСЃС‚СЂРѕР№СЃС‚РІ, С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ РјРѕРґСѓР»РµР№, СѓР¶Рµ РџРћРЎР›Р• РўРћР“Рћ РљРђРљ Р’Р«Р–Р”РђР›Р 2 РњРРќРЈРўР« РћР–Р”РР”РђРќРРЇ PC 
  */
 #pragma section("FLASH_code")
 static int OnInitState(void)
@@ -567,11 +567,11 @@ static int OnInitState(void)
 
     LED_set_state(LED_TEST_STATE, LED_TEST_STATE, LED_TEST_STATE, LED_TEST_STATE);
 
-    /* Обнулим */
+    /* РћР±РЅСѓР»РёРј */
     memset(&xShiftModemTime, 0, sizeof(xShiftModemTime));
 
 
-    /* Забьем отсчеты фильтра 2-ным напяжением минимума */
+    /* Р—Р°Р±СЊРµРј РѕС‚СЃС‡РµС‚С‹ С„РёР»СЊС‚СЂР° 2-РЅС‹Рј РЅР°РїСЏР¶РµРЅРёРµРј РјРёРЅРёРјСѓРјР° */
     for (i = 0; i < POWER_DROP_COUNT; i++) {
 	xVoltArray.volts[i] = POWER_DROP_MIN * 2;
     }
@@ -579,25 +579,25 @@ static int OnInitState(void)
     xVoltArray.num = 0;
 
 
-    /* Задержка */
+    /* Р—Р°РґРµСЂР¶РєР° */
     t0 = get_msec_ticks();
     while (get_msec_ticks() - t0 < 250) {
 	LED_test();
     }
 
 
-    /* Если у нас карта не монтирована - Подключим SD карту к BF и монтируем ФС  */
+    /* Р•СЃР»Рё Сѓ РЅР°СЃ РєР°СЂС‚Р° РЅРµ РјРѕРЅС‚РёСЂРѕРІР°РЅР° - РџРѕРґРєР»СЋС‡РёРј SD РєР°СЂС‚Сѓ Рє BF Рё РјРѕРЅС‚РёСЂСѓРµРј Р¤РЎ  */
     if (!log_check_mounted() || dev_status.st_test0 & 0x40) {
 	if (log_mount_fs() != RES_NO_ERROR) {
 	    return -1;
 	}
     }
 
-    select_analog_power();	/* Включить аналоговую часть */
-    test_all(&dev_status);	/*  Тестируем ВСЕ модули здесь!  */
+    select_analog_power();	/* Р’РєР»СЋС‡РёС‚СЊ Р°РЅР°Р»РѕРіРѕРІСѓСЋ С‡Р°СЃС‚СЊ */
+    test_all(&dev_status);	/*  РўРµСЃС‚РёСЂСѓРµРј Р’РЎР• РјРѕРґСѓР»Рё Р·РґРµСЃСЊ!  */
 
 
-    /* Открыть файл регистрации и получить все времена */
+    /* РћС‚РєСЂС‹С‚СЊ С„Р°Р№Р» СЂРµРіРёСЃС‚СЂР°С†РёРё Рё РїРѕР»СѓС‡РёС‚СЊ РІСЃРµ РІСЂРµРјРµРЅР° */
     res = log_read_reg_file(&gns110_param);
     if (res != RES_NO_ERROR) {
 	log_write_error_file("Error:   Can't parse reg file. parameters error (%d)\n", res);
@@ -617,7 +617,7 @@ static int OnInitState(void)
 	log_write_log_file("=======DEV_INIT_STATE=======\n");
     }
 
-    /* В самый верх лога! */
+    /* Р’ СЃР°РјС‹Р№ РІРµСЂС… Р»РѕРіР°! */
     log_write_log_file("WARN: --- This program was compilied for %d MHz VCXO ---\n", QUARTZ_CLK_FREQ / TIMER_US_DIVIDER);
 
     print_reset_cause(xShooseMode.reset);
@@ -628,7 +628,7 @@ static int OnInitState(void)
 #endif
 
 
-/* Обычно модули R2B > 6 */
+/* РћР±С‹С‡РЅРѕ РјРѕРґСѓР»Рё R2B > 6 */
 #if defined GNS110_R2A_BOARD
     sym = 'a';
 #elif defined GNS110_R2B_BOARD
@@ -643,64 +643,64 @@ static int OnInitState(void)
 	log_write_log_file("WARN: Unknown program version. Compilation time: %s %s\n", __DATE__, __TIME__);
     }
 
-    /* Запишем в статус частоты в МГц */
+    /* Р—Р°РїРёС€РµРј РІ СЃС‚Р°С‚СѓСЃ С‡Р°СЃС‚РѕС‚С‹ РІ РњР“С† */
     log_write_log_file("INFO: Periph Clock %d MHz, Core clock %d MHz\n", dev_status.sclk, dev_status.cclk);
 
-    /* Какой у нас CPU */
+    /* РљР°РєРѕР№ Сѓ РЅР°СЃ CPU */
     log_write_log_file("INFO: Device ID: %04d with %s CPU\n", dev_addr.addr % 9999, (get_cpu_endian() == 1) ? "Big-endian" : "Little-endian");
     log_write_log_file("INFO: Built for CPU ver. %d, running on CPU ver. %d\n", built_for, running_on);
 
-    /* Разобрали параметры */
+    /* Р Р°Р·РѕР±СЂР°Р»Рё РїР°СЂР°РјРµС‚СЂС‹ */
     log_write_log_file("INFO: Params file was read and parsed OK\n");
-    log_write_log_file("INFO: Work DIR: %s\n", gns110_param.gns110_dir_name);	/* Название директории для всех файлов */
-    log_write_log_file("INFO: Setting Position: %d\n", gns110_param.gns110_pos);	/* Позиция установки */
-    log_write_log_file("INFO: file len %d hour(s), freq %d, pga %d\n", gns110_param.gns110_file_len,	/* Размер файла данных в часах */
-		       gns110_param.gns110_adc_freq,	/* Частота АЦП  */
-		       gns110_param.gns110_adc_pga);	/* Усиление АЦП  */
+    log_write_log_file("INFO: Work DIR: %s\n", gns110_param.gns110_dir_name);	/* РќР°Р·РІР°РЅРёРµ РґРёСЂРµРєС‚РѕСЂРёРё РґР»СЏ РІСЃРµС… С„Р°Р№Р»РѕРІ */
+    log_write_log_file("INFO: Setting Position: %d\n", gns110_param.gns110_pos);	/* РџРѕР·РёС†РёСЏ СѓСЃС‚Р°РЅРѕРІРєРё */
+    log_write_log_file("INFO: file len %d hour(s), freq %d, pga %d\n", gns110_param.gns110_file_len,	/* Р Р°Р·РјРµСЂ С„Р°Р№Р»Р° РґР°РЅРЅС‹С… РІ С‡Р°СЃР°С… */
+		       gns110_param.gns110_adc_freq,	/* Р§Р°СЃС‚РѕС‚Р° РђР¦Рџ  */
+		       gns110_param.gns110_adc_pga);	/* РЈСЃРёР»РµРЅРёРµ РђР¦Рџ  */
 
-    log_write_log_file("INFO: bitmap 0x%02X, consum %s, flt %f\n", gns110_param.gns110_adc_bitmap,	/* какие каналы используются */
-		       gns110_param.gns110_adc_consum ? "Hi" : "Lo",	/* энергопотребление сюда */
-		       gns110_param.gns110_adc_flt_freq);	/* Фильтр */
+    log_write_log_file("INFO: bitmap 0x%02X, consum %s, flt %f\n", gns110_param.gns110_adc_bitmap,	/* РєР°РєРёРµ РєР°РЅР°Р»С‹ РёСЃРїРѕР»СЊР·СѓСЋС‚СЃСЏ */
+		       gns110_param.gns110_adc_consum ? "Hi" : "Lo",	/* СЌРЅРµСЂРіРѕРїРѕС‚СЂРµР±Р»РµРЅРёРµ СЃСЋРґР° */
+		       gns110_param.gns110_adc_flt_freq);	/* Р¤РёР»СЊС‚СЂ */
 
-    log_write_log_file("INFO: Aquisition mode time: %d hours %02d min \n", dwt.time_work / 3600, dwt.time_work % 60);	/* Время работы в режиме сбора данных */
-    log_write_log_file("INFO: Command Mode time: %d hours %02d min \n", dwt.time_cmd / 3600, dwt.time_cmd % 60);	/* Время работы в командном режиме */
-    log_write_log_file("INFO: Modem operation time: %d hours %02d min \n", dwt.time_modem / 3600, dwt.time_modem % 60);	/* Время работы модема */
+    log_write_log_file("INFO: Aquisition mode time: %d hours %02d min \n", dwt.time_work / 3600, dwt.time_work % 60);	/* Р’СЂРµРјСЏ СЂР°Р±РѕС‚С‹ РІ СЂРµР¶РёРјРµ СЃР±РѕСЂР° РґР°РЅРЅС‹С… */
+    log_write_log_file("INFO: Command Mode time: %d hours %02d min \n", dwt.time_cmd / 3600, dwt.time_cmd % 60);	/* Р’СЂРµРјСЏ СЂР°Р±РѕС‚С‹ РІ РєРѕРјР°РЅРґРЅРѕРј СЂРµР¶РёРјРµ */
+    log_write_log_file("INFO: Modem operation time: %d hours %02d min \n", dwt.time_modem / 3600, dwt.time_modem % 60);	/* Р’СЂРµРјСЏ СЂР°Р±РѕС‚С‹ РјРѕРґРµРјР° */
     log_write_log_file("INFO: This program can properly work until 2038\n");
 
-    read_dac_coefs_from_eeprom(&dac_data);	/* Прочитать из flash начальные значения для ДАКов */
+    read_dac_coefs_from_eeprom(&dac_data);	/* РџСЂРѕС‡РёС‚Р°С‚СЊ РёР· flash РЅР°С‡Р°Р»СЊРЅС‹Рµ Р·РЅР°С‡РµРЅРёСЏ РґР»СЏ Р”РђРљРѕРІ */
     log_write_log_file("INFO: Read DAC(19.2): %d, DAC(4.096): %d\n", dac_data.dac19_data, dac_data.dac4_data);
 
-    /* Если различаются очень сильно - записать начальные */
+    /* Р•СЃР»Рё СЂР°Р·Р»РёС‡Р°СЋС‚СЃСЏ РѕС‡РµРЅСЊ СЃРёР»СЊРЅРѕ - Р·Р°РїРёСЃР°С‚СЊ РЅР°С‡Р°Р»СЊРЅС‹Рµ */
     if (dac_data.dac19_data > DAC19_MAX_DATA || (int) dac_data.dac19_data <= 0) {
 	dac_data.dac19_data = DAC19_INIT_DATA;
 	log_write_log_file("WARN: Bad DAC(19.2), write default %d\n", dac_data.dac19_data);
     }
 #if QUARTZ_CLK_FREQ==(19200000)
-    /* Если различаются очень сильно - записать начальные */
+    /* Р•СЃР»Рё СЂР°Р·Р»РёС‡Р°СЋС‚СЃСЏ РѕС‡РµРЅСЊ СЃРёР»СЊРЅРѕ - Р·Р°РїРёСЃР°С‚СЊ РЅР°С‡Р°Р»СЊРЅС‹Рµ */
     if (abs(dac_data.dac4_data - DAC4_INIT_DATA) > DAC4_MAX_DIFF) {
 	dac_data.dac4_data = DAC4_INIT_DATA;
 	log_write_log_file("WARN: Bad DAC coefs for VCXO 4.096, write old %d\n", dac_data.dac4_data);
     }
-    // Есть ошибка?
+    // Р•СЃС‚СЊ РѕС€РёР±РєР°?
     log_write_log_file("INFO: DAC4 test %s\n", (dev_status.st_test1 & 0x20) ? "FAIL" : "OK");
     log_write_log_file("INFO: tim3[0] = %d, tim3[1] = %d\n", dev_status.st_tim3[0], dev_status.st_tim3[1]);
 
-    /* Заплатка! Есть ошибка?  - пока не можем проверить. */
+    /* Р—Р°РїР»Р°С‚РєР°! Р•СЃС‚СЊ РѕС€РёР±РєР°?  - РїРѕРєР° РЅРµ РјРѕР¶РµРј РїСЂРѕРІРµСЂРёС‚СЊ. */
     if (!(dev_status.st_test1 & 0x10)) {
 	log_write_log_file("INFO: DAC19 test OK\n");
 	log_write_log_file("INFO: tim4[0] = %d, tim4[1] = %d\n", dev_status.st_tim4[0], dev_status.st_tim4[1]);
-	dac_data.dac19_coef = abs(dev_status.st_tim4[1] - dev_status.st_tim4[0]);	/* Коэфициент для прямой */
+	dac_data.dac19_coef = abs(dev_status.st_tim4[1] - dev_status.st_tim4[0]);	/* РљРѕСЌС„РёС†РёРµРЅС‚ РґР»СЏ РїСЂСЏРјРѕР№ */
 	log_write_log_file("INFO: delta = %d\n", dac_data.dac19_coef);
     } else {
 	log_write_log_file("INFO: DAC19 test Fail! May be we use new GPS module.\n");
 	log_write_log_file("INFO: We'll check DAC19 later!\n");
     }
 #else
-    /* Заплатка! Есть ошибка?  - пока не можем проверить. */
+    /* Р—Р°РїР»Р°С‚РєР°! Р•СЃС‚СЊ РѕС€РёР±РєР°?  - РїРѕРєР° РЅРµ РјРѕР¶РµРј РїСЂРѕРІРµСЂРёС‚СЊ. */
     if (!(dev_status.st_test1 & 0x10)) {
 	log_write_log_file("INFO: DAC19 test OK\n");
 	log_write_log_file("INFO: tim4 min = %d, tim4 max = %d\n", dev_status.st_tim4[0], dev_status.st_tim4[1]);
-	dac_data.dac19_coef = abs(dev_status.st_tim4[1] - dev_status.st_tim4[0]);	/* Коэфициент для прямой */
+	dac_data.dac19_coef = abs(dev_status.st_tim4[1] - dev_status.st_tim4[0]);	/* РљРѕСЌС„РёС†РёРµРЅС‚ РґР»СЏ РїСЂСЏРјРѕР№ */
 	log_write_log_file("INFO: delta = %d\n", dac_data.dac19_coef);
     } else {
 	log_write_log_file("INFO: DAC19 test Fail! May be we use new GPS module.\n");
@@ -708,7 +708,7 @@ static int OnInitState(void)
 	log_write_log_file("INFO: We'll check DAC19 later!\n");
     }
 #endif
-    /* Проверим АЦП */
+    /* РџСЂРѕРІРµСЂРёРј РђР¦Рџ */
     for (i = 0; i < ADC_CHAN; i++) {
 	if (dev_status.st_adc & (1 << i))
 	    log_write_log_file("ERROR: ADS1282 # %d fail\n", i);
@@ -717,13 +717,13 @@ static int OnInitState(void)
     }
 
 
-    /* Какая то ошибка при настройках DAC */
+    /* РљР°РєР°СЏ С‚Рѕ РѕС€РёР±РєР° РїСЂРё РЅР°СЃС‚СЂРѕР№РєР°С… DAC */
     if (dev_status.st_test1 & 0x20) {
 	log_write_log_file("ERROR: test dac for 4.096 VCXO\n");
 	return -1;
     }
 
-    /* количество прерываний */
+    /* РєРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРµСЂС‹РІР°РЅРёР№ */
     res = ADS1282_get_irq_count();
     log_write_log_file("INFO: test ADS1282 OK, num irq: %d\n", res);
     if (dev_status.st_main & 0x10) {
@@ -731,7 +731,7 @@ static int OnInitState(void)
 	return -1;
     }
 
-    /* Сначала подали на все даки - пусть разогреюца */
+    /* РЎРЅР°С‡Р°Р»Р° РїРѕРґР°Р»Рё РЅР° РІСЃРµ РґР°РєРё - РїСѓСЃС‚СЊ СЂР°Р·РѕРіСЂРµСЋС†Р° */
     DAC_init();
     DAC_write(DAC_19MHZ, dac_data.dac19_data);
 #if QUARTZ_CLK_FREQ==(19200000)
@@ -739,28 +739,28 @@ static int OnInitState(void)
 #endif
     log_write_log_file("INFO: All DACs init OK\n");
 
-    /* АЦП и подключенные устройства */
+    /* РђР¦Рџ Рё РїРѕРґРєР»СЋС‡РµРЅРЅС‹Рµ СѓСЃС‚СЂРѕР№СЃС‚РІР° */
     adc_init(&dev_status);
-    print_status(&dev_status);	/* Статус тестирования */
-    print_set_times(&gns110_param);	/* Выведем полученные времена и смотрим грубые ошибки! */
-    print_modem_type(&gns110_param);	/* Тип и номер модема */
+    print_status(&dev_status);	/* РЎС‚Р°С‚СѓСЃ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ */
+    print_set_times(&gns110_param);	/* Р’С‹РІРµРґРµРј РїРѕР»СѓС‡РµРЅРЅС‹Рµ РІСЂРµРјРµРЅР° Рё СЃРјРѕС‚СЂРёРј РіСЂСѓР±С‹Рµ РѕС€РёР±РєРё! */
+    print_modem_type(&gns110_param);	/* РўРёРї Рё РЅРѕРјРµСЂ РјРѕРґРµРјР° */
 
 
-    /* Если RTC исправны - установим статус часов. Установим номер устройства если не стоит ноль */
+    /* Р•СЃР»Рё RTC РёСЃРїСЂР°РІРЅС‹ - СѓСЃС‚Р°РЅРѕРІРёРј СЃС‚Р°С‚СѓСЃ С‡Р°СЃРѕРІ. РЈСЃС‚Р°РЅРѕРІРёРј РЅРѕРјРµСЂ СѓСЃС‚СЂРѕР№СЃС‚РІР° РµСЃР»Рё РЅРµ СЃС‚РѕРёС‚ РЅРѕР»СЊ */
     if (!(dev_status.st_main & 0x01) && !(dev_status.st_test0 & 0x01)) {
-	xRtcTicks.u_check.xRtcCheck.cStatus = CLOCK_RTC_TIME;	/* Берем время от RTC */
+	xRtcTicks.u_check.xRtcCheck.cStatus = CLOCK_RTC_TIME;	/* Р‘РµСЂРµРј РІСЂРµРјСЏ РѕС‚ RTC */
 
-	/* Проверить времена */
+	/* РџСЂРѕРІРµСЂРёС‚СЊ РІСЂРµРјРµРЅР° */
 	if (check_set_times(&gns110_param) < 0) {
 	    return -1;
 	}
 
-	/* Проверим, как установили время для модема */
+	/* РџСЂРѕРІРµСЂРёРј, РєР°Рє СѓСЃС‚Р°РЅРѕРІРёР»Рё РІСЂРµРјСЏ РґР»СЏ РјРѕРґРµРјР° */
 	if (check_modem_times(&gns110_param) < 0) {
 	    return -1;
 	}
 
-	/* Если был непридвиденный сброс - модем не трогаем! */
+	/* Р•СЃР»Рё Р±С‹Р» РЅРµРїСЂРёРґРІРёРґРµРЅРЅС‹Р№ СЃР±СЂРѕСЃ - РјРѕРґРµРј РЅРµ С‚СЂРѕРіР°РµРј! */
 	if (xShooseMode.reset != CAUSE_WDT_RESET) {
 	    res = modem_init_all_types(&gns110_param);
 
@@ -777,24 +777,24 @@ static int OnInitState(void)
     }
 
 
-    print_ads1282_parms(&gns110_param);	/* Данные АЦП   */
-    unselect_debug_uart();	/* Отключаем модем */
+    print_ads1282_parms(&gns110_param);	/* Р”Р°РЅРЅС‹Рµ РђР¦Рџ   */
+    unselect_debug_uart();	/* РћС‚РєР»СЋС‡Р°РµРј РјРѕРґРµРј */
     log_write_log_file("INFO: Unselect debug UART OK\n");
 
-    unselect_analog_power();	/* Выключить аналоговую часть */
+    unselect_analog_power();	/* Р’С‹РєР»СЋС‡РёС‚СЊ Р°РЅР°Р»РѕРіРѕРІСѓСЋ С‡Р°СЃС‚СЊ */
     log_write_log_file("INFO: Unselect analog power OK\n");
 
-    print_adc_data(&dev_status);	/* Печатаем данные среды, после инициализации еще не успела пройти запуск в adc_init()  */
+    print_adc_data(&dev_status);	/* РџРµС‡Р°С‚Р°РµРј РґР°РЅРЅС‹Рµ СЃСЂРµРґС‹, РїРѕСЃР»Рµ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё РµС‰Рµ РЅРµ СѓСЃРїРµР»Р° РїСЂРѕР№С‚Рё Р·Р°РїСѓСЃРє РІ adc_init()  */
 
     if (xShooseMode.reset == CAUSE_WDT_RESET) {
 	return 1;
     } else {
-	return 0;		/* Все OK */
+	return 0;		/* Р’СЃРµ OK */
     }
 }
 
 /************************************************************************
- *  Получить 3d fix от GPS, а так же дрифт после всплытия
+ *  РџРѕР»СѓС‡РёС‚СЊ 3d fix РѕС‚ GPS, Р° С‚Р°Рє Р¶Рµ РґСЂРёС„С‚ РїРѕСЃР»Рµ РІСЃРїР»С‹С‚РёСЏ
 ************************************************************************/
 #pragma section("FLASH_code")
 static int OnGet3DFixState(void)
@@ -805,22 +805,22 @@ static int OnGet3DFixState(void)
 
     now = get_sec_ticks();
 
-    /* Установим время и будем ждать наступления 3dfix  */
+    /* РЈСЃС‚Р°РЅРѕРІРёРј РІСЂРµРјСЏ Рё Р±СѓРґРµРј Р¶РґР°С‚СЊ РЅР°СЃС‚СѓРїР»РµРЅРёСЏ 3dfix  */
     if (xRtcTicks.iTime0 == 0) {
 	log_write_log_file("=======DEV_GET_3DFIX_STATE=======\n");
 
-	LED_toggle(LED_BLUE);	/* Зажгем лампу */
+	LED_toggle(LED_BLUE);	/* Р—Р°Р¶РіРµРј Р»Р°РјРїСѓ */
 
-	/* Синяя лампа медленно пока не получили 3d fix */
+	/* РЎРёРЅСЏСЏ Р»Р°РјРїР° РјРµРґР»РµРЅРЅРѕ РїРѕРєР° РЅРµ РїРѕР»СѓС‡РёР»Рё 3d fix */
 	LED_set_state(LED_OFF_STATE, LED_OFF_STATE, LED_OFF_STATE, LED_SLOW_STATE);
 
-	res = gps_init();	/* Откроем UART на новой скорости */
+	res = gps_init();	/* РћС‚РєСЂРѕРµРј UART РЅР° РЅРѕРІРѕР№ СЃРєРѕСЂРѕСЃС‚Рё */
 	if (res < 0)
-	    return -1;		/* не могу открыть порт GPS */
+	    return -1;		/* РЅРµ РјРѕРіСѓ РѕС‚РєСЂС‹С‚СЊ РїРѕСЂС‚ GPS */
 
 	xRtcTicks.u_check.xRtcCheck.cPackCnt = 0;
 	xRtcTicks.u_check.xRtcCheck.cCheck = 0;
-	xRtcTicks.iTime0 = now;	/* Ставим метку на таймаут приема GPS - один час на вот это состояние + следующее */
+	xRtcTicks.iTime0 = now;	/* РЎС‚Р°РІРёРј РјРµС‚РєСѓ РЅР° С‚Р°Р№РјР°СѓС‚ РїСЂРёРµРјР° GPS - РѕРґРёРЅ С‡Р°СЃ РЅР° РІРѕС‚ СЌС‚Рѕ СЃРѕСЃС‚РѕСЏРЅРёРµ + СЃР»РµРґСѓСЋС‰РµРµ */
 	xRtcTicks.iSec = now;
 	TIMER4_config();
 	TIMER4_init_vector();
@@ -831,20 +831,20 @@ static int OnGet3DFixState(void)
 	gps_set_grmc();
 	offset = gps_get_utc_offset();
 	log_write_log_file("INFO: UTC Offset: %d sec\n", offset);
-	log_write_log_file("INFO: Try to get valid NMEA for 60 min...\n");	/* Запишем в лог  */
-    } else if (now - xRtcTicks.iSec > WAIT_3DFIX_TIME) {	/* Если уже больше часа настраиваем - на ошибку! */
-	log_write_log_file("ERROR: Can't get 3dFix %d minutes\n", WAIT_3DFIX_TIME / 60);	/* Запишем в лог  */
+	log_write_log_file("INFO: Try to get valid NMEA for 60 min...\n");	/* Р—Р°РїРёС€РµРј РІ Р»РѕРі  */
+    } else if (now - xRtcTicks.iSec > WAIT_3DFIX_TIME) {	/* Р•СЃР»Рё СѓР¶Рµ Р±РѕР»СЊС€Рµ С‡Р°СЃР° РЅР°СЃС‚СЂР°РёРІР°РµРј - РЅР° РѕС€РёР±РєСѓ! */
+	log_write_log_file("ERROR: Can't get 3dFix %d minutes\n", WAIT_3DFIX_TIME / 60);	/* Р—Р°РїРёС€РµРј РІ Р»РѕРі  */
 	return -1;
     }
 
-    /* Получили время и подождали минимум 16 пакетов подряд, чтобы для следущего состояния КА у нас уже был заполненный буфер  */
+    /* РџРѕР»СѓС‡РёР»Рё РІСЂРµРјСЏ Рё РїРѕРґРѕР¶РґР°Р»Рё РјРёРЅРёРјСѓРј 16 РїР°РєРµС‚РѕРІ РїРѕРґСЂСЏРґ, С‡С‚РѕР±С‹ РґР»СЏ СЃР»РµРґСѓС‰РµРіРѕ СЃРѕСЃС‚РѕСЏРЅРёСЏ РљРђ Сѓ РЅР°СЃ СѓР¶Рµ Р±С‹Р» Р·Р°РїРѕР»РЅРµРЅРЅС‹Р№ Р±СѓС„РµСЂ  */
     t0 = gps_get_nmea_time();
     if (t0 > 0 && xRtcTicks.iTime1 != t0 && now - xRtcTicks.iTime0 > 4) {
 	xRtcTicks.iTime1 = t0;
 
-	LED_set_state(LED_OFF_STATE, LED_OFF_STATE, LED_OFF_STATE, LED_QUICK_STATE);	// Синяя лампа быстро - получили 3d fix
+	LED_set_state(LED_OFF_STATE, LED_OFF_STATE, LED_OFF_STATE, LED_QUICK_STATE);	// РЎРёРЅСЏСЏ Р»Р°РјРїР° Р±С‹СЃС‚СЂРѕ - РїРѕР»СѓС‡РёР»Рё 3d fix
 	if (xRtcTicks.u_check.xRtcCheck.cPackCnt < TIM4_BUF_SIZE) {
-	    /* Запишем в лог  */
+	    /* Р—Р°РїРёС€РµРј РІ Р»РѕРі  */
 	    if (gps_get_nmea_string(str, sizeof(str))) {
 		log_write_log_file("NMEA:->%s\n", str);
 	    }
@@ -854,19 +854,19 @@ static int OnGet3DFixState(void)
 	    long rtc;
 	    s64 tim1, tim4;
 
-	    /* Синхронизируем время - в этом случае ни UART ни TIMER4 не выключаем */
+	    /* РЎРёРЅС…СЂРѕРЅРёР·РёСЂСѓРµРј РІСЂРµРјСЏ - РІ СЌС‚РѕРј СЃР»СѓС‡Р°Рµ РЅРё UART РЅРё TIMER4 РЅРµ РІС‹РєР»СЋС‡Р°РµРј */
 	    if (dev_state == DEV_GET_3DFIX_STATE) {
-		TIMER1_set_sec(t0);	/* А теперь становим время в PRTC */
-		rtc = get_rtc_sec_ticks();	/* Время RTC получили */
-		set_rtc_sec_ticks(t0);	/* 3D FIX - Поставили в RTC */
+		TIMER1_set_sec(t0);	/* Рђ С‚РµРїРµСЂСЊ СЃС‚Р°РЅРѕРІРёРј РІСЂРµРјСЏ РІ PRTC */
+		rtc = get_rtc_sec_ticks();	/* Р’СЂРµРјСЏ RTC РїРѕР»СѓС‡РёР»Рё */
+		set_rtc_sec_ticks(t0);	/* 3D FIX - РџРѕСЃС‚Р°РІРёР»Рё РІ RTC */
 		gps_get_nmea_string(str, sizeof(str));
-		log_write_log_file("NMEA:->%s\n", str);	/* Запишем в лог  */
+		log_write_log_file("NMEA:->%s\n", str);	/* Р—Р°РїРёС€РµРј РІ Р»РѕРі  */
 		sec_to_str(t0, str);
 		log_write_log_file("NMEA time: %s\n", str);
 		sec_to_str(rtc, str);
 		log_write_log_file("RTC time:  %s\n", str);
 		log_write_log_file("RTC error: %d sec\n", rtc - t0);
-		xRtcTicks.u_check.xRtcCheck.cStatus = CLOCK_NO_GPS_TIME;	/* Пока у нас не настроен GPS  */
+		xRtcTicks.u_check.xRtcCheck.cStatus = CLOCK_NO_GPS_TIME;	/* РџРѕРєР° Сѓ РЅР°СЃ РЅРµ РЅР°СЃС‚СЂРѕРµРЅ GPS  */
 	    } else {
 		tim1 = TIMER1_get_long_time();
 		tim4 = TIMER4_get_long_time();
@@ -875,24 +875,24 @@ static int OnGet3DFixState(void)
 		    return 0;
 		}
 
-		/* Попробуем определить UTC offset */
+		/* РџРѕРїСЂРѕР±СѓРµРј РѕРїСЂРµРґРµР»РёС‚СЊ UTC offset */
 		offset = gps_get_utc_offset();
 		log_write_log_file("INFO: UTC Offset: %d sec\n", offset);
 
-		rtc = get_rtc_sec_ticks();	/* Время RTC получили */
+		rtc = get_rtc_sec_ticks();	/* Р’СЂРµРјСЏ RTC РїРѕР»СѓС‡РёР»Рё */
 		xRtcTicks.iLabel = get_sec_ticks() - xRtcTicks.iLabel;
 		xRtcTicks.iLabel = (xRtcTicks.iLabel == 0) ? 1 : xRtcTicks.iLabel;
-		print_drift_and_work_time(tim1, tim4, rtc, xRtcTicks.iLabel);	/* Время работы и уход часов */
+		print_drift_and_work_time(tim1, tim4, rtc, xRtcTicks.iLabel);	/* Р’СЂРµРјСЏ СЂР°Р±РѕС‚С‹ Рё СѓС…РѕРґ С‡Р°СЃРѕРІ */
 		xRtcTicks.iWasDrift = 1;
 		gps_close();
-		TIMER4_disable();	/* Выключим таймер */
+		TIMER4_disable();	/* Р’С‹РєР»СЋС‡РёРј С‚Р°Р№РјРµСЂ */
 	    }
 	    xRtcTicks.iTime0 = 0;
-	    res = 1;		/* Все OK  */
+	    res = 1;		/* Р’СЃРµ OK  */
 	}
     }
 
-    /* Раз в минуту всегда! */
+    /* Р Р°Р· РІ РјРёРЅСѓС‚Сѓ РІСЃРµРіРґР°! */
     else if (t0 == 0 && xRtcTicks.iTime1 != now && now % 60 == 0) {
 	int i;
 	xRtcTicks.iTime1 = now;
@@ -905,7 +905,7 @@ static int OnGet3DFixState(void)
 	    xRtcTicks.u_check.xRtcCheck.cCheck++;
 	    /*   log_write_log_file("WARN: Can't get NMEA.\n"); */
 	}
-	/* нет приема в течении 5-ти минут */
+	/* РЅРµС‚ РїСЂРёРµРјР° РІ С‚РµС‡РµРЅРёРё 5-С‚Рё РјРёРЅСѓС‚ */
 	if (xRtcTicks.u_check.xRtcCheck.cCheck > 5) {
 	    log_write_log_file("ERROR: Can't get NMEA, defective GPS module\n");
 	    return -1;
@@ -915,7 +915,7 @@ static int OnGet3DFixState(void)
 }
 
 /************************************************************************
- * Функция подстройки кварца 19.2 МГц для таймера 1 (PRTC)
+ * Р¤СѓРЅРєС†РёСЏ РїРѕРґСЃС‚СЂРѕР№РєРё РєРІР°СЂС†Р° 19.2 РњР“С† РґР»СЏ С‚Р°Р№РјРµСЂР° 1 (PRTC)
  ************************************************************************/
 #pragma section("FLASH_code")
 static int OnTuneQ19State(void)
@@ -928,120 +928,120 @@ static int OnTuneQ19State(void)
     char str[NMEA_GPRMC_STRING_SIZE];
     u16 old;
 
-    /* Синяя лампа быстро - получили 3dfix  */
+    /* РЎРёРЅСЏСЏ Р»Р°РјРїР° Р±С‹СЃС‚СЂРѕ - РїРѕР»СѓС‡РёР»Рё 3dfix  */
     log_write_log_file("=======DEV_TUNE_Q19_STATE=======\n");
     LED_set_state(LED_OFF_STATE, LED_OFF_STATE, LED_OFF_STATE, LED_QUICK_STATE);
 
-    log_write_log_file("INFO: Stage 1. Primary tuning...\n");	/* Запишем в лог  */
-    err[0] = err[1] = err[2] = TIM1_GRANT_ERROR * 5;	/* Поставим ошибки. чтобы там не было нулей  */
+    log_write_log_file("INFO: Stage 1. Primary tuning...\n");	/* Р—Р°РїРёС€РµРј РІ Р»РѕРі  */
+    err[0] = err[1] = err[2] = TIM1_GRANT_ERROR * 5;	/* РџРѕСЃС‚Р°РІРёРј РѕС€РёР±РєРё. С‡С‚РѕР±С‹ С‚Р°Рј РЅРµ Р±С‹Р»Рѕ РЅСѓР»РµР№  */
 
     if (dac_data.dac19_coef < 10 || dac_data.dac19_coef > 250) {
 	log_write_log_file("WARN: Bad dac19 coeficient. Set to default (98)\n");
 	dac_data.dac19_coef = 98;
     }
 
-    /* Проверить здесь и насчет запроса на выключение */
+    /* РџСЂРѕРІРµСЂРёС‚СЊ Р·РґРµСЃСЊ Рё РЅР°СЃС‡РµС‚ Р·Р°РїСЂРѕСЃР° РЅР° РІС‹РєР»СЋС‡РµРЅРёРµ */
     do {
 	old = dac_data.dac19_data;
-	DAC_write(DAC_19MHZ, old);	/* Подали настройку  */
+	DAC_write(DAC_19MHZ, old);	/* РџРѕРґР°Р»Рё РЅР°СЃС‚СЂРѕР№РєСѓ  */
 
-	/* Собираем буфер - вместо задержек */
+	/* РЎРѕР±РёСЂР°РµРј Р±СѓС„РµСЂ - РІРјРµСЃС‚Рѕ Р·Р°РґРµСЂР¶РµРє */
 	t0 = get_sec_ticks();
 
 	while (get_sec_ticks() - t0 < TIM4_BUF_SIZE) {
-	    LED_blink();	/* Собрали и есть достоверность + 1 секунда */
+	    LED_blink();	/* РЎРѕР±СЂР°Р»Рё Рё РµСЃС‚СЊ РґРѕСЃС‚РѕРІРµСЂРЅРѕСЃС‚СЊ + 1 СЃРµРєСѓРЅРґР° */
 
-	    /* Соберем заново */
+	    /* РЎРѕР±РµСЂРµРј Р·Р°РЅРѕРІРѕ */
 	    if (!gps_check_for_reliability()) {
-		log_write_log_file("WARN: NMEA isn't valid. Reset buffer!\n");	/* Запишем в лог  */
+		log_write_log_file("WARN: NMEA isn't valid. Reset buffer!\n");	/* Р—Р°РїРёС€РµРј РІ Р»РѕРі  */
 		t0 = get_sec_ticks();
-		return 1;	/* Сбросим время и уйдем на поиск NMEA */
+		return 1;	/* РЎР±СЂРѕСЃРёРј РІСЂРµРјСЏ Рё СѓР№РґРµРј РЅР° РїРѕРёСЃРє NMEA */
 	    }
 
 	    if (t0 - xRtcTicks.iSec > WAIT_3DFIX_TIME) {
-		log_write_log_file("ERROR: Can't to tune 19.2 MHz generator\n");	/* Запишем в лог  */
-		return -1;	/* Если уже больше часа настраиваем - на ошибку! */
+		log_write_log_file("ERROR: Can't to tune 19.2 MHz generator\n");	/* Р—Р°РїРёС€РµРј РІ Р»РѕРі  */
+		return -1;	/* Р•СЃР»Рё СѓР¶Рµ Р±РѕР»СЊС€Рµ С‡Р°СЃР° РЅР°СЃС‚СЂР°РёРІР°РµРј - РЅР° РѕС€РёР±РєСѓ! */
 	    }
 	}
 
-	sum = TIMER4_get_ticks_buf_sum();	/* нашли сумму */
+	sum = TIMER4_get_ticks_buf_sum();	/* РЅР°С€Р»Рё СЃСѓРјРјСѓ */
 	dac_data.dac19_data = get_dac_ctrl_value(sum, old, dac_data.dac19_coef);
 
 	err[2] = err[1];
 	err[1] = err[0];
-	err[0] = sum - TIM4_TICKS_FOR_16_SEC;	/* считаем ошибку - поставить еще через расчет ошибки? */
+	err[0] = sum - TIM4_TICKS_FOR_16_SEC;	/* СЃС‡РёС‚Р°РµРј РѕС€РёР±РєСѓ - РїРѕСЃС‚Р°РІРёС‚СЊ РµС‰Рµ С‡РµСЂРµР· СЂР°СЃС‡РµС‚ РѕС€РёР±РєРё? */
 
 	log_write_log_file("Dac19(%d) Sum(%ld) Per(%d) Err(%d)\n", old, sum, sum / TIM4_BUF_SIZE, err[0]);
-	LED_blink();		/* Моргнуть синей лампой примерно раз в полсекунды */
+	LED_blink();		/* РњРѕСЂРіРЅСѓС‚СЊ СЃРёРЅРµР№ Р»Р°РјРїРѕР№ РїСЂРёРјРµСЂРЅРѕ СЂР°Р· РІ РїРѕР»СЃРµРєСѓРЅРґС‹ */
 
-	/* условие выхода - ошибка три раза меньше TIM1_GRANT_ERROR */
+	/* СѓСЃР»РѕРІРёРµ РІС‹С…РѕРґР° - РѕС€РёР±РєР° С‚СЂРё СЂР°Р·Р° РјРµРЅСЊС€Рµ TIM1_GRANT_ERROR */
     } while (!((abs(err[0]) <= TIM1_GRANT_ERROR) && (abs(err[1]) <= TIM1_GRANT_ERROR)
 	       && (abs(err[2]) <= TIM1_GRANT_ERROR)));
 
-    /* Запишем в лог  */
+    /* Р—Р°РїРёС€РµРј РІ Р»РѕРі  */
     log_write_log_file("INFO: Stage 2. Verification. Last errors: %d %d %d\n", err[0], err[1], err[2]);
 
-    /* собираем буфер - вместо задержек */
+    /* СЃРѕР±РёСЂР°РµРј Р±СѓС„РµСЂ - РІРјРµСЃС‚Рѕ Р·Р°РґРµСЂР¶РµРє */
     t0 = get_sec_ticks();
     while (get_sec_ticks() - t0 < TIM4_BUF_SIZE) {
-	LED_blink();		/* Моргнуть синей лампой примерно раз в полсекунды */
+	LED_blink();		/* РњРѕСЂРіРЅСѓС‚СЊ СЃРёРЅРµР№ Р»Р°РјРїРѕР№ РїСЂРёРјРµСЂРЅРѕ СЂР°Р· РІ РїРѕР»СЃРµРєСѓРЅРґС‹ */
     }
-    sum = TIMER4_get_ticks_buf_sum();	/* нашли сумму */
+    sum = TIMER4_get_ticks_buf_sum();	/* РЅР°С€Р»Рё СЃСѓРјРјСѓ */
     log_write_log_file("INFO: 19.2MHz tuned OK. Per(%ld) Err(%ld)\n", sum / TIM4_BUF_SIZE, sum - TIM4_TICKS_FOR_16_SEC);
 
-    /* Настройка по-новому */
-    TIMER4_del_vector();	/* Теперь можно смотреть только по флажку прерываний! */
+    /* РќР°СЃС‚СЂРѕР№РєР° РїРѕ-РЅРѕРІРѕРјСѓ */
+    TIMER4_del_vector();	/* РўРµРїРµСЂСЊ РјРѕР¶РЅРѕ СЃРјРѕС‚СЂРµС‚СЊ С‚РѕР»СЊРєРѕ РїРѕ С„Р»Р°Р¶РєСѓ РїСЂРµСЂС‹РІР°РЅРёР№! */
     log_write_log_file("INFO: Stage 3. Synch timer1 with PPS ...\n");
-    TIMER1_config();		/* Настриваем секундный таймер со своим PPS, но не запускаем! Разрешим прерывания для первого таймера  */
-    LED_toggle(LED_BLUE);	/* Моргнули лампой  */
+    TIMER1_config();		/* РќР°СЃС‚СЂРёРІР°РµРј СЃРµРєСѓРЅРґРЅС‹Р№ С‚Р°Р№РјРµСЂ СЃРѕ СЃРІРѕРёРј PPS, РЅРѕ РЅРµ Р·Р°РїСѓСЃРєР°РµРј! Р Р°Р·СЂРµС€РёРј РїСЂРµСЂС‹РІР°РЅРёСЏ РґР»СЏ РїРµСЂРІРѕРіРѕ С‚Р°Р№РјРµСЂР°  */
+    LED_toggle(LED_BLUE);	/* РњРѕСЂРіРЅСѓР»Рё Р»Р°РјРїРѕР№  */
 
     for (i = 0; i < 2; i++) {
-	while (TIMER4_wait_for_irq() != true);	/* Теперь ждем, когда стработает 4-й таймер, и сразу запускаем 1-й таймер  */
+	while (TIMER4_wait_for_irq() != true);	/* РўРµРїРµСЂСЊ Р¶РґРµРј, РєРѕРіРґР° СЃС‚СЂР°Р±РѕС‚Р°РµС‚ 4-Р№ С‚Р°Р№РјРµСЂ, Рё СЃСЂР°Р·Сѓ Р·Р°РїСѓСЃРєР°РµРј 1-Р№ С‚Р°Р№РјРµСЂ  */
     }
-    TIMER1_enable();		/* Таймер1 запущен */
-    TIMER4_init_vector();	/* Снова запускаем Т4 */
+    TIMER1_enable();		/* РўР°Р№РјРµСЂ1 Р·Р°РїСѓС‰РµРЅ */
+    TIMER4_init_vector();	/* РЎРЅРѕРІР° Р·Р°РїСѓСЃРєР°РµРј Рў4 */
 
-    t0 = TIMER1_get_drift((u32 *) & err[0], (u32 *) & err[1]);	/* Померим дельту */
+    t0 = TIMER1_get_drift((u32 *) & err[0], (u32 *) & err[1]);	/* РџРѕРјРµСЂРёРј РґРµР»СЊС‚Сѓ */
     log_write_log_file("INFO: Delta (t1 - t4) = %d ns (%d ticks)\n", t0, abs(err[0] - err[1]));
     log_write_log_file("INFO: Stage 4. shift phase...\n");
 
     delta = err[1] - err[0];
     if (delta != TIMER_PERIOD)
-	TIMER1_shift_phase(delta);	/* Величину дельты t4 - t1 в период для подстройки - наоборот!  */
+	TIMER1_shift_phase(delta);	/* Р’РµР»РёС‡РёРЅСѓ РґРµР»СЊС‚С‹ t4 - t1 РІ РїРµСЂРёРѕРґ РґР»СЏ РїРѕРґСЃС‚СЂРѕР№РєРё - РЅР°РѕР±РѕСЂРѕС‚!  */
 
-    /* Подождем сдвига таймера 2 - 3 секунды - использовать задержки а не получать секунды, т.к. таймер работает, но не считает еще! */
+    /* РџРѕРґРѕР¶РґРµРј СЃРґРІРёРіР° С‚Р°Р№РјРµСЂР° 2 - 3 СЃРµРєСѓРЅРґС‹ - РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ Р·Р°РґРµСЂР¶РєРё Р° РЅРµ РїРѕР»СѓС‡Р°С‚СЊ СЃРµРєСѓРЅРґС‹, С‚.Рє. С‚Р°Р№РјРµСЂ СЂР°Р±РѕС‚Р°РµС‚, РЅРѕ РЅРµ СЃС‡РёС‚Р°РµС‚ РµС‰Рµ! */
     for (i = 0; i < 500; i++) {
 	delay_ms(5);
-	LED_blink();		/* Моргнуть синей лампой примерно раз в полсекунды */
+	LED_blink();		/* РњРѕСЂРіРЅСѓС‚СЊ СЃРёРЅРµР№ Р»Р°РјРїРѕР№ РїСЂРёРјРµСЂРЅРѕ СЂР°Р· РІ РїРѕР»СЃРµРєСѓРЅРґС‹ */
     }
     log_write_log_file("OK\n");
 
     log_write_log_file("INFO: Stage 5. Try to sync timer\n");
 
-    /* Подождем пока таймер 1 находится дальше середины цикла.
+    /* РџРѕРґРѕР¶РґРµРј РїРѕРєР° С‚Р°Р№РјРµСЂ 1 РЅР°С…РѕРґРёС‚СЃСЏ РґР°Р»СЊС€Рµ СЃРµСЂРµРґРёРЅС‹ С†РёРєР»Р°.
      * PPS->|__xxxxxxxxxx__NMEA__________________________________|<-PPS
-     * Должен быть ^ здесь (где xxx - перед приходом NMEA) чтобы взять нормальное время 
+     * Р”РѕР»Р¶РµРЅ Р±С‹С‚СЊ ^ Р·РґРµСЃСЊ (РіРґРµ xxx - РїРµСЂРµРґ РїСЂРёС…РѕРґРѕРј NMEA) С‡С‚РѕР±С‹ РІР·СЏС‚СЊ РЅРѕСЂРјР°Р»СЊРЅРѕРµ РІСЂРµРјСЏ 
      */
     for (i = 0; i < 5; i++) {
 	log_write_log_file("INFO: Try # %d to set timer !\n", i + 1);
 
-	sec = TIMER1_sync_timer();	/* Синхронизируем таймер. Время синхронизации сохраним */
-	LED_blink();		/* Моргнуть синей лампой примерно раз в полсекунды */
+	sec = TIMER1_sync_timer();	/* РЎРёРЅС…СЂРѕРЅРёР·РёСЂСѓРµРј С‚Р°Р№РјРµСЂ. Р’СЂРµРјСЏ СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё СЃРѕС…СЂР°РЅРёРј */
+	LED_blink();		/* РњРѕСЂРіРЅСѓС‚СЊ СЃРёРЅРµР№ Р»Р°РјРїРѕР№ РїСЂРёРјРµСЂРЅРѕ СЂР°Р· РІ РїРѕР»СЃРµРєСѓРЅРґС‹ */
 
 	if (sec < 5) {
 	    log_write_log_file("INFO: Time %d, real %c\n", gps_get_nmea_time(), gps_check_for_reliability()? 't' : 'f');
-	    delay_ms(5);	/* Подождем - запрос может случиться когда время сброшено */
+	    delay_ms(5);	/* РџРѕРґРѕР¶РґРµРј - Р·Р°РїСЂРѕСЃ РјРѕР¶РµС‚ СЃР»СѓС‡РёС‚СЊСЃСЏ РєРѕРіРґР° РІСЂРµРјСЏ СЃР±СЂРѕС€РµРЅРѕ */
 	    continue;
 	}
 
-	/* Меряем снова значения + RTC */
+	/* РњРµСЂСЏРµРј СЃРЅРѕРІР° Р·РЅР°С‡РµРЅРёСЏ + RTC */
 	diff = TIMER1_get_drift(NULL, NULL);
 	ns1 = TIMER1_get_long_time();
 	ns4 = TIMER4_get_long_time();
 	rtc = get_rtc_sec_ticks();
 	print_drift_and_work_time(ns1, ns4, rtc, 0);
 
-	/* Если время в секундах равно */
+	/* Р•СЃР»Рё РІСЂРµРјСЏ РІ СЃРµРєСѓРЅРґР°С… СЂР°РІРЅРѕ */
 	if ((ns1 / TIMER_NS_DIVIDER) == (ns4 / TIMER_NS_DIVIDER)) {
 	    break;
 	}
@@ -1053,39 +1053,39 @@ static int OnTuneQ19State(void)
 	log_write_log_file("INFO: Timer Start Time!\n");
     }
 
-    /* Попробуем определить UTC offset */
+    /* РџРѕРїСЂРѕР±СѓРµРј РѕРїСЂРµРґРµР»РёС‚СЊ UTC offset */
     offset = gps_get_utc_offset();
     log_write_log_file("INFO: UTC Offset: %d sec\n", offset);
 
-    /* Попробуем определить координаты, где получено врем и пр. */
+    /* РџРѕРїСЂРѕР±СѓРµРј РѕРїСЂРµРґРµР»РёС‚СЊ РєРѕРѕСЂРґРёРЅР°С‚С‹, РіРґРµ РїРѕР»СѓС‡РµРЅРѕ РІСЂРµРј Рё РїСЂ. */
     gps_get_coordinates(&t0, &t1);
     print_coordinates(t0, t1);
     log_write_log_file("-------------------------------------------------\n");
 
-    /* Cоздать заголовок как только получили время:  5541.8005(N) ~ +55418005 */
+    /* CРѕР·РґР°С‚СЊ Р·Р°РіРѕР»РѕРІРѕРє РєР°Рє С‚РѕР»СЊРєРѕ РїРѕР»СѓС‡РёР»Рё РІСЂРµРјСЏ:  5541.8005(N) ~ +55418005 */
     log_create_adc_header(ns4, diff, t0, t1);
 
 
-    log_write_log_file("INFO: Turn off timer2\n");	/* Выключаем второй таймер и более его не используем. Рабочие секунды сохранятся  */
+    log_write_log_file("INFO: Turn off timer2\n");	/* Р’С‹РєР»СЋС‡Р°РµРј РІС‚РѕСЂРѕР№ С‚Р°Р№РјРµСЂ Рё Р±РѕР»РµРµ РµРіРѕ РЅРµ РёСЃРїРѕР»СЊР·СѓРµРј. Р Р°Р±РѕС‡РёРµ СЃРµРєСѓРЅРґС‹ СЃРѕС…СЂР°РЅСЏС‚СЃСЏ  */
     IRQ_unregister_vector(TIM2_VECTOR_NUM);
     TIMER2_disable();
 
-    res = write_dac19_coef_to_eeprom(dac_data.dac19_data);	/* сбросить на eeprom коэффициент с которым было настроено */
+    res = write_dac19_coef_to_eeprom(dac_data.dac19_data);	/* СЃР±СЂРѕСЃРёС‚СЊ РЅР° eeprom РєРѕСЌС„С„РёС†РёРµРЅС‚ СЃ РєРѕС‚РѕСЂС‹Рј Р±С‹Р»Рѕ РЅР°СЃС‚СЂРѕРµРЅРѕ */
     log_write_log_file("INFO: write DAC19 coef (%d) on EEPROM %s\n", dac_data.dac19_data, res == 0 ? "success" : "error");
 
 
-    xRtcTicks.iLabel = get_sec_ticks();	// Ставим метку времени - определим убегание генератора
-    xRtcTicks.u_check.xRtcCheck.cStatus = CLOCK_PREC_TIME;	/* У нас настроен GPS  */
-    gps_close();		/* Закрываем порт gps */
-    TIMER4_disable();		/* Выключаем четвертый таймер - он нам долго будет не нужен  */
+    xRtcTicks.iLabel = get_sec_ticks();	// РЎС‚Р°РІРёРј РјРµС‚РєСѓ РІСЂРµРјРµРЅРё - РѕРїСЂРµРґРµР»РёРј СѓР±РµРіР°РЅРёРµ РіРµРЅРµСЂР°С‚РѕСЂР°
+    xRtcTicks.u_check.xRtcCheck.cStatus = CLOCK_PREC_TIME;	/* РЈ РЅР°СЃ РЅР°СЃС‚СЂРѕРµРЅ GPS  */
+    gps_close();		/* Р—Р°РєСЂС‹РІР°РµРј РїРѕСЂС‚ gps */
+    TIMER4_disable();		/* Р’С‹РєР»СЋС‡Р°РµРј С‡РµС‚РІРµСЂС‚С‹Р№ С‚Р°Р№РјРµСЂ - РѕРЅ РЅР°Рј РґРѕР»РіРѕ Р±СѓРґРµС‚ РЅРµ РЅСѓР¶РµРЅ  */
 
 
-    return 0;			/* все хорошо? */
+    return 0;			/* РІСЃРµ С…РѕСЂРѕС€Рѕ? */
 }
 
 /*****************************************************************************
- * В случае если у нас произошла перезагрузка под водой
- * Настроим таймер просто по часам RTC
+ * Р’ СЃР»СѓС‡Р°Рµ РµСЃР»Рё Сѓ РЅР°СЃ РїСЂРѕРёР·РѕС€Р»Р° РїРµСЂРµР·Р°РіСЂСѓР·РєР° РїРѕРґ РІРѕРґРѕР№
+ * РќР°СЃС‚СЂРѕРёРј С‚Р°Р№РјРµСЂ РїСЂРѕСЃС‚Рѕ РїРѕ С‡Р°СЃР°Рј RTC
  *****************************************************************************/
 #pragma section("FLASH_code")
 static int OnTuneWithoutGPS(void)
@@ -1094,27 +1094,27 @@ static int OnTuneWithoutGPS(void)
 
     log_write_log_file("!!!!!!!!!!!!!!!!!! DEV_TUNE_WITHOUT_GPS_STATE !!!!!!!!!!!!!!!!!!\n");
 
-    t0 = get_sec_ticks();	/* Получим секунды от таймера 2. Будем проверять RTC - нормальное у нас время или нет? */
+    t0 = get_sec_ticks();	/* РџРѕР»СѓС‡РёРј СЃРµРєСѓРЅРґС‹ РѕС‚ С‚Р°Р№РјРµСЂР° 2. Р‘СѓРґРµРј РїСЂРѕРІРµСЂСЏС‚СЊ RTC - РЅРѕСЂРјР°Р»СЊРЅРѕРµ Сѓ РЅР°СЃ РІСЂРµРјСЏ РёР»Рё РЅРµС‚? */
 
-    /* Коэффициент для DAC не может сильно отличаться */
-    DAC_write(DAC_19MHZ, dac_data.dac19_data);	/* Подали настройку  */
-    TIMER1_quick_start(t0);	/* Настриваем секундный таймер и запускаем */
+    /* РљРѕСЌС„С„РёС†РёРµРЅС‚ РґР»СЏ DAC РЅРµ РјРѕР¶РµС‚ СЃРёР»СЊРЅРѕ РѕС‚Р»РёС‡Р°С‚СЊСЃСЏ */
+    DAC_write(DAC_19MHZ, dac_data.dac19_data);	/* РџРѕРґР°Р»Рё РЅР°СЃС‚СЂРѕР№РєСѓ  */
+    TIMER1_quick_start(t0);	/* РќР°СЃС‚СЂРёРІР°РµРј СЃРµРєСѓРЅРґРЅС‹Р№ С‚Р°Р№РјРµСЂ Рё Р·Р°РїСѓСЃРєР°РµРј */
 
 
     log_create_adc_header(t0 * TIMER_NS_DIVIDER, -1, 0, 0);
-    log_write_log_file("INFO: Turn off timer2\n");	/* Выключаем второй таймер и более его не используем. Рабочие секунды сохранятся  */
+    log_write_log_file("INFO: Turn off timer2\n");	/* Р’С‹РєР»СЋС‡Р°РµРј РІС‚РѕСЂРѕР№ С‚Р°Р№РјРµСЂ Рё Р±РѕР»РµРµ РµРіРѕ РЅРµ РёСЃРїРѕР»СЊР·СѓРµРј. Р Р°Р±РѕС‡РёРµ СЃРµРєСѓРЅРґС‹ СЃРѕС…СЂР°РЅСЏС‚СЃСЏ  */
     IRQ_unregister_vector(TIM2_VECTOR_NUM);
     TIMER2_disable();
 
-    xRtcTicks.iLabel = get_sec_ticks();	/* Ставим метку времени - определим убегание генератора */
-    xRtcTicks.u_check.xRtcCheck.cStatus = CLOCK_RTC_TIME;	/* У нас НЕ настроен GPS, поэтому время берем от RTC */
+    xRtcTicks.iLabel = get_sec_ticks();	/* РЎС‚Р°РІРёРј РјРµС‚РєСѓ РІСЂРµРјРµРЅРё - РѕРїСЂРµРґРµР»РёРј СѓР±РµРіР°РЅРёРµ РіРµРЅРµСЂР°С‚РѕСЂР° */
+    xRtcTicks.u_check.xRtcCheck.cStatus = CLOCK_RTC_TIME;	/* РЈ РЅР°СЃ РќР• РЅР°СЃС‚СЂРѕРµРЅ GPS, РїРѕСЌС‚РѕРјСѓ РІСЂРµРјСЏ Р±РµСЂРµРј РѕС‚ RTC */
     return 0;
 }
 
 /*****************************************************************************
- * Переход в спящий режим перед регистрацией-проснуться по таймеру!
- * В случае если у нас опоздание в файле-запускаем все равно
- * Заходим один раз, все остальное время выдаем "0"
+ * РџРµСЂРµС…РѕРґ РІ СЃРїСЏС‰РёР№ СЂРµР¶РёРј РїРµСЂРµРґ СЂРµРіРёСЃС‚СЂР°С†РёРµР№-РїСЂРѕСЃРЅСѓС‚СЊСЃСЏ РїРѕ С‚Р°Р№РјРµСЂСѓ!
+ * Р’ СЃР»СѓС‡Р°Рµ РµСЃР»Рё Сѓ РЅР°СЃ РѕРїРѕР·РґР°РЅРёРµ РІ С„Р°Р№Р»Рµ-Р·Р°РїСѓСЃРєР°РµРј РІСЃРµ СЂР°РІРЅРѕ
+ * Р—Р°С…РѕРґРёРј РѕРґРёРЅ СЂР°Р·, РІСЃРµ РѕСЃС‚Р°Р»СЊРЅРѕРµ РІСЂРµРјСЏ РІС‹РґР°РµРј "0"
  *****************************************************************************/
 #pragma section("FLASH_code")
 static int OnSleepAndDiveState(void)
@@ -1129,40 +1129,40 @@ static int OnSleepAndDiveState(void)
 
 	xShooseMode.mode |= MODE_SLEEP_LOCK;
 
-	/* Зеленый редко моргает */
+	/* Р—РµР»РµРЅС‹Р№ СЂРµРґРєРѕ РјРѕСЂРіР°РµС‚ */
 	LED_set_state(LED_SLOW_STATE, LED_OFF_STATE, LED_OFF_STATE, LED_OFF_STATE);
 
 	log_write_log_file("=======DEV_SLEEP_AND_DIVE_STATE=======\n");
 
 
 	if (gns110_param.gns110_modem_type > 0) {
-	    tgns = get_sec_ticks();	/* Определим время GNS */
+	    tgns = get_sec_ticks();	/* РћРїСЂРµРґРµР»РёРј РІСЂРµРјСЏ GNS */
 	    sec_to_str(tgns, str1);
 	    log_write_log_file("GNS   time: %s\n", str1);
-	    tmod = modem_check_modem_time(&gns110_param);	/* Определим время модема */
+	    tmod = modem_check_modem_time(&gns110_param);	/* РћРїСЂРµРґРµР»РёРј РІСЂРµРјСЏ РјРѕРґРµРјР° */
 	    sec_to_str(tmod, str2);
 	    log_write_log_file("Modem time: %s\n", str2);
 	}
 
 
-	/* Установим модем если неисправен - сброс был не по WDT */
+	/* РЈСЃС‚Р°РЅРѕРІРёРј РјРѕРґРµРј РµСЃР»Рё РЅРµРёСЃРїСЂР°РІРµРЅ - СЃР±СЂРѕСЃ Р±С‹Р» РЅРµ РїРѕ WDT */
 	if (xShooseMode.reset != CAUSE_WDT_RESET && gns110_param.gns110_modem_type > 0 && xShiftModemTime.bInit && abs(tgns - tmod) > 300) {
 	    log_write_log_file("----------------Init modem---------------\n");
 
-	    /* Проверим то что  записали */
+	    /* РџСЂРѕРІРµСЂРёРј С‚Рѕ С‡С‚Рѕ  Р·Р°РїРёСЃР°Р»Рё */
 	    t0 = modem_init_all_types(&gns110_param);
 	    if (t0 < 0)
 		return -1;
 
-	    unselect_debug_uart();	/* Отключаем модем */
+	    unselect_debug_uart();	/* РћС‚РєР»СЋС‡Р°РµРј РјРѕРґРµРј */
 	}
-	/*  Проверить время с уже настроенным генератором */
+	/*  РџСЂРѕРІРµСЂРёС‚СЊ РІСЂРµРјСЏ СЃ СѓР¶Рµ РЅР°СЃС‚СЂРѕРµРЅРЅС‹Рј РіРµРЅРµСЂР°С‚РѕСЂРѕРј */
 	if (check_set_times(&gns110_param)) {
 	    return -1;
 	}
     }
 
-    /* Ждем, когда нужно проснуться для подстройки */
+    /* Р–РґРµРј, РєРѕРіРґР° РЅСѓР¶РЅРѕ РїСЂРѕСЃРЅСѓС‚СЊСЃСЏ РґР»СЏ РїРѕРґСЃС‚СЂРѕР№РєРё */
     t0 = get_sec_ticks();
     if ((int) gns110_param.gns110_wakeup_time <= (int) t0) {
 	return 1;
@@ -1172,8 +1172,8 @@ static int OnSleepAndDiveState(void)
 }
 
 /************************************************************************************ 
- * Проснуться и начать сделать первичную инициализацию кварца на 4 МГц
- * Как только подстроил генератор 4.096 - установить все остальные обработчики
+ * РџСЂРѕСЃРЅСѓС‚СЊСЃСЏ Рё РЅР°С‡Р°С‚СЊ СЃРґРµР»Р°С‚СЊ РїРµСЂРІРёС‡РЅСѓСЋ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЋ РєРІР°СЂС†Р° РЅР° 4 РњР“С†
+ * РљР°Рє С‚РѕР»СЊРєРѕ РїРѕРґСЃС‚СЂРѕРёР» РіРµРЅРµСЂР°С‚РѕСЂ 4.096 - СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РІСЃРµ РѕСЃС‚Р°Р»СЊРЅС‹Рµ РѕР±СЂР°Р±РѕС‚С‡РёРєРё
  ************************************************************************************/
 #pragma section("FLASH_code")
 static int OnWakeupState(void)
@@ -1181,49 +1181,49 @@ static int OnWakeupState(void)
     s32 t0;
     bool res;
 
-    /* Зеленый редко моргает */
+    /* Р—РµР»РµРЅС‹Р№ СЂРµРґРєРѕ РјРѕСЂРіР°РµС‚ */
     LED_set_state(LED_SLOW_STATE, LED_OFF_STATE, LED_OFF_STATE, LED_OFF_STATE);
 
     log_write_log_file("=======DEV_WAKEUP_STATE=======\n");
 
     t0 = get_sec_ticks();
 
-    /* Моргнули зеленым */
+    /* РњРѕСЂРіРЅСѓР»Рё Р·РµР»РµРЅС‹Рј */
     LED_toggle(LED_GREEN);
 
 #if QUARTZ_CLK_FREQ==(19200000)
     log_write_log_file("INFO: 4MHz quart tunning.\n");
 #endif
-    select_analog_power();	/* Включаем аналоговую часть */
+    select_analog_power();	/* Р’РєР»СЋС‡Р°РµРј Р°РЅР°Р»РѕРіРѕРІСѓСЋ С‡Р°СЃС‚СЊ */
     log_write_log_file("INFO: Analog power for ADS1282 ON\n");
 
-    ADS1282_standby();		/* Выключить АЦП  */
+    ADS1282_standby();		/* Р’С‹РєР»СЋС‡РёС‚СЊ РђР¦Рџ  */
 
 #if QUARTZ_CLK_FREQ==(19200000)
 
     log_write_log_file("INFO: set %d on DAC for 4MHz VCXO\n", dac_data.dac4_data);
 
-    /* Делаем первичную настройку кварца 4 МГц. Начальный коэффициент кварца 4 у нас есть */
+    /* Р”РµР»Р°РµРј РїРµСЂРІРёС‡РЅСѓСЋ РЅР°СЃС‚СЂРѕР№РєСѓ РєРІР°СЂС†Р° 4 РњР“С†. РќР°С‡Р°Р»СЊРЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ РєРІР°СЂС†Р° 4 Сѓ РЅР°СЃ РµСЃС‚СЊ */
     DAC_write(DAC_4MHZ, dac_data.dac4_data);
 
-    /* Установим 3-й таймер примерно на середине счета таймера 1 */
+    /* РЈСЃС‚Р°РЅРѕРІРёРј 3-Р№ С‚Р°Р№РјРµСЂ РїСЂРёРјРµСЂРЅРѕ РЅР° СЃРµСЂРµРґРёРЅРµ СЃС‡РµС‚Р° С‚Р°Р№РјРµСЂР° 1 */
     while (TIMER1_get_counter() > (TIMER_HALF_PERIOD - TIMER_TUNE_SHIFT)
 	   && TIMER1_get_counter() < (TIMER_HALF_PERIOD + TIMER_TUNE_SHIFT));
     TIMER3_init();
 
-    LED_toggle(LED_GREEN);	/* Моргнули */
+    LED_toggle(LED_GREEN);	/* РњРѕСЂРіРЅСѓР»Рё */
 
-    /* Получили секунды  */
-    t0 = get_sec_ticks();	/* Получили секунды  */
+    /* РџРѕР»СѓС‡РёР»Рё СЃРµРєСѓРЅРґС‹  */
+    t0 = get_sec_ticks();	/* РџРѕР»СѓС‡РёР»Рё СЃРµРєСѓРЅРґС‹  */
     while ((get_sec_ticks() - t0) < TIM3_DELAY_SEC) {
-	LED_blink();		/* На разогрев - 5 секунд, пока не соберется буфер */
+	LED_blink();		/* РќР° СЂР°Р·РѕРіСЂРµРІ - 5 СЃРµРєСѓРЅРґ, РїРѕРєР° РЅРµ СЃРѕР±РµСЂРµС‚СЃСЏ Р±СѓС„РµСЂ */
     }
 
 
     log_write_log_file("INFO: wait for timer3 tune freq and phase\n");
-    TIMER3_shift_phase(t0);	/* Поймаем фазу */
+    TIMER3_shift_phase(t0);	/* РџРѕР№РјР°РµРј С„Р°Р·Сѓ */
 
-    /* Ждем пока таймер 3 подстроиться в течении макс. 10 секунд! */
+    /* Р–РґРµРј РїРѕРєР° С‚Р°Р№РјРµСЂ 3 РїРѕРґСЃС‚СЂРѕРёС‚СЊСЃСЏ РІ С‚РµС‡РµРЅРёРё РјР°РєСЃ. 10 СЃРµРєСѓРЅРґ! */
     t0 = get_sec_ticks();
     do {
 	res = TIMER3_is_shift_ok();
@@ -1238,37 +1238,37 @@ static int OnWakeupState(void)
 	log_write_log_file("INFO: timer3 was not tuned correctly. Continue to work\n");
     }
 #endif
-    return 0;			/* Даже если не подстроили  */
+    return 0;			/* Р”Р°Р¶Рµ РµСЃР»Рё РЅРµ РїРѕРґСЃС‚СЂРѕРёР»Рё  */
 }
 
 /************************************************************************************ 
- *  Регистрация, вызывается 1 раз в секунду
+ *  Р РµРіРёСЃС‚СЂР°С†РёСЏ, РІС‹Р·С‹РІР°РµС‚СЃСЏ 1 СЂР°Р· РІ СЃРµРєСѓРЅРґСѓ
  ************************************************************************************/
 #pragma section("FLASH_code")
 static int OnRegState(void)
 {
     int err;
 
-    /* не заходить больше сюда */
+    /* РЅРµ Р·Р°С…РѕРґРёС‚СЊ Р±РѕР»СЊС€Рµ СЃСЋРґР° */
     if (!(xShooseMode.mode & MODE_REG_LOCK)) {
 	xShooseMode.mode |= MODE_REG_LOCK;
 
-	/* Зеленый редко моргает */
+	/* Р—РµР»РµРЅС‹Р№ СЂРµРґРєРѕ РјРѕСЂРіР°РµС‚ */
 	LED_set_state(LED_SLOW_STATE, LED_OFF_STATE, LED_OFF_STATE, LED_OFF_STATE);
-	write_reset_cause_to_eeprom(CAUSE_WDT_RESET);	/* Запишем причину сброса - при сбросе будет работать без подстройки */
+	write_reset_cause_to_eeprom(CAUSE_WDT_RESET);	/* Р—Р°РїРёС€РµРј РїСЂРёС‡РёРЅСѓ СЃР±СЂРѕСЃР° - РїСЂРё СЃР±СЂРѕСЃРµ Р±СѓРґРµС‚ СЂР°Р±РѕС‚Р°С‚СЊ Р±РµР· РїРѕРґСЃС‚СЂРѕР№РєРё */
 	log_write_log_file("=======DEV_REG_STATE=======\n");
     }
 
-    /* Если запустились - вывести в лог! */
+    /* Р•СЃР»Рё Р·Р°РїСѓСЃС‚РёР»РёСЃСЊ - РІС‹РІРµСЃС‚Рё РІ Р»РѕРі! */
     if (xShooseMode.u_reg.xCtrlReg.bStart && !xShooseMode.u_reg.xCtrlReg.bBeginReg) {
 	xShooseMode.u_reg.xCtrlReg.bBeginReg = true;
 	log_write_log_file(">>>>>>>>>>>>>>>>>>Begin record<<<<<<<<<<<<<<<<<<<<<\n");
-	LED_set_state(LED_QUICK_STATE, LED_OFF_STATE, LED_OFF_STATE, LED_OFF_STATE);	/* Зеленый часто моргает */
+	LED_set_state(LED_QUICK_STATE, LED_OFF_STATE, LED_OFF_STATE, LED_OFF_STATE);	/* Р—РµР»РµРЅС‹Р№ С‡Р°СЃС‚Рѕ РјРѕСЂРіР°РµС‚ */
     }
 
 
-    /* После настройки частоты и фазы - 1 раз подаем SYNC, очередность внутри if именно такая!
-     * Конфигурировать АЦП на частоту freq , pga и формат слова... */
+    /* РџРѕСЃР»Рµ РЅР°СЃС‚СЂРѕР№РєРё С‡Р°СЃС‚РѕС‚С‹ Рё С„Р°Р·С‹ - 1 СЂР°Р· РїРѕРґР°РµРј SYNC, РѕС‡РµСЂРµРґРЅРѕСЃС‚СЊ РІРЅСѓС‚СЂРё if РёРјРµРЅРЅРѕ С‚Р°РєР°СЏ!
+     * РљРѕРЅС„РёРіСѓСЂРёСЂРѕРІР°С‚СЊ РђР¦Рџ РЅР° С‡Р°СЃС‚РѕС‚Сѓ freq , pga Рё С„РѕСЂРјР°С‚ СЃР»РѕРІР°... */
     if (!xShooseMode.u_mode.xCtrlMode.bSync
 #if QUARTZ_CLK_FREQ==(19200000)
 	&& TIMER3_is_tuned_ok()
@@ -1278,24 +1278,24 @@ static int OnRegState(void)
 	    return -1;
 	}
 #if QUARTZ_CLK_FREQ==(19200000)
-	err = write_dac4_coef_to_eeprom(dac_data.dac4_data);	/* сбросить на eeprom коэффициент с которым было настроено */
+	err = write_dac4_coef_to_eeprom(dac_data.dac4_data);	/* СЃР±СЂРѕСЃРёС‚СЊ РЅР° eeprom РєРѕСЌС„С„РёС†РёРµРЅС‚ СЃ РєРѕС‚РѕСЂС‹Рј Р±С‹Р»Рѕ РЅР°СЃС‚СЂРѕРµРЅРѕ */
 	log_write_log_file("INFO: %s: write DAC 4.096 coef(%d) on EEPROM\n", err == 0 ? "SUCCESS" : "ERROR", dac_data.dac4_data);
 #endif
 
 	xShooseMode.u_mode.xCtrlMode.bSync = true;
 
-	/* Сдвинуть время старта и финиша, а если время окончания меньше чем "сейчас" - выйти */
+	/* РЎРґРІРёРЅСѓС‚СЊ РІСЂРµРјСЏ СЃС‚Р°СЂС‚Р° Рё С„РёРЅРёС€Р°, Р° РµСЃР»Рё РІСЂРµРјСЏ РѕРєРѕРЅС‡Р°РЅРёСЏ РјРµРЅСЊС€Рµ С‡РµРј "СЃРµР№С‡Р°СЃ" - РІС‹Р№С‚Рё */
 	if (check_start_time(&gns110_param) != 0) {
 	    log_write_log_file("ERROR: checking time\n");
 	    return -1;
 	}
 
-	TIMER1_set_callback(timer1_callback_func);	/* Установить будильники на все времена: работа, окончание, всплытие и пр. */
+	TIMER1_set_callback(timer1_callback_func);	/* РЈСЃС‚Р°РЅРѕРІРёС‚СЊ Р±СѓРґРёР»СЊРЅРёРєРё РЅР° РІСЃРµ РІСЂРµРјРµРЅР°: СЂР°Р±РѕС‚Р°, РѕРєРѕРЅС‡Р°РЅРёРµ, РІСЃРїР»С‹С‚РёРµ Рё РїСЂ. */
 	log_write_log_file("INFO: Timers were tuned and handlers were installed\n");
 	print_set_times(&gns110_param);
     }
 
-    /* Моргаем желтым - SIGNAL handler  */
+    /* РњРѕСЂРіР°РµРј Р¶РµР»С‚С‹Рј - SIGNAL handler  */
     if (ADS1282_get_handler_flag()) {
 	ADS1282_reset_handler_flag();
 	LED_toggle(LED_SIGNAL);
@@ -1305,24 +1305,24 @@ static int OnRegState(void)
 }
 
 /************************************************************************
- * Функция окончания регистрации
+ * Р¤СѓРЅРєС†РёСЏ РѕРєРѕРЅС‡Р°РЅРёСЏ СЂРµРіРёСЃС‚СЂР°С†РёРё
  ************************************************************************/
 #pragma section("FLASH_code")
 static int OnFinishRegState(void)
 {
-    /* не заходить больше сюда */
+    /* РЅРµ Р·Р°С…РѕРґРёС‚СЊ Р±РѕР»СЊС€Рµ СЃСЋРґР° */
     if (!(xShooseMode.mode & MODE_FIN_LOCK)) {
 	char str[32];
 	xShooseMode.mode |= MODE_FIN_LOCK;
 
-	/* если не было окончания */
+	/* РµСЃР»Рё РЅРµ Р±С‹Р»Рѕ РѕРєРѕРЅС‡Р°РЅРёСЏ */
 	if (!(xShooseMode.mode & MODE_HALT_LOCK)) {
-	    LED_set_state(LED_OFF_STATE, LED_SLOW_STATE, LED_OFF_STATE, LED_OFF_STATE);	/* Огоньки, желтый редко */
+	    LED_set_state(LED_OFF_STATE, LED_SLOW_STATE, LED_OFF_STATE, LED_OFF_STATE);	/* РћРіРѕРЅСЊРєРё, Р¶РµР»С‚С‹Р№ СЂРµРґРєРѕ */
 	}
 	xShooseMode.u_reg.xCtrlReg.bFinish = true;
-	write_reset_cause_to_eeprom(CAUSE_UNKNOWN_RESET);	/* поставить причину сброса - непредвиденный (если вытащим питание) */
+	write_reset_cause_to_eeprom(CAUSE_UNKNOWN_RESET);	/* РїРѕСЃС‚Р°РІРёС‚СЊ РїСЂРёС‡РёРЅСѓ СЃР±СЂРѕСЃР° - РЅРµРїСЂРµРґРІРёРґРµРЅРЅС‹Р№ (РµСЃР»Рё РІС‹С‚Р°С‰РёРј РїРёС‚Р°РЅРёРµ) */
 	log_write_log_file("=======DEV_FINISH_REG_STATE=======\n");
-	finish_reg();		/* Закончить регистрацию */
+	finish_reg();		/* Р—Р°РєРѕРЅС‡РёС‚СЊ СЂРµРіРёСЃС‚СЂР°С†РёСЋ */
     }
     return 0;
 }
@@ -1330,38 +1330,38 @@ static int OnFinishRegState(void)
 
 
 /*************************************************************************************** 
- * Завершение работы
+ * Р—Р°РІРµСЂС€РµРЅРёРµ СЂР°Р±РѕС‚С‹
  ****************************************************************************************/
 #pragma section("FLASH_code")
 static int OnHaltState(void)
 {
-    /* не заходить больше сюда */
+    /* РЅРµ Р·Р°С…РѕРґРёС‚СЊ Р±РѕР»СЊС€Рµ СЃСЋРґР° */
     if (!(xShooseMode.mode & MODE_HALT_LOCK)) {
 	xShooseMode.mode |= MODE_HALT_LOCK;
 
-	/* Ожидание подъема на борт - моргают две лампы */
+	/* РћР¶РёРґР°РЅРёРµ РїРѕРґСЉРµРјР° РЅР° Р±РѕСЂС‚ - РјРѕСЂРіР°СЋС‚ РґРІРµ Р»Р°РјРїС‹ */
 	log_write_log_file("=======DEV_HALT_STATE=======\n");
 	LED_set_state(LED_OFF_STATE, LED_QUICK_STATE, LED_OFF_STATE, LED_QUICK_STATE);
 
 	if (gps_init() < 0)
 	    return -1;
 
-	IRQ_unregister_vector(NMEA_VECTOR_NUM);	/* Отрегистрируем прерывание порт gps */
+	IRQ_unregister_vector(NMEA_VECTOR_NUM);	/* РћС‚СЂРµРіРёСЃС‚СЂРёСЂСѓРµРј РїСЂРµСЂС‹РІР°РЅРёРµ РїРѕСЂС‚ gps */
 	log_write_log_file("INFO: Unregister GPS vector\n");
 
 
-	/* Всегда делать!  */
+	/* Р’СЃРµРіРґР° РґРµР»Р°С‚СЊ!  */
 	if (gns110_param.gns110_modem_type > 0) {
 	    if (modem_set_radio(&gns110_param) < 0)
 		return -1;
 	}
     }
-    return 0;			/* Всегда  */
+    return 0;			/* Р’СЃРµРіРґР°  */
 }
 
 
 /*************************************************************************************** 
- * Выключение питания
+ * Р’С‹РєР»СЋС‡РµРЅРёРµ РїРёС‚Р°РЅРёСЏ
  ****************************************************************************************/
 #pragma section("FLASH_code")
 static int OnPowerOffState(void)
@@ -1371,17 +1371,17 @@ static int OnPowerOffState(void)
 
     print_timer_and_sd_card_error();
 
-    /* Завершим регистрацию - если не было завершения */
+    /* Р—Р°РІРµСЂС€РёРј СЂРµРіРёСЃС‚СЂР°С†РёСЋ - РµСЃР»Рё РЅРµ Р±С‹Р»Рѕ Р·Р°РІРµСЂС€РµРЅРёСЏ */
     if (!xShooseMode.u_reg.xCtrlReg.bFinish) {
 	finish_reg();
     }
 
     POWER_off(CAUSE_POWER_OFF, xShooseMode.u_burn.xCtrlBurn.bPowerOff);
-    return 0;			/* Не обязательно! */
+    return 0;			/* РќРµ РѕР±СЏР·Р°С‚РµР»СЊРЅРѕ! */
 }
 
 /************************************************************************************ 
- *  Ошибка
+ *  РћС€РёР±РєР°
  ************************************************************************************/
 #pragma section("FLASH_code")
 static int OnErrorState(void)
@@ -1389,24 +1389,24 @@ static int OnErrorState(void)
     int res = 0;
     int sec = get_sec_ticks();
 
-    /* не заходить больше сюда */
+    /* РЅРµ Р·Р°С…РѕРґРёС‚СЊ Р±РѕР»СЊС€Рµ СЃСЋРґР° */
     if (!(xShooseMode.mode & MODE_ERR_LOCK)) {
 	xShooseMode.mode |= MODE_ERR_LOCK;
 
-	LED_all_off();		/* Выключить все для начала */
+	LED_all_off();		/* Р’С‹РєР»СЋС‡РёС‚СЊ РІСЃРµ РґР»СЏ РЅР°С‡Р°Р»Р° */
 	xShooseMode.u_reg.xCtrlReg.cLock = LOCK_NONE_REQ;
 
-	/* Красная часто */
+	/* РљСЂР°СЃРЅР°СЏ С‡Р°СЃС‚Рѕ */
 	LED_set_state(LED_OFF_STATE, LED_OFF_STATE, LED_QUICK_STATE, LED_OFF_STATE);
 	log_write_log_file("=======DEV_ERROR_STATE=======\n");
-	TIMER1_del_callback();	/* Если есть установленные времена - убрать их */
-	xShooseMode.time = sec;	/* Ставим секунды */
+	TIMER1_del_callback();	/* Р•СЃР»Рё РµСЃС‚СЊ СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅС‹Рµ РІСЂРµРјРµРЅР° - СѓР±СЂР°С‚СЊ РёС… */
+	xShooseMode.time = sec;	/* РЎС‚Р°РІРёРј СЃРµРєСѓРЅРґС‹ */
     }
 
-    /* Выключаем, если в ошибке > 10 минут */
+    /* Р’С‹РєР»СЋС‡Р°РµРј, РµСЃР»Рё РІ РѕС€РёР±РєРµ > 10 РјРёРЅСѓС‚ */
     if (sec - xShooseMode.time > POWEROFF_NO_LINK_TIME) {
 	log_write_log_file("INFO: 10 minutes expired. Power off\n");
-	xShooseMode.u_burn.xCtrlBurn.bPowerOff = false;	/* без модема */
+	xShooseMode.u_burn.xCtrlBurn.bPowerOff = false;	/* Р±РµР· РјРѕРґРµРјР° */
 	res = -1;
     }
 
@@ -1414,21 +1414,21 @@ static int OnErrorState(void)
 }
 
 /****************************************************************************
- * Режим аварийного ожидания
+ * Р РµР¶РёРј Р°РІР°СЂРёР№РЅРѕРіРѕ РѕР¶РёРґР°РЅРёСЏ
  ****************************************************************************/
 #pragma section("FLASH_code")
 static int OnEmergencyModeState(void)
 {
-    /* Не заходить сюда больше  */
+    /* РќРµ Р·Р°С…РѕРґРёС‚СЊ СЃСЋРґР° Р±РѕР»СЊС€Рµ  */
     if (!(xShooseMode.mode & MODE_EMERGENCY_LOCK)) {
 	xShooseMode.mode |= MODE_EMERGENCY_LOCK;
-	LED_set_state(LED_OFF_STATE, LED_SLOW_STATE, LED_SLOW_STATE, LED_OFF_STATE);	/* Желтый редко, красный редко */
+	LED_set_state(LED_OFF_STATE, LED_SLOW_STATE, LED_SLOW_STATE, LED_OFF_STATE);	/* Р–РµР»С‚С‹Р№ СЂРµРґРєРѕ, РєСЂР°СЃРЅС‹Р№ СЂРµРґРєРѕ */
     }
     return 0;
 }
 
 /****************************************************************************
- * Командный режим (работа от PC)
+ * РљРѕРјР°РЅРґРЅС‹Р№ СЂРµР¶РёРј (СЂР°Р±РѕС‚Р° РѕС‚ PC)
  ****************************************************************************/
 #pragma section("FLASH_code")
 static int OnCommandModeState(void)
@@ -1441,33 +1441,33 @@ static int OnCommandModeState(void)
     u8 res;
     int ret = 0;
 
-    /* Не заходить сюда больше и сделать тесты */
+    /* РќРµ Р·Р°С…РѕРґРёС‚СЊ СЃСЋРґР° Р±РѕР»СЊС€Рµ Рё СЃРґРµР»Р°С‚СЊ С‚РµСЃС‚С‹ */
     if (!(xShooseMode.mode & MODE_CMD_LOCK)) {
 	xShooseMode.mode |= MODE_CMD_LOCK;
 
 
-	LED_set_state(LED_QUICK_STATE, LED_OFF_STATE, LED_OFF_STATE, LED_QUICK_STATE);	/* Синий часто, зеленый часто  */
+	LED_set_state(LED_QUICK_STATE, LED_OFF_STATE, LED_OFF_STATE, LED_QUICK_STATE);	/* РЎРёРЅРёР№ С‡Р°СЃС‚Рѕ, Р·РµР»РµРЅС‹Р№ С‡Р°СЃС‚Рѕ  */
 
 	select_analog_power();
 
-	eeprom_test(&dev_status);	/* Тест eeprom  */
-	test_gps(&dev_status);	/* Тест GPS  */
-	test_reset(&dev_status);	/* Получили причину сброса */
-	rtc_test(&dev_status);	/* Test RTC: Прочитаем время из RTC, если ошибка - не используем */
-	test_bmp085(&dev_status);	/* Test Датчик температуры и давления:  Прочитаем коэффициенты из bmp085 */
-	test_acc(&dev_status);	/* Test Акселерометра: */
-	test_cmps(&dev_status);	/* Test Компаса: */
-	test_adc(&dev_status);	/* Чтобы появились коэффициенты АЦП */
+	eeprom_test(&dev_status);	/* РўРµСЃС‚ eeprom  */
+	test_gps(&dev_status);	/* РўРµСЃС‚ GPS  */
+	test_reset(&dev_status);	/* РџРѕР»СѓС‡РёР»Рё РїСЂРёС‡РёРЅСѓ СЃР±СЂРѕСЃР° */
+	rtc_test(&dev_status);	/* Test RTC: РџСЂРѕС‡РёС‚Р°РµРј РІСЂРµРјСЏ РёР· RTC, РµСЃР»Рё РѕС€РёР±РєР° - РЅРµ РёСЃРїРѕР»СЊР·СѓРµРј */
+	test_bmp085(&dev_status);	/* Test Р”Р°С‚С‡РёРє С‚РµРјРїРµСЂР°С‚СѓСЂС‹ Рё РґР°РІР»РµРЅРёСЏ:  РџСЂРѕС‡РёС‚Р°РµРј РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ РёР· bmp085 */
+	test_acc(&dev_status);	/* Test РђРєСЃРµР»РµСЂРѕРјРµС‚СЂР°: */
+	test_cmps(&dev_status);	/* Test РљРѕРјРїР°СЃР°: */
+	test_adc(&dev_status);	/* Р§С‚РѕР±С‹ РїРѕСЏРІРёР»РёСЃСЊ РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ РђР¦Рџ */
 
 	DAC_init();
 	dac.dac19_data = DAC19_INIT_DATA;
-	dac.dac4_data = DAC4_INIT_DATA;	/* настроим ЦАПЫ */
+	dac.dac4_data = DAC4_INIT_DATA;	/* РЅР°СЃС‚СЂРѕРёРј Р¦РђРџР« */
 	DAC_write(DAC_19MHZ, dac.dac19_data);
 	DAC_write(DAC_4MHZ, dac.dac4_data);
-	delay_ms(50);		/* раскачали */
-	dev_status.st_main |= 0x40;	/* Ставим статус: остановлен */
+	delay_ms(50);		/* СЂР°СЃРєР°С‡Р°Р»Рё */
+	dev_status.st_main |= 0x40;	/* РЎС‚Р°РІРёРј СЃС‚Р°С‚СѓСЃ: РѕСЃС‚Р°РЅРѕРІР»РµРЅ */
 
-	i = get_rtc_sec_ticks();	/* время RTC */
+	i = get_rtc_sec_ticks();	/* РІСЂРµРјСЏ RTC */
 	xShooseMode.time = i;
 	set_sec_ticks(i);
     }
@@ -1476,7 +1476,7 @@ static int OnCommandModeState(void)
 }
 
 /**
- * Выполнить внешнюю команду от UART.!
+ * Р’С‹РїРѕР»РЅРёС‚СЊ РІРЅРµС€РЅСЋСЋ РєРѕРјР°РЅРґСѓ РѕС‚ UART.!
  */
 #pragma section("FLASH_code")
 static void exec_uart_cmd(DEV_STATE_ENUM * state)
@@ -1487,16 +1487,16 @@ static void exec_uart_cmd(DEV_STATE_ENUM * state)
     if (*state != DEV_COMMAND_MODE_STATE)
 	return;
 
-    /* Выполняем только в командном режиме  */
+    /* Р’С‹РїРѕР»РЅСЏРµРј С‚РѕР»СЊРєРѕ РІ РєРѕРјР°РЅРґРЅРѕРј СЂРµР¶РёРјРµ  */
     if (uart_cmd.cmd != 0) {
 
-	xShooseMode.time = get_sec_ticks();	/* отодвигаем время выключения */
+	xShooseMode.time = get_sec_ticks();	/* РѕС‚РѕРґРІРёРіР°РµРј РІСЂРµРјСЏ РІС‹РєР»СЋС‡РµРЅРёСЏ */
 
 
-	/* Смотрим параметр */
+	/* РЎРјРѕС‚СЂРёРј РїР°СЂР°РјРµС‚СЂ */
 	switch (uart_cmd.cmd) {
 
-	    // данные в eeprom по умолчанию
+	    // РґР°РЅРЅС‹Рµ РІ eeprom РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ
 	case UART_CMD_ZERO_ALL_EEPROM:
 	    write_default_data_to_eeprom(&dev_status);
 	    break;
@@ -1505,35 +1505,35 @@ static void exec_uart_cmd(DEV_STATE_ENUM * state)
 	    test_all(&dev_status);
 	    break;
 
-	    /* Выключение питания БЕЗ выключения модема */
+	    /* Р’С‹РєР»СЋС‡РµРЅРёРµ РїРёС‚Р°РЅРёСЏ Р‘Р•Р— РІС‹РєР»СЋС‡РµРЅРёСЏ РјРѕРґРµРјР° */
 	case UART_CMD_POWER_OFF:
 	    xShooseMode.u_burn.xCtrlBurn.bPowerOff = false;
 	    *state = DEV_POWER_OFF_STATE;
 	    break;
 
-	    /* Сброс DSP. Запишем и причину сброса */
+	    /* РЎР±СЂРѕСЃ DSP. Р—Р°РїРёС€РµРј Рё РїСЂРёС‡РёРЅСѓ СЃР±СЂРѕСЃР° */
 	case UART_CMD_DSP_RESET:
 	    delay_ms(50);
 	    write_reset_cause_to_eeprom(CAUSE_EXT_RESET);
 	    PLL_reset();
 	    break;
 
-	    /* Управление реле пережиг ВКЛ */
+	    /* РЈРїСЂР°РІР»РµРЅРёРµ СЂРµР»Рµ РїРµСЂРµР¶РёРі Р’РљР› */
 	case UART_CMD_BURN_ON:
 	    burn_wire_on();
 	    break;
 
-	    /* Управление реле пережиг ВЫКЛ */
+	    /* РЈРїСЂР°РІР»РµРЅРёРµ СЂРµР»Рµ РїРµСЂРµР¶РёРі Р’Р«РљР› */
 	case UART_CMD_BURN_OFF:
 	    burn_wire_off();
 	    break;
 
-	    /* Управление GPS ВКЛ */
+	    /* РЈРїСЂР°РІР»РµРЅРёРµ GPS Р’РљР› */
 	case UART_CMD_GPS_ON:
 	    res = gps_init();
 	    if (res == 0) {
 		dev_status.st_test0 &= ~0x10;
-		dev_status.st_test1 |= 0x01;	// Включили GPS 
+		dev_status.st_test1 |= 0x01;	// Р’РєР»СЋС‡РёР»Рё GPS 
 		xNmeaSet.bEnter = true;
 		xNmeaSet.lTime0 = get_sec_ticks();
 	    } else {
@@ -1541,50 +1541,50 @@ static void exec_uart_cmd(DEV_STATE_ENUM * state)
 	    }
 	    break;
 
-	    /* Управление GPS ВЫКЛ */
+	    /* РЈРїСЂР°РІР»РµРЅРёРµ GPS Р’Р«РљР› */
 	case UART_CMD_GPS_OFF:
 	    gps_close();
 	    xNmeaSet.bEnter = false;
 	    xNmeaSet.lTime0 = 0;
-	    dev_status.st_test1 &= ~0x01;	// вЫключили GPS
+	    dev_status.st_test1 &= ~0x01;	// РІР«РєР»СЋС‡РёР»Рё GPS
 	    break;
 
-	    /* Управление: включить реле модема. И Сдвинуть ВРЕМЯ! */
+	    /* РЈРїСЂР°РІР»РµРЅРёРµ: РІРєР»СЋС‡РёС‚СЊ СЂРµР»Рµ РјРѕРґРµРјР°. Р РЎРґРІРёРЅСѓС‚СЊ Р’Р Р•РњРЇ! */
 	case UART_CMD_MODEM_ON:
 	    modem_on();
-	    dev_status.st_test1 |= 0x06;	// Включили модем  + тест модема
+	    dev_status.st_test1 |= 0x06;	// Р’РєР»СЋС‡РёР»Рё РјРѕРґРµРј  + С‚РµСЃС‚ РјРѕРґРµРјР°
 	    xShiftModemTime.bEnter = true;
 	    xShiftModemTime.lTime0 = get_sec_ticks();
 	    break;
 
-	    /* Управление: вЫключить реле модема   */
+	    /* РЈРїСЂР°РІР»РµРЅРёРµ: РІР«РєР»СЋС‡РёС‚СЊ СЂРµР»Рµ РјРѕРґРµРјР°   */
 	case UART_CMD_MODEM_OFF:
 	    modem_off();
-	    dev_status.st_test1 &= ~0x02;	// вЫключили модем 
+	    dev_status.st_test1 &= ~0x02;	// РІР«РєР»СЋС‡РёР»Рё РјРѕРґРµРј 
 	    xShiftModemTime.bEnter = false;
 	    xShiftModemTime.lTime0 = 0;
 	    break;
 
 
-	    /* Управление: ретранслировать команду модему  */
+	    /* РЈРїСЂР°РІР»РµРЅРёРµ: СЂРµС‚СЂР°РЅСЃР»РёСЂРѕРІР°С‚СЊ РєРѕРјР°РЅРґСѓ РјРѕРґРµРјСѓ  */
 	case UART_CMD_MODEM_REQUEST:
 	//vvvv:    delay_ms(50);
-	    dev_status.st_main |= 0x02;	// Идет тестирование модема - ставим ошибку модема
+	    dev_status.st_main |= 0x02;	// РРґРµС‚ С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ РјРѕРґРµРјР° - СЃС‚Р°РІРёРј РѕС€РёР±РєСѓ РјРѕРґРµРјР°
 	    if (modem_convey_buf((char *) uart_cmd.u.cPar, uart_cmd.len % MODEM_BUF_LEN) == 0) {
-		dev_status.st_main &= ~0x02;	// Сняли ошибку
+		dev_status.st_main &= ~0x02;	// РЎРЅСЏР»Рё РѕС€РёР±РєСѓ
 	    }
 	    break;
 
-	    /* Старт осцилограф */
+	    /* РЎС‚Р°СЂС‚ РѕСЃС†РёР»РѕРіСЂР°С„ */
 	case UART_CMD_DEV_START:
 	    start_adc_osciloscope((char *) uart_cmd.u.cPar);
-	    dev_status.st_main &= ~0x02;	// Сняли ошибку
+	    dev_status.st_main &= ~0x02;	// РЎРЅСЏР»Рё РѕС€РёР±РєСѓ
 	    break;
 
-	    /* Старт осцилограф */
+	    /* РЎС‚Р°СЂС‚ РѕСЃС†РёР»РѕРіСЂР°С„ */
 	case UART_CMD_DEV_STOP:
 	    stop_adc_osciloscope();
-	    dev_status.st_main &= ~0x02;	/* Сняли ошибку */
+	    dev_status.st_main &= ~0x02;	/* РЎРЅСЏР»Рё РѕС€РёР±РєСѓ */
 	    break;
 
 
@@ -1594,21 +1594,21 @@ static void exec_uart_cmd(DEV_STATE_ENUM * state)
 	}
 	uart_cmd.cmd = UART_CMD_NONE;
     }
-    // через 5 секунд подаем команду на UART0
+    // С‡РµСЂРµР· 5 СЃРµРєСѓРЅРґ РїРѕРґР°РµРј РєРѕРјР°РЅРґСѓ РЅР° UART0
     if (xNmeaSet.bEnter == true) {
 	long t1 = get_sec_ticks();
 	if (t1 - xNmeaSet.lTime0 > 5) {
 
-	    // ААА..иначе забьет без этого другими строками
+	    // РђРђРђ..РёРЅР°С‡Рµ Р·Р°Р±СЊРµС‚ Р±РµР· СЌС‚РѕРіРѕ РґСЂСѓРіРёРјРё СЃС‚СЂРѕРєР°РјРё
 	    gps_set_grmc();
 	    xNmeaSet.bEnter = false;
 	}
     }
-    // включаем и ждем 5 секунды
-    // Ждать ~5 секунд (подобрать!)
+    // РІРєР»СЋС‡Р°РµРј Рё Р¶РґРµРј 5 СЃРµРєСѓРЅРґС‹
+    // Р–РґР°С‚СЊ ~5 СЃРµРєСѓРЅРґ (РїРѕРґРѕР±СЂР°С‚СЊ!)
     if (xShiftModemTime.bEnter == true) {
 
-	// Включаем модем после ожидания и обнуляем команду и enter в конце
+	// Р’РєР»СЋС‡Р°РµРј РјРѕРґРµРј РїРѕСЃР»Рµ РѕР¶РёРґР°РЅРёСЏ Рё РѕР±РЅСѓР»СЏРµРј РєРѕРјР°РЅРґСѓ Рё enter РІ РєРѕРЅС†Рµ
 	if (get_sec_ticks() - xShiftModemTime.lTime0 > MODEM_POWERON_TIME_SEC) {
 
 /////vvvvv:
@@ -1626,21 +1626,21 @@ static void exec_uart_cmd(DEV_STATE_ENUM * state)
 
 
 /** 
- * Выполнить внешнюю команду от UART!
- * которая пришла в прерывании порта UART
+ * Р’С‹РїРѕР»РЅРёС‚СЊ РІРЅРµС€РЅСЋСЋ РєРѕРјР°РЅРґСѓ РѕС‚ UART!
+ * РєРѕС‚РѕСЂР°СЏ РїСЂРёС€Р»Р° РІ РїСЂРµСЂС‹РІР°РЅРёРё РїРѕСЂС‚Р° UART
  */
 #pragma section("FLASH_code")
 void make_extern_uart_cmd(void *i, void *o)
 {
     if (i != NULL && o != NULL) {
-	memcpy(&uart_cmd, i, sizeof(uart_cmd));	/* Какую команду исполнять */
-	memcpy(o, &dev_status, 3);	/* Отвечаем: OK, 2 байта статуса (не полным!) + длина */
+	memcpy(&uart_cmd, i, sizeof(uart_cmd));	/* РљР°РєСѓСЋ РєРѕРјР°РЅРґСѓ РёСЃРїРѕР»РЅСЏС‚СЊ */
+	memcpy(o, &dev_status, 3);	/* РћС‚РІРµС‡Р°РµРј: OK, 2 Р±Р°Р№С‚Р° СЃС‚Р°С‚СѓСЃР° (РЅРµ РїРѕР»РЅС‹Рј!) + РґР»РёРЅР° */
 	*(u8 *) o = 2;
     }
 }
 
 
-/* Получить время ИЗ RTC не чаще раза в секунду  */
+/* РџРѕР»СѓС‡РёС‚СЊ РІСЂРµРјСЏ РР— RTC РЅРµ С‡Р°С‰Рµ СЂР°Р·Р° РІ СЃРµРєСѓРЅРґСѓ  */
 #pragma section("FLASH_code")
 void cmd_get_gns110_rtc(void *buf)
 {
@@ -1653,13 +1653,13 @@ void cmd_get_gns110_rtc(void *buf)
     }
 
     if (buf != NULL) {
-	*(u8 *) buf = 0x04;	/* Длина в первом байте */
+	*(u8 *) buf = 0x04;	/* Р”Р»РёРЅР° РІ РїРµСЂРІРѕРј Р±Р°Р№С‚Рµ */
 	memcpy((u8 *) buf + 1, &xRtcTicks.iSec, 4);
     }
 }
 
 
-/* Запуск всех АЦП в командном режиме */
+/* Р—Р°РїСѓСЃРє РІСЃРµС… РђР¦Рџ РІ РєРѕРјР°РЅРґРЅРѕРј СЂРµР¶РёРјРµ */
 section("FLASH_code")
 void start_adc_osciloscope(void *in)
 {
@@ -1667,11 +1667,11 @@ void start_adc_osciloscope(void *in)
     u32 i, freq;
     f32 flt;
 
-    dev_status.st_main |= 0x04;	// ошибка в команде
+    dev_status.st_main |= 0x04;	// РѕС€РёР±РєР° РІ РєРѕРјР°РЅРґРµ
 
     if (!ADS1282_is_run()) {
 
-	freq = get_long_from_buf(in, 0);	// частота
+	freq = get_long_from_buf(in, 0);	// С‡Р°СЃС‚РѕС‚Р°
 	if (freq == 4000)
 	    par.sps = SPS4K;
 	else if (freq == 2000)
@@ -1687,7 +1687,7 @@ void start_adc_osciloscope(void *in)
 	else 
 	   par.sps = SPS62;
 
-	i = get_long_from_buf(in, 4);	// Получили PGA
+	i = get_long_from_buf(in, 4);	// РџРѕР»СѓС‡РёР»Рё PGA
 	if (i == 64)
 	    par.pga = PGA64;
 	else if (i == 32)
@@ -1708,7 +1708,7 @@ void start_adc_osciloscope(void *in)
 	i = get_long_from_buf(in, 12);	// 12 HI or LO res
 	par.res = (i > 0) ? 1 : 0;
 
-	i = get_long_from_buf(in, 16);	// Получили CHOP
+	i = get_long_from_buf(in, 16);	// РџРѕР»СѓС‡РёР»Рё CHOP
 	par.chop = (i > 0) ? 1 : 0;
 
 
@@ -1716,65 +1716,65 @@ void start_adc_osciloscope(void *in)
 	par.hpf = get_hpf_from_freq(flt, freq);
 
 	if (ADS1282_config(&par) == false) {
-	    dev_status.st_main |= 0x04;	// ошибка в команде
+	    dev_status.st_main |= 0x04;	// РѕС€РёР±РєР° РІ РєРѕРјР°РЅРґРµ
 	} else {
-	    ADS1282_start();	/* Запускаем АЦП с PGA  */
-	    ADS1282_start_irq();	/* Разрешаем IRQ  */
-	    dev_status.st_main &= ~0x44;	// Сняли бит
+	    ADS1282_start();	/* Р—Р°РїСѓСЃРєР°РµРј РђР¦Рџ СЃ PGA  */
+	    ADS1282_start_irq();	/* Р Р°Р·СЂРµС€Р°РµРј IRQ  */
+	    dev_status.st_main &= ~0x44;	// РЎРЅСЏР»Рё Р±РёС‚
 	}
     }
 }
 
 
-/* Стоп всех АЦП */
+/* РЎС‚РѕРї РІСЃРµС… РђР¦Рџ */
 #pragma section("FLASH_code")
 void stop_adc_osciloscope(void)
 {
     ADS1282_stop();
-    dev_status.st_main |= 0x40;	// остановлен
+    dev_status.st_main |= 0x40;	// РѕСЃС‚Р°РЅРѕРІР»РµРЅ
 }
 
-/* Очистить буфер данных*/
+/* РћС‡РёСЃС‚РёС‚СЊ Р±СѓС„РµСЂ РґР°РЅРЅС‹С…*/
 #pragma section("FLASH_code")
 void cmd_clear_adc_buf(void *out)
 {
     if (out != NULL) {
 	ADS1282_clear_adc_buf();
-	dev_status.st_main &= ~0x20;	// Переполнение памяти снимаем
+	dev_status.st_main &= ~0x20;	// РџРµСЂРµРїРѕР»РЅРµРЅРёРµ РїР°РјСЏС‚Рё СЃРЅРёРјР°РµРј
     }
-    memcpy(out, &dev_status, 3);	/* Отвечаем: OK, 2 байта статуса (не полным!) + длина  */
-    *(u8 *) out = 2;		/* Отвечаем: 2 байта статуса */
+    memcpy(out, &dev_status, 3);	/* РћС‚РІРµС‡Р°РµРј: OK, 2 Р±Р°Р№С‚Р° СЃС‚Р°С‚СѓСЃР° (РЅРµ РїРѕР»РЅС‹Рј!) + РґР»РёРЅР°  */
+    *(u8 *) out = 2;		/* РћС‚РІРµС‡Р°РµРј: 2 Р±Р°Р№С‚Р° СЃС‚Р°С‚СѓСЃР° */
 }
 
 
-/* Получить данные */
+/* РџРѕР»СѓС‡РёС‚СЊ РґР°РЅРЅС‹Рµ */
 #pragma section("FLASH_code")
 void cmd_get_adc_data(void *buf)
 {
     if (buf != NULL) {
 
 	if (ADS1282_get_pack(buf) == true) {
-	    dev_status.st_main &= ~0x20;	/* снимаем переполнение буфера */
-	    *(u8 *) buf = sizeof(ADS1282_PACK_STRUCT) - 3;	/* Передаем столько байт (252 -3) */
+	    dev_status.st_main &= ~0x20;	/* СЃРЅРёРјР°РµРј РїРµСЂРµРїРѕР»РЅРµРЅРёРµ Р±СѓС„РµСЂР° */
+	    *(u8 *) buf = sizeof(ADS1282_PACK_STRUCT) - 3;	/* РџРµСЂРµРґР°РµРј СЃС‚РѕР»СЊРєРѕ Р±Р°Р№С‚ (252 -3) */
 	} else {
-	    memcpy(buf, &dev_status, 3);	/* Отвечаем: OK, 2 байта статуса (не полным!) + длина */
-	    *(u8 *) buf = 2;	/* Отвечаем: 2 байта статуса */
+	    memcpy(buf, &dev_status, 3);	/* РћС‚РІРµС‡Р°РµРј: OK, 2 Р±Р°Р№С‚Р° СЃС‚Р°С‚СѓСЃР° (РЅРµ РїРѕР»РЅС‹Рј!) + РґР»РёРЅР° */
+	    *(u8 *) buf = 2;	/* РћС‚РІРµС‡Р°РµРј: 2 Р±Р°Р№С‚Р° СЃС‚Р°С‚СѓСЃР° */
 	}
     }
 }
 
 
-/* Обнулить eeprom - поставить данные по-умолчанию  */
+/* РћР±РЅСѓР»РёС‚СЊ eeprom - РїРѕСЃС‚Р°РІРёС‚СЊ РґР°РЅРЅС‹Рµ РїРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ  */
 #pragma section("FLASH_code")
 void cmd_zero_all_eeprom(void *buf)
 {
     if (buf != NULL) {
-	memcpy(buf, &dev_status, 3);	/* Отвечаем: OK, 2 байта статуса (не полным!) + длина */
-	*(u8 *) buf = 2;	/* Отвечаем: 2 байта статуса */
+	memcpy(buf, &dev_status, 3);	/* РћС‚РІРµС‡Р°РµРј: OK, 2 Р±Р°Р№С‚Р° СЃС‚Р°С‚СѓСЃР° (РЅРµ РїРѕР»РЅС‹Рј!) + РґР»РёРЅР° */
+	*(u8 *) buf = 2;	/* РћС‚РІРµС‡Р°РµРј: 2 Р±Р°Р№С‚Р° СЃС‚Р°С‚СѓСЃР° */
     }
 }
 
-/* Записать константы во все каналы */
+/* Р—Р°РїРёСЃР°С‚СЊ РєРѕРЅСЃС‚Р°РЅС‚С‹ РІРѕ РІСЃРµ РєР°РЅР°Р»С‹ */
 #pragma section("FLASH_code")
 void cmd_set_adc_const(void *in, void *out)
 {
@@ -1783,80 +1783,80 @@ void cmd_set_adc_const(void *in, void *out)
     ADS1282_Regs regs;
 
 
-    /* Данные упорядочены как в структуре ADS1282_regs. Первое число - magic */
+    /* Р”Р°РЅРЅС‹Рµ СѓРїРѕСЂСЏРґРѕС‡РµРЅС‹ РєР°Рє РІ СЃС‚СЂСѓРєС‚СѓСЂРµ ADS1282_regs. РџРµСЂРІРѕРµ С‡РёСЃР»Рѕ - magic */
     if (in != NULL && out != NULL) {
 	memcpy(&regs, in, sizeof(ADS1282_Regs));
 
 	for (i = 0; i < ADC_CHAN; i++)
-	    ADS1282_set_adc_const(i, regs.chan[i].offset, regs.chan[i].gain);	// Ставим константы
+	    ADS1282_set_adc_const(i, regs.chan[i].offset, regs.chan[i].gain);	// РЎС‚Р°РІРёРј РєРѕРЅСЃС‚Р°РЅС‚С‹
 
 
-	/* Записать константы */
+	/* Р—Р°РїРёСЃР°С‚СЊ РєРѕРЅСЃС‚Р°РЅС‚С‹ */
 	res = ADS1282_set_adc_const(0xff, 0, 0);
 
 	if (regs.magic == MAGIC && res == true) {
-	    dev_status.st_test1 &= ~0x08;	// Снимаем статус - нет констант 
+	    dev_status.st_test1 &= ~0x08;	// РЎРЅРёРјР°РµРј СЃС‚Р°С‚СѓСЃ - РЅРµС‚ РєРѕРЅСЃС‚Р°РЅС‚ 
 	} else {
-	    dev_status.st_main |= 0x04;	// Посылаем статус - Ошибка в команде? */
+	    dev_status.st_main |= 0x04;	// РџРѕСЃС‹Р»Р°РµРј СЃС‚Р°С‚СѓСЃ - РћС€РёР±РєР° РІ РєРѕРјР°РЅРґРµ? */
 	}
 
-	memcpy(out, &dev_status, 3);	/* Отвечаем: OK, 2 байта статуса (не полным!) + длина  */
-	*(u8 *) out = 2;	/* Отвечаем: 2 байта статуса */
+	memcpy(out, &dev_status, 3);	/* РћС‚РІРµС‡Р°РµРј: OK, 2 Р±Р°Р№С‚Р° СЃС‚Р°С‚СѓСЃР° (РЅРµ РїРѕР»РЅС‹Рј!) + РґР»РёРЅР°  */
+	*(u8 *) out = 2;	/* РћС‚РІРµС‡Р°РµРј: 2 Р±Р°Р№С‚Р° СЃС‚Р°С‚СѓСЃР° */
     }
 }
 
 
-/* Получить константы всех каналов  */
+/* РџРѕР»СѓС‡РёС‚СЊ РєРѕРЅСЃС‚Р°РЅС‚С‹ РІСЃРµС… РєР°РЅР°Р»РѕРІ  */
 #pragma section("FLASH_code")
 void cmd_get_adc_const(void *buf)
 {
-    ADS1282_Regs regs;		// константы каналов
+    ADS1282_Regs regs;		// РєРѕРЅСЃС‚Р°РЅС‚С‹ РєР°РЅР°Р»РѕРІ
     u32 a, b;
     int i;
 
     if (buf != NULL) {
 	for (i = 0; i < ADC_CHAN; i++) {
-	    ADS1282_get_adc_const(i, &a, &b);	// Получаем константы
+	    ADS1282_get_adc_const(i, &a, &b);	// РџРѕР»СѓС‡Р°РµРј РєРѕРЅСЃС‚Р°РЅС‚С‹
 	    regs.chan[i].offset = a;
 	    regs.chan[i].gain = b;
 	}
-	/* Скопируем в буфер со второго байта (в первом будет длина) regs.magic = MAGIC; */
+	/* РЎРєРѕРїРёСЂСѓРµРј РІ Р±СѓС„РµСЂ СЃРѕ РІС‚РѕСЂРѕРіРѕ Р±Р°Р№С‚Р° (РІ РїРµСЂРІРѕРј Р±СѓРґРµС‚ РґР»РёРЅР°) regs.magic = MAGIC; */
 	memcpy((u8 *) buf + 1, &regs, sizeof(ADS1282_Regs));
-	*(u8 *) buf = sizeof(ADS1282_Regs);	/* Передаем столько байт - в структуре нету других полей! */
+	*(u8 *) buf = sizeof(ADS1282_Regs);	/* РџРµСЂРµРґР°РµРј СЃС‚РѕР»СЊРєРѕ Р±Р°Р№С‚ - РІ СЃС‚СЂСѓРєС‚СѓСЂРµ РЅРµС‚Сѓ РґСЂСѓРіРёС… РїРѕР»РµР№! */
     } else {
-	memcpy(buf, &dev_status, 3);	/* Отвечаем: OK, 2 байта статуса (не полным!) + длина */
-	*(u8 *) buf = 2;	/* Отвечаем: 2 байта статуса */
+	memcpy(buf, &dev_status, 3);	/* РћС‚РІРµС‡Р°РµРј: OK, 2 Р±Р°Р№С‚Р° СЃС‚Р°С‚СѓСЃР° (РЅРµ РїРѕР»РЅС‹Рј!) + РґР»РёРЅР° */
+	*(u8 *) buf = 2;	/* РћС‚РІРµС‡Р°РµРј: 2 Р±Р°Р№С‚Р° СЃС‚Р°С‚СѓСЃР° */
     }
 }
 
-/* Получить адрес и версию ПО модуля */
+/* РџРѕР»СѓС‡РёС‚СЊ Р°РґСЂРµСЃ Рё РІРµСЂСЃРёСЋ РџРћ РјРѕРґСѓР»СЏ */
 #pragma section("FLASH_code")
 void cmd_get_dsp_addr(void *par)
 {
     dev_state = DEV_COMMAND_MODE_STATE;
-    dev_addr.len = sizeof(DEV_ADDR_STRUCT) - 3;	/* xxx байт передаем  */
+    dev_addr.len = sizeof(DEV_ADDR_STRUCT) - 3;	/* xxx Р±Р°Р№С‚ РїРµСЂРµРґР°РµРј  */
 
     if (par != NULL)
 	memcpy(par, &dev_addr, sizeof(dev_addr));
 }
 
 /**
- * Установить номер модуля (как имя или адрес )
+ * РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РЅРѕРјРµСЂ РјРѕРґСѓР»СЏ (РєР°Рє РёРјСЏ РёР»Рё Р°РґСЂРµСЃ )
  */
 #pragma section("FLASH_code")
 void cmd_set_dsp_addr(u16 addr, void *buf)
 {
     write_mod_id_to_eeprom(addr);
 
-    dev_status.st_main &= ~0x04;	/* снимаем "ошибка" */
+    dev_status.st_main &= ~0x04;	/* СЃРЅРёРјР°РµРј "РѕС€РёР±РєР°" */
 
     if (buf != NULL)
-	memcpy(buf, &dev_status, 3);	/* Отвечаем: OK, 2 байта статуса (не полным!) + длина */
-    *(u8 *) buf = 2;		/* Отвечаем: 2 байта статуса */
+	memcpy(buf, &dev_status, 3);	/* РћС‚РІРµС‡Р°РµРј: OK, 2 Р±Р°Р№С‚Р° СЃС‚Р°С‚СѓСЃР° (РЅРµ РїРѕР»РЅС‹Рј!) + РґР»РёРЅР° */
+    *(u8 *) buf = 2;		/* РћС‚РІРµС‡Р°РµРј: 2 Р±Р°Р№С‚Р° СЃС‚Р°С‚СѓСЃР° */
 }
 
 
-/* Получить время работы прибора */
+/* РџРѕР»СѓС‡РёС‚СЊ РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ РїСЂРёР±РѕСЂР° */
 #pragma section("FLASH_code")
 void cmd_get_work_time(void *buf)
 {
@@ -1866,7 +1866,7 @@ void cmd_get_work_time(void *buf)
     }
 }
 
-/* Записать время работы прибора */
+/* Р—Р°РїРёСЃР°С‚СЊ РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ РїСЂРёР±РѕСЂР° */
 #pragma section("FLASH_code")
 void cmd_set_work_time(u32 t1, u32 t2, u32 t3, void *buf)
 {
@@ -1879,40 +1879,40 @@ void cmd_set_work_time(u32 t1, u32 t2, u32 t3, void *buf)
 
 	if (res == 0) {
 	    dev_status.st_main &= ~0x04;
-	    dwt.time_work = t1;	/* Время работы в режиме сбора данных */
-	    dwt.time_cmd = t2;	/* Время работы в командном режиме */
-	    dwt.time_modem = t3;	/* Время работы модема */
+	    dwt.time_work = t1;	/* Р’СЂРµРјСЏ СЂР°Р±РѕС‚С‹ РІ СЂРµР¶РёРјРµ СЃР±РѕСЂР° РґР°РЅРЅС‹С… */
+	    dwt.time_cmd = t2;	/* Р’СЂРµРјСЏ СЂР°Р±РѕС‚С‹ РІ РєРѕРјР°РЅРґРЅРѕРј СЂРµР¶РёРјРµ */
+	    dwt.time_modem = t3;	/* Р’СЂРµРјСЏ СЂР°Р±РѕС‚С‹ РјРѕРґРµРјР° */
 	} else {
 	    dev_status.st_main |= 0x04;
 	}
 
-	memcpy(buf, &dev_status, 3);	/* Отвечаем: OK, 2 байта статуса (не полным!) + длина */
-	*(u8 *) buf = 2;	/* Отвечаем: 2 байта статуса */
+	memcpy(buf, &dev_status, 3);	/* РћС‚РІРµС‡Р°РµРј: OK, 2 Р±Р°Р№С‚Р° СЃС‚Р°С‚СѓСЃР° (РЅРµ РїРѕР»РЅС‹Рј!) + РґР»РёРЅР° */
+	*(u8 *) buf = 2;	/* РћС‚РІРµС‡Р°РµРј: 2 Р±Р°Р№С‚Р° СЃС‚Р°С‚СѓСЃР° */
     }
 }
 
 
-/* синхронизация */
+/* СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ */
 #pragma section("FLASH_code")
 void cmd_set_gns110_rtc(u32 sec, void *par)
 {
-    dev_status.st_main &= ~0x01;	/* Сбрасываем. "нет времени" */
+    dev_status.st_main &= ~0x01;	/* РЎР±СЂР°СЃС‹РІР°РµРј. "РЅРµС‚ РІСЂРµРјРµРЅРё" */
     set_rtc_sec_ticks(sec);
 
-    /* Поставим и таймер TIM1 */
+    /* РџРѕСЃС‚Р°РІРёРј Рё С‚Р°Р№РјРµСЂ TIM1 */
     set_sec_ticks(sec);
 
 
-    /* Отодвигаем время сброса */
+    /* РћС‚РѕРґРІРёРіР°РµРј РІСЂРµРјСЏ СЃР±СЂРѕСЃР° */
     xShooseMode.time = sec;
 
     if (par != NULL) {
-	memcpy(par, &dev_status, 3);	/* Отвечаем: OK, 2 байта статуса (не полным!) + длина */
-	*(u8 *) par = 2;	/* 2 младших байта статуса */
+	memcpy(par, &dev_status, 3);	/* РћС‚РІРµС‡Р°РµРј: OK, 2 Р±Р°Р№С‚Р° СЃС‚Р°С‚СѓСЃР° (РЅРµ РїРѕР»РЅС‹Рј!) + РґР»РёРЅР° */
+	*(u8 *) par = 2;	/* 2 РјР»Р°РґС€РёС… Р±Р°Р№С‚Р° СЃС‚Р°С‚СѓСЃР° */
     }
 }
 
-/* Выставить статус */
+/* Р’С‹СЃС‚Р°РІРёС‚СЊ СЃС‚Р°С‚СѓСЃ */
 #pragma section("FLASH_code")
 void cmd_set_dsp_status(void *par)
 {
@@ -1921,9 +1921,9 @@ void cmd_set_dsp_status(void *par)
 }
 
 /**
- * Моргать лампами в зависимости от режима работы
- * пока просто передадим управление
- * Если пережиг - быстро моргать желтым
+ * РњРѕСЂРіР°С‚СЊ Р»Р°РјРїР°РјРё РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ СЂРµР¶РёРјР° СЂР°Р±РѕС‚С‹
+ * РїРѕРєР° РїСЂРѕСЃС‚Рѕ РїРµСЂРµРґР°РґРёРј СѓРїСЂР°РІР»РµРЅРёРµ
+ * Р•СЃР»Рё РїРµСЂРµР¶РёРі - Р±С‹СЃС‚СЂРѕ РјРѕСЂРіР°С‚СЊ Р¶РµР»С‚С‹Рј
  */
 #pragma section("FLASH_code")
 static void blink_all_leds(DEV_STATE_ENUM state)
@@ -1937,15 +1937,15 @@ static void blink_all_leds(DEV_STATE_ENUM state)
 }
 
 /**
- * Фильтруем напряжение
+ * Р¤РёР»СЊС‚СЂСѓРµРј РЅР°РїСЂСЏР¶РµРЅРёРµ
  */
 #pragma section("FLASH_code")
 static s16 filt_reg_power(s16 u)
 {
     int volt = 0, i;
 
-    /* Забиваем напряжение в отсчеты */
-    xVoltArray.volts[xVoltArray.count % POWER_DROP_COUNT] = u;	/* Собираем напряжение */
+    /* Р—Р°Р±РёРІР°РµРј РЅР°РїСЂСЏР¶РµРЅРёРµ РІ РѕС‚СЃС‡РµС‚С‹ */
+    xVoltArray.volts[xVoltArray.count % POWER_DROP_COUNT] = u;	/* РЎРѕР±РёСЂР°РµРј РЅР°РїСЂСЏР¶РµРЅРёРµ */
     xVoltArray.count++;
 
     for (i = 0; i < POWER_DROP_COUNT; i++) {
@@ -1960,7 +1960,7 @@ static s16 filt_reg_power(s16 u)
 
 
 /**
- * Считаем время работы каждую секунду
+ * РЎС‡РёС‚Р°РµРј РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ РєР°Р¶РґСѓСЋ СЃРµРєСѓРЅРґСѓ
  */
 #pragma section("FLASH_code")
 static void count_work_time(DEV_STATE_ENUM state)
@@ -1970,21 +1970,21 @@ static void count_work_time(DEV_STATE_ENUM state)
 
     ticks = get_sec_ticks();
 
-    if (time != ticks) {	/* раз в секунду */
+    if (time != ticks) {	/* СЂР°Р· РІ СЃРµРєСѓРЅРґСѓ */
 	time = ticks;
 
 	if (state == DEV_COMMAND_MODE_STATE) {
-	    dwt.time_cmd++;	/* Получаем время работы и увеличиваем */
+	    dwt.time_cmd++;	/* РџРѕР»СѓС‡Р°РµРј РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ Рё СѓРІРµР»РёС‡РёРІР°РµРј */
 
 	} else if (state > DEV_INIT_STATE) {
-	    dwt.time_work++;	/* Получаем время работы и увеличиваем */
+	    dwt.time_work++;	/* РџРѕР»СѓС‡Р°РµРј РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ Рё СѓРІРµР»РёС‡РёРІР°РµРј */
 
 	    if (gns110_param.gns110_modem_type > 0) {
-		dwt.time_modem++;	/* Время работы модема  */
+		dwt.time_modem++;	/* Р’СЂРµРјСЏ СЂР°Р±РѕС‚С‹ РјРѕРґРµРјР°  */
 	    }
 	}
 
-	/* Сбросим на eeprom раз в ***минуту. Не в начале минуты!!! */
+	/* РЎР±СЂРѕСЃРёРј РЅР° eeprom СЂР°Р· РІ ***РјРёРЅСѓС‚Сѓ. РќРµ РІ РЅР°С‡Р°Р»Рµ РјРёРЅСѓС‚С‹!!! */
 	if (time % 60 == 0) {
 	    write_work_time();
 	}
@@ -1992,7 +1992,7 @@ static void count_work_time(DEV_STATE_ENUM state)
 }
 
 /**
- * Записать в eeprom время работы----посмотреть чтобы не накладывалось с пред. функцией!
+ * Р—Р°РїРёСЃР°С‚СЊ РІ eeprom РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹----РїРѕСЃРјРѕС‚СЂРµС‚СЊ С‡С‚РѕР±С‹ РЅРµ РЅР°РєР»Р°РґС‹РІР°Р»РѕСЃСЊ СЃ РїСЂРµРґ. С„СѓРЅРєС†РёРµР№!
  */
 #pragma section("FLASH_code")
 void write_work_time(void)
@@ -2003,11 +2003,11 @@ void write_work_time(void)
 }
 
 /**
- * Выдать статус часов:
- * N - нет времени
- * R - время RTC
- * G - GPS не подстроен
- * P - точное время
+ * Р’С‹РґР°С‚СЊ СЃС‚Р°С‚СѓСЃ С‡Р°СЃРѕРІ:
+ * N - РЅРµС‚ РІСЂРµРјРµРЅРё
+ * R - РІСЂРµРјСЏ RTC
+ * G - GPS РЅРµ РїРѕРґСЃС‚СЂРѕРµРЅ
+ * P - С‚РѕС‡РЅРѕРµ РІСЂРµРјСЏ
  */
 #pragma section("FLASH_code")
 int get_clock_status(void)
@@ -2016,7 +2016,7 @@ int get_clock_status(void)
 }
 
 /**
- * Установить статус часов
+ * РЈСЃС‚Р°РЅРѕРІРёС‚СЊ СЃС‚Р°С‚СѓСЃ С‡Р°СЃРѕРІ
  */
 #pragma section("FLASH_code")
 void set_clock_status(int s)
@@ -2026,9 +2026,9 @@ void set_clock_status(int s)
 
 
 /*************************************************************************************
- *    Функции подстройки кварца 4.096 МГц живут здесь 
- *    будет вызыватся в бесконечном цикле,
- *    так же опрашиваем АЦП
+ *    Р¤СѓРЅРєС†РёРё РїРѕРґСЃС‚СЂРѕР№РєРё РєРІР°СЂС†Р° 4.096 РњР“С† Р¶РёРІСѓС‚ Р·РґРµСЃСЊ 
+ *    Р±СѓРґРµС‚ РІС‹Р·С‹РІР°С‚СЃСЏ РІ Р±РµСЃРєРѕРЅРµС‡РЅРѕРј С†РёРєР»Рµ,
+ *    С‚Р°Рє Р¶Рµ РѕРїСЂР°С€РёРІР°РµРј РђР¦Рџ
  *************************************************************************************/
 #if QUARTZ_CLK_FREQ==(19200000)
 #pragma section("FLASH_code")
@@ -2039,35 +2039,35 @@ static void quartz4_tune(DEV_STATE_ENUM state)
 
     t0 = TIMER3_get_sec_ticks();
 
-    /* Подстраивать кварц 4 МГц если работает таймер3 и находимся в режиме регистрации */
+    /* РџРѕРґСЃС‚СЂР°РёРІР°С‚СЊ РєРІР°СЂС† 4 РњР“С† РµСЃР»Рё СЂР°Р±РѕС‚Р°РµС‚ С‚Р°Р№РјРµСЂ3 Рё РЅР°С…РѕРґРёРјСЃСЏ РІ СЂРµР¶РёРјРµ СЂРµРіРёСЃС‚СЂР°С†РёРё */
     if (TIMER3_is_run() && tick != t0 && state >= DEV_REG_STATE) {
 	int dac, freq, phase, per;
 
 	tick = t0;
 
-	/* Попробуем отрегулировать период каждую секунду:
-	 * Если ошибка частоты < 0 - таймер 3 идет быстрее чем таймер 1
-	 * т.е он быстрее снимает метки
-	 * если ошибка  частоты > 0 - таймер 3 идет медленнее чем таймер 1   
-	 * Если фаза  < 0 - таймер 3 опережает таймер 1
-	 * Если фаза  > 0 - таймер 3 опаздывает по отношению к таймеру 1    */
+	/* РџРѕРїСЂРѕР±СѓРµРј РѕС‚СЂРµРіСѓР»РёСЂРѕРІР°С‚СЊ РїРµСЂРёРѕРґ РєР°Р¶РґСѓСЋ СЃРµРєСѓРЅРґСѓ:
+	 * Р•СЃР»Рё РѕС€РёР±РєР° С‡Р°СЃС‚РѕС‚С‹ < 0 - С‚Р°Р№РјРµСЂ 3 РёРґРµС‚ Р±С‹СЃС‚СЂРµРµ С‡РµРј С‚Р°Р№РјРµСЂ 1
+	 * С‚.Рµ РѕРЅ Р±С‹СЃС‚СЂРµРµ СЃРЅРёРјР°РµС‚ РјРµС‚РєРё
+	 * РµСЃР»Рё РѕС€РёР±РєР°  С‡Р°СЃС‚РѕС‚С‹ > 0 - С‚Р°Р№РјРµСЂ 3 РёРґРµС‚ РјРµРґР»РµРЅРЅРµРµ С‡РµРј С‚Р°Р№РјРµСЂ 1   
+	 * Р•СЃР»Рё С„Р°Р·Р°  < 0 - С‚Р°Р№РјРµСЂ 3 РѕРїРµСЂРµР¶Р°РµС‚ С‚Р°Р№РјРµСЂ 1
+	 * Р•СЃР»Рё С„Р°Р·Р°  > 0 - С‚Р°Р№РјРµСЂ 3 РѕРїР°Р·РґС‹РІР°РµС‚ РїРѕ РѕС‚РЅРѕС€РµРЅРёСЋ Рє С‚Р°Р№РјРµСЂСѓ 1    */
 	freq = TIMER3_get_freq_err();
 	phase = TIMER3_get_phase_err();
 	per = TIMER3_get_period();
 
-	dac = freq - phase / 10 + dac_data.dac4_data;	/* Уравнение регулятора для 48 МГц */
+	dac = freq - phase / 10 + dac_data.dac4_data;	/* РЈСЂР°РІРЅРµРЅРёРµ СЂРµРіСѓР»СЏС‚РѕСЂР° РґР»СЏ 48 РњР“С† */
 
-	/* против переполнения, ЦАП работает на пределе разрядной величины!!! 
-	 * Какую проверку добавить, если фаза не будет подстраиваца? */
+	/* РїСЂРѕС‚РёРІ РїРµСЂРµРїРѕР»РЅРµРЅРёСЏ, Р¦РђРџ СЂР°Р±РѕС‚Р°РµС‚ РЅР° РїСЂРµРґРµР»Рµ СЂР°Р·СЂСЏРґРЅРѕР№ РІРµР»РёС‡РёРЅС‹!!! 
+	 * РљР°РєСѓСЋ РїСЂРѕРІРµСЂРєСѓ РґРѕР±Р°РІРёС‚СЊ, РµСЃР»Рё С„Р°Р·Р° РЅРµ Р±СѓРґРµС‚ РїРѕРґСЃС‚СЂР°РёРІР°С†Р°? */
 	if (dac > 0x3fff)
 	    dac = 0x3fff;
 	if (dac < 0)
 	    dac = 0;
 
 	dac_data.dac4_data = dac;
-	DAC_write(DAC_4MHZ, dac_data.dac4_data);	/* Подать на ЦАП, и после подачи будем делать выдержку - кварц инерционный!  */
+	DAC_write(DAC_4MHZ, dac_data.dac4_data);	/* РџРѕРґР°С‚СЊ РЅР° Р¦РђРџ, Рё РїРѕСЃР»Рµ РїРѕРґР°С‡Рё Р±СѓРґРµРј РґРµР»Р°С‚СЊ РІС‹РґРµСЂР¶РєСѓ - РєРІР°СЂС† РёРЅРµСЂС†РёРѕРЅРЅС‹Р№!  */
 
-	/* Пишем в лог только при превышении ОБОИХ пределов */
+	/* РџРёС€РµРј РІ Р»РѕРі С‚РѕР»СЊРєРѕ РїСЂРё РїСЂРµРІС‹С€РµРЅРёРё РћР‘РћРРҐ РїСЂРµРґРµР»РѕРІ */
 	if ((abs(freq) > TIM3_GRANT_ERROR) && (abs(phase) > TIM3_GRANT_ERROR)) {
 	    log_write_log_file("dac4 =  %d: phase = %d, per = %ld, err = %ld\n", dac, phase, per, freq);
 	}
@@ -2076,7 +2076,7 @@ static void quartz4_tune(DEV_STATE_ENUM state)
 #endif
 
 /**
- * Начать регистрацию в рабочем режиме
+ * РќР°С‡Р°С‚СЊ СЂРµРіРёСЃС‚СЂР°С†РёСЋ РІ СЂР°Р±РѕС‡РµРј СЂРµР¶РёРјРµ
  */
 #pragma section("FLASH_code")
 static int begin_reg(void)
@@ -2112,7 +2112,7 @@ static int begin_reg(void)
 	break;
 
     default:
-	par.sps = SPS62;	/* По умолчанию - всегда 62.5 */
+	par.sps = SPS62;	/* РџРѕ СѓРјРѕР»С‡Р°РЅРёСЋ - РІСЃРµРіРґР° 62.5 */
 	break;
 #endif
     }
@@ -2123,38 +2123,38 @@ static int begin_reg(void)
 	PGA8 : (gns110_param.gns110_adc_pga == 16) ? PGA16 : (gns110_param.gns110_adc_pga == 32) ? PGA32 : PGA64;
 
     par.file_len = gns110_param.gns110_file_len;
-    par.mode = WORK_MODE;	/* Рабочий режим */
+    par.mode = WORK_MODE;	/* Р Р°Р±РѕС‡РёР№ СЂРµР¶РёРј */
     par.res = gns110_param.gns110_adc_consum;
     par.hpf = get_hpf_from_freq(gns110_param.gns110_adc_flt_freq, gns110_param.gns110_adc_freq);
     par.bitmap = gns110_param.gns110_adc_bitmap;
 
-    /* Файлы на 24 часа, пока нет параметра  */
+    /* Р¤Р°Р№Р»С‹ РЅР° 24 С‡Р°СЃР°, РїРѕРєР° РЅРµС‚ РїР°СЂР°РјРµС‚СЂР°  */
     if (ADS1282_config(&par) == false) {
 	return -1;
     }
 
-    /* Запускаем АЦП и синхронизируем АЦП */
+    /* Р—Р°РїСѓСЃРєР°РµРј РђР¦Рџ Рё СЃРёРЅС…СЂРѕРЅРёР·РёСЂСѓРµРј РђР¦Рџ */
     ADS1282_start();
     return 0;
 }
 
 
 /**
- *  Завершить регистрацию в рабочем режиме
+ *  Р—Р°РІРµСЂС€РёС‚СЊ СЂРµРіРёСЃС‚СЂР°С†РёСЋ РІ СЂР°Р±РѕС‡РµРј СЂРµР¶РёРјРµ
  */
 #pragma section("FLASH_code")
 static void finish_reg(void)
 {
     log_write_log_file(">>>>>>>>>>>>>>>>>>>Finish record<<<<<<<<<<<<<<<<<<<\n");
-    ADS1282_stop();		/* Выключаем АЦП и в Powerdown его */
-    TIMER3_disable();		/* Выключим 3-1 таймер   */
-    log_close_data_file();	/* Закрываем файл данных */
+    ADS1282_stop();		/* Р’С‹РєР»СЋС‡Р°РµРј РђР¦Рџ Рё РІ Powerdown РµРіРѕ */
+    TIMER3_disable();		/* Р’С‹РєР»СЋС‡РёРј 3-1 С‚Р°Р№РјРµСЂ   */
+    log_close_data_file();	/* Р—Р°РєСЂС‹РІР°РµРј С„Р°Р№Р» РґР°РЅРЅС‹С… */
     delay_ms(50);
-    unselect_analog_power();	/* Выключить аналоговую часть */
+    unselect_analog_power();	/* Р’С‹РєР»СЋС‡РёС‚СЊ Р°РЅР°Р»РѕРіРѕРІСѓСЋ С‡Р°СЃС‚СЊ */
 }
 
 /**
- * Ставим время компиляции,  номер устройства и время работы
+ * РЎС‚Р°РІРёРј РІСЂРµРјСЏ РєРѕРјРїРёР»СЏС†РёРё,  РЅРѕРјРµСЂ СѓСЃС‚СЂРѕР№СЃС‚РІР° Рё РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹
  */
 #pragma section("FLASH_code")
 static void get_dev_params(void *p0, void *p1)
@@ -2164,21 +2164,21 @@ static void get_dev_params(void *p0, void *p1)
     DEV_WORK_TIME_STRUCT *wt;
     TIME_DATE d;
 
-    dev_status.eeprom = read_all_data_from_eeprom();	/* получить  параметры из EEPROM иначе имени не будет */
+    dev_status.eeprom = read_all_data_from_eeprom();	/* РїРѕР»СѓС‡РёС‚СЊ  РїР°СЂР°РјРµС‚СЂС‹ РёР· EEPROM РёРЅР°С‡Рµ РёРјРµРЅРё РЅРµ Р±СѓРґРµС‚ */
 
     if (p0 != NULL) {
 	par = (DEV_ADDR_STRUCT *) p0;
 	sprintf(date, "%s", __DATE__);
 	sprintf(time, "%s", __TIME__);
 
-	/* Определим и поставим время компиляции  */
+	/* РћРїСЂРµРґРµР»РёРј Рё РїРѕСЃС‚Р°РІРёРј РІСЂРµРјСЏ РєРѕРјРїРёР»СЏС†РёРё  */
 	par->time = get_comp_time();
-	par->addr = read_mod_id_from_eeprom();	/* Получим адрес устройства */
-	par->ver = get_version();	/* Версия ПО */
-	par->rev = get_revision();	/* Ревизию ПО */
+	par->addr = read_mod_id_from_eeprom();	/* РџРѕР»СѓС‡РёРј Р°РґСЂРµСЃ СѓСЃС‚СЂРѕР№СЃС‚РІР° */
+	par->ver = get_version();	/* Р’РµСЂСЃРёСЏ РџРћ */
+	par->rev = get_revision();	/* Р РµРІРёР·РёСЋ РџРћ */
     }
 
-    /* Получим время работы  */
+    /* РџРѕР»СѓС‡РёРј РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹  */
     if (p1 != NULL) {
 	wt = (DEV_WORK_TIME_STRUCT *) p1;
 	wt->time_work = read_time_work_from_eeprom();
@@ -2187,12 +2187,12 @@ static void get_dev_params(void *p0, void *p1)
     }
 }
 
-/* Получить полный статус - в командном режиме */
+/* РџРѕР»СѓС‡РёС‚СЊ РїРѕР»РЅС‹Р№ СЃС‚Р°С‚СѓСЃ - РІ РєРѕРјР°РЅРґРЅРѕРј СЂРµР¶РёРјРµ */
 #pragma section("FLASH_code")
 void cmd_get_dsp_status(void *par)
 {
-    dev_status.len = sizeof(DEV_STATUS_STRUCT) - 3;	/*  Размер полного статуса */
-    dev_status.st_main &= ~0x04;	/* Снимаем "ошибка" если была */
+    dev_status.len = sizeof(DEV_STATUS_STRUCT) - 3;	/*  Р Р°Р·РјРµСЂ РїРѕР»РЅРѕРіРѕ СЃС‚Р°С‚СѓСЃР° */
+    dev_status.st_main &= ~0x04;	/* РЎРЅРёРјР°РµРј "РѕС€РёР±РєР°" РµСЃР»Рё Р±С‹Р»Р° */
     xShooseMode.time = get_sec_ticks();
     if (par != NULL) {
 	memcpy(par, &dev_status, sizeof(dev_status));
@@ -2200,54 +2200,54 @@ void cmd_get_dsp_status(void *par)
 }
 
 /**
- * Выдает параметры наружу
+ * Р’С‹РґР°РµС‚ РїР°СЂР°РјРµС‚СЂС‹ РЅР°СЂСѓР¶Сѓ
  */
 #pragma section("FLASH_code")
 void get_gns110_start_params(void *par)
 {
-    if (par != NULL) {		/* Передает в параметр Эту структуру */
+    if (par != NULL) {		/* РџРµСЂРµРґР°РµС‚ РІ РїР°СЂР°РјРµС‚СЂ Р­С‚Сѓ СЃС‚СЂСѓРєС‚СѓСЂСѓ */
 	memcpy(par, &gns110_param, sizeof(GNS110_PARAM_STRUCT));
     }
 }
 
 
 /**
- * Копируют всю структуру за раз
+ * РљРѕРїРёСЂСѓСЋС‚ РІСЃСЋ СЃС‚СЂСѓРєС‚СѓСЂСѓ Р·Р° СЂР°Р·
  */
 #pragma section("FLASH_code")
 void set_gns110_start_params(void *par)
 {
-    if (par != NULL) {		/* Ставит эту структуру из параметра  */
+    if (par != NULL) {		/* РЎС‚Р°РІРёС‚ СЌС‚Сѓ СЃС‚СЂСѓРєС‚СѓСЂСѓ РёР· РїР°СЂР°РјРµС‚СЂР°  */
 	memcpy(&gns110_param, par, sizeof(GNS110_PARAM_STRUCT));
     }
 }
 
 
 /** 
- * Получить uart_cmd 
+ * РџРѕР»СѓС‡РёС‚СЊ uart_cmd 
  */
 #pragma section("FLASH_code")
 void get_uart_cmd_buf(void *par)
 {
     if (par != NULL) {
-	memcpy(par, &uart_cmd, sizeof(DEV_UART_CMD));	/* Получить буфер */
+	memcpy(par, &uart_cmd, sizeof(DEV_UART_CMD));	/* РџРѕР»СѓС‡РёС‚СЊ Р±СѓС„РµСЂ */
     }
 }
 
 
 /** 
- * Записать uart_cmd 
+ * Р—Р°РїРёСЃР°С‚СЊ uart_cmd 
  */
 #pragma section("FLASH_code")
 void set_uart_cmd_buf(void *par)
 {
     if (par != NULL) {
-	memcpy(&uart_cmd, par, sizeof(DEV_UART_CMD));	/* Записать буфер */
+	memcpy(&uart_cmd, par, sizeof(DEV_UART_CMD));	/* Р—Р°РїРёСЃР°С‚СЊ Р±СѓС„РµСЂ */
     }
 }
 
 /**
- * Вернуть, в каком состоянии мы находимся 
+ * Р’РµСЂРЅСѓС‚СЊ, РІ РєР°РєРѕРј СЃРѕСЃС‚РѕСЏРЅРёРё РјС‹ РЅР°С…РѕРґРёРјСЃСЏ 
  */
 #pragma section("FLASH_code")
 int get_dev_state(void)
@@ -2256,7 +2256,7 @@ int get_dev_state(void)
 }
 
 /**
- * Выдать время компиляции,  номер устройства и время работы
+ * Р’С‹РґР°С‚СЊ РІСЂРµРјСЏ РєРѕРјРїРёР»СЏС†РёРё,  РЅРѕРјРµСЂ СѓСЃС‚СЂРѕР№СЃС‚РІР° Рё РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹
  */
 #pragma section("FLASH_code")
 long get_comp_time(void)
@@ -2276,9 +2276,9 @@ long get_comp_time(void)
 
 
 /**
- * Получаем напряжения и параметры среды с АЦП
- * В зависимости от состояния - раз в минуту или реже
- * Возможно добавить несколько секунд, чтобы записи в заголовок не пересекались из ADS1282.c!
+ * РџРѕР»СѓС‡Р°РµРј РЅР°РїСЂСЏР¶РµРЅРёСЏ Рё РїР°СЂР°РјРµС‚СЂС‹ СЃСЂРµРґС‹ СЃ РђР¦Рџ
+ * Р’ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ СЃРѕСЃС‚РѕСЏРЅРёСЏ - СЂР°Р· РІ РјРёРЅСѓС‚Сѓ РёР»Рё СЂРµР¶Рµ
+ * Р’РѕР·РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ РЅРµСЃРєРѕР»СЊРєРѕ СЃРµРєСѓРЅРґ, С‡С‚РѕР±С‹ Р·Р°РїРёСЃРё РІ Р·Р°РіРѕР»РѕРІРѕРє РЅРµ РїРµСЂРµСЃРµРєР°Р»РёСЃСЊ РёР· ADS1282.c!
  */
 #pragma section("FLASH_code")
 static void get_atmega_data(DEV_STATE_ENUM * state)
@@ -2291,31 +2291,31 @@ static void get_atmega_data(DEV_STATE_ENUM * state)
     int volt;
     SD_CARD_ERROR_STRUCT ts;
 
-    /* Опрос - каждую секунду или минуту */
+    /* РћРїСЂРѕСЃ - РєР°Р¶РґСѓСЋ СЃРµРєСѓРЅРґСѓ РёР»Рё РјРёРЅСѓС‚Сѓ */
     ticks = get_sec_ticks();
     if (time != ticks) {
 	time = ticks;
 
 	adc_get(&dev_status);
 
-	/* В режиме регистрации меняем данные в заголовке раз в минуту
-	 * Чтобы не попадало на запись заголовка */
+	/* Р’ СЂРµР¶РёРјРµ СЂРµРіРёСЃС‚СЂР°С†РёРё РјРµРЅСЏРµРј РґР°РЅРЅС‹Рµ РІ Р·Р°РіРѕР»РѕРІРєРµ СЂР°Р· РІ РјРёРЅСѓС‚Сѓ
+	 * Р§С‚РѕР±С‹ РЅРµ РїРѕРїР°РґР°Р»Рѕ РЅР° Р·Р°РїРёСЃСЊ Р·Р°РіРѕР»РѕРІРєР° */
 	if (*state == DEV_REG_STATE && time % 60 == 30) {
 	    log_change_adc_header(&dev_status);
 	}
 
 
-	/* При регистрации (когда в воде)- не выходить на ошибку! */
+	/* РџСЂРё СЂРµРіРёСЃС‚СЂР°С†РёРё (РєРѕРіРґР° РІ РІРѕРґРµ)- РЅРµ РІС‹С…РѕРґРёС‚СЊ РЅР° РѕС€РёР±РєСѓ! */
 	if (!check_sd_card()) {
 	    if (*state != DEV_COMMAND_MODE_STATE && *state >= DEV_INIT_STATE && *state < DEV_REG_STATE) {
 		*state = DEV_ERROR_STATE;
 	    } else {
-		/* Выключаем АЦП и перейдем в режим "Аварийное ожидание"  */
+		/* Р’С‹РєР»СЋС‡Р°РµРј РђР¦Рџ Рё РїРµСЂРµР№РґРµРј РІ СЂРµР¶РёРј "РђРІР°СЂРёР№РЅРѕРµ РѕР¶РёРґР°РЅРёРµ"  */
 		dev_status.st_test0 |= 0x40;
 	    }
 	}
 
-	/* Моргать красной лампой в случае таймаута или ошибке карты */
+	/* РњРѕСЂРіР°С‚СЊ РєСЂР°СЃРЅРѕР№ Р»Р°РјРїРѕР№ РІ СЃР»СѓС‡Р°Рµ С‚Р°Р№РјР°СѓС‚Р° РёР»Рё РѕС€РёР±РєРµ РєР°СЂС‚С‹ */
 	get_sd_card_timeout(&ts);
 	if (ts.any_error != num) {
 	    num = ts.any_error;
@@ -2325,13 +2325,13 @@ static void get_atmega_data(DEV_STATE_ENUM * state)
 	    log_write_log_file("INFO: cmd(%d), read(%d) write(%d)\n", ts.cmd_error, ts.read_timeout, ts.write_timeout);
 #endif
 	}
-#if !defined	JTAG_DEBUG	/* Не проверяем при подключении из студии */
+#if !defined	JTAG_DEBUG	/* РќРµ РїСЂРѕРІРµСЂСЏРµРј РїСЂРё РїРѕРґРєР»СЋС‡РµРЅРёРё РёР· СЃС‚СѓРґРёРё */
 	if (*state == DEV_COMMAND_MODE_STATE && ticks - xShooseMode.time > POWEROFF_NO_LINK_TIME) {
-	    POWER_off(CAUSE_NO_LINK, true);	/* Если нет связи - выключить питание и модем */
+	    POWER_off(CAUSE_NO_LINK, true);	/* Р•СЃР»Рё РЅРµС‚ СЃРІСЏР·Рё - РІС‹РєР»СЋС‡РёС‚СЊ РїРёС‚Р°РЅРёРµ Рё РјРѕРґРµРј */
 	}
 #endif
 
-	/* Печатать параметры раз в 1 минуту или раз в 10 минут или в час */
+	/* РџРµС‡Р°С‚Р°С‚СЊ РїР°СЂР°РјРµС‚СЂС‹ СЂР°Р· РІ 1 РјРёРЅСѓС‚Сѓ РёР»Рё СЂР°Р· РІ 10 РјРёРЅСѓС‚ РёР»Рё РІ С‡Р°СЃ */
 	if ((*state > DEV_INIT_STATE) && (*state <= DEV_HALT_STATE) && (time % ADC_DATA_PRINT_COEF == 0))
 #if !defined	ENABLE_NEW_SIVY
 	    print_adc_data(&dev_status);
@@ -2342,79 +2342,79 @@ static void get_atmega_data(DEV_STATE_ENUM * state)
 	ma = dev_status.iburn_sense;
 
 	/* 
-	 * Ставим флаг на пережиг - чтобы не писать все это в условии.  Внешний пережиг - иногда дает ошибку: ток 250 ма,
-	 * и напряжение неск. милиампер. по неизвестной причине.  Не будем смотреть на ток! 
+	 * РЎС‚Р°РІРёРј С„Р»Р°Рі РЅР° РїРµСЂРµР¶РёРі - С‡С‚РѕР±С‹ РЅРµ РїРёСЃР°С‚СЊ РІСЃРµ СЌС‚Рѕ РІ СѓСЃР»РѕРІРёРё.  Р’РЅРµС€РЅРёР№ РїРµСЂРµР¶РёРі - РёРЅРѕРіРґР° РґР°РµС‚ РѕС€РёР±РєСѓ: С‚РѕРє 250 РјР°,
+	 * Рё РЅР°РїСЂСЏР¶РµРЅРёРµ РЅРµСЃРє. РјРёР»РёР°РјРїРµСЂ. РїРѕ РЅРµРёР·РІРµСЃС‚РЅРѕР№ РїСЂРёС‡РёРЅРµ.  РќРµ Р±СѓРґРµРј СЃРјРѕС‚СЂРµС‚СЊ РЅР° С‚РѕРє! 
 	 */
 	xShooseMode.u_burn.xCtrlBurn.bExternBurn = false;
 	if (mv > 6000) {
 	    xShooseMode.u_burn.xCtrlBurn.bExternBurn = true;
 
-	    /* Метка начала внешнего пережига */
+	    /* РњРµС‚РєР° РЅР°С‡Р°Р»Р° РІРЅРµС€РЅРµРіРѕ РїРµСЂРµР¶РёРіР° */
 	    if (false == xShooseMode.burn_time.bBurnLock) {
 		xShooseMode.burn_time.bBurnLock = true;
 		xShooseMode.burn_time.ExtBurnDur = get_sec_ticks();
 		xShooseMode.burn_time.cBurnCnt++;
 
-		/* если внутреннего нет */
+		/* РµСЃР»Рё РІРЅСѓС‚СЂРµРЅРЅРµРіРѕ РЅРµС‚ */
 		log_write_log_file("[-------- U burn %#5d mv appeared ---------]\n", mv);
 	    }
 	}
 
-	/* Если внешний пережиг закончился - смещаем времена по первому пережигу! */
+	/* Р•СЃР»Рё РІРЅРµС€РЅРёР№ РїРµСЂРµР¶РёРі Р·Р°РєРѕРЅС‡РёР»СЃСЏ - СЃРјРµС‰Р°РµРј РІСЂРµРјРµРЅР° РїРѕ РїРµСЂРІРѕРјСѓ РїРµСЂРµР¶РёРіСѓ! */
 	if (true == xShooseMode.burn_time.bBurnLock && false == xShooseMode.u_burn.xCtrlBurn.bExternBurn) {
 	    xShooseMode.burn_time.bBurnLock = false;
 	    log_write_log_file("[-------- U burn disapeared ----------------]\n");
 	    log_write_log_file("[-------- Burning was %d time(s) %#3d sec ----]\n", xShooseMode.burn_time.cBurnCnt,
 			       get_sec_ticks() - xShooseMode.burn_time.ExtBurnDur);
 
-	    /* Смещаем времена после первого пережига */
+	    /* РЎРјРµС‰Р°РµРј РІСЂРµРјРµРЅР° РїРѕСЃР»Рµ РїРµСЂРІРѕРіРѕ РїРµСЂРµР¶РёРіР° */
 	    if (xShooseMode.burn_time.cBurnCnt == 1) {
 		shift_gns_time_after_burn();
 	    }
 	}
 
-	/* Проверяем раз в минуту напряжение питания */
+	/* РџСЂРѕРІРµСЂСЏРµРј СЂР°Р· РІ РјРёРЅСѓС‚Сѓ РЅР°РїСЂСЏР¶РµРЅРёРµ РїРёС‚Р°РЅРёСЏ */
 	if (time % 60 == 0) {
 	    u = filt_reg_power(dev_status.regpwr_volt);
 	    xVoltArray.num++;
 
-	    /* Если в течении 10 - минут подряд */
+	    /* Р•СЃР»Рё РІ С‚РµС‡РµРЅРёРё 10 - РјРёРЅСѓС‚ РїРѕРґСЂСЏРґ */
 	    if (u < POWER_DROP_MIN && *state != DEV_COMMAND_MODE_STATE) {
 
-		/* В командном режиме не выключать */
+		/* Р’ РєРѕРјР°РЅРґРЅРѕРј СЂРµР¶РёРјРµ РЅРµ РІС‹РєР»СЋС‡Р°С‚СЊ */
 		if (xVoltArray.num > POWER_DROP_COUNT) {
 		    log_write_log_file("WARN: average voltage %d is less %d mv during 10 min.\n", u, POWER_DROP_MIN);
-		    POWER_off(CAUSE_BROWN_OUT, false);	/* Не выключаем модем!!! */
+		    POWER_off(CAUSE_BROWN_OUT, false);	/* РќРµ РІС‹РєР»СЋС‡Р°РµРј РјРѕРґРµРј!!! */
 		}
 	    } else {
-		xVoltArray.num = 0;	/* Сбрасываем счетчик */
+		xVoltArray.num = 0;	/* РЎР±СЂР°СЃС‹РІР°РµРј СЃС‡РµС‚С‡РёРє */
 	    }
 	}
     }
 }
 
 /**
- * Поднос магнита "Быстрая" функция - запрос на выключение прибора - вызывается из ISR!
- * Нужно перебирать число подносов магнита...!
+ * РџРѕРґРЅРѕСЃ РјР°РіРЅРёС‚Р° "Р‘С‹СЃС‚СЂР°СЏ" С„СѓРЅРєС†РёСЏ - Р·Р°РїСЂРѕСЃ РЅР° РІС‹РєР»СЋС‡РµРЅРёРµ РїСЂРёР±РѕСЂР° - РІС‹Р·С‹РІР°РµС‚СЃСЏ РёР· ISR!
+ * РќСѓР¶РЅРѕ РїРµСЂРµР±РёСЂР°С‚СЊ С‡РёСЃР»Рѕ РїРѕРґРЅРѕСЃРѕРІ РјР°РіРЅРёС‚Р°...!
  */
 #pragma section("FLASH_code")
 void send_magnet_request(void)
 {
-    /* принудительно выключить, если уже был запрос и GNS "всплывает"! */
+    /* РїСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕ РІС‹РєР»СЋС‡РёС‚СЊ, РµСЃР»Рё СѓР¶Рµ Р±С‹Р» Р·Р°РїСЂРѕСЃ Рё GNS "РІСЃРїР»С‹РІР°РµС‚"! */
     if (dev_state > DEV_CHOOSE_MODE_STATE || dev_state == DEV_ERROR_STATE) {
-	xShooseMode.u_burn.xCtrlBurn.bPowerOff = true;	/* Можно выключать  */
+	xShooseMode.u_burn.xCtrlBurn.bPowerOff = true;	/* РњРѕР¶РЅРѕ РІС‹РєР»СЋС‡Р°С‚СЊ  */
 
-	/* Выключать в этих режимах! */
+	/* Р’С‹РєР»СЋС‡Р°С‚СЊ РІ СЌС‚РёС… СЂРµР¶РёРјР°С…! */
 	if (dev_state == DEV_COMMAND_MODE_STATE || dev_state == DEV_TUNE_Q19_STATE || dev_state == DEV_WAIT_GPS_STATE || dev_state == DEV_EMERGENCY_WAIT_STATE) {
 	    POWER_off(CAUSE_POWER_OFF, true);
 	}
     } else {
-	xShooseMode.u_burn.xCtrlBurn.bInitCmd = true;	/* Переключение в рабочий режим */
+	xShooseMode.u_burn.xCtrlBurn.bInitCmd = true;	/* РџРµСЂРµРєР»СЋС‡РµРЅРёРµ РІ СЂР°Р±РѕС‡РёР№ СЂРµР¶РёРј */
     }
 }
 
 /**
- * Проверять запросы от магнита и пережига
+ * РџСЂРѕРІРµСЂСЏС‚СЊ Р·Р°РїСЂРѕСЃС‹ РѕС‚ РјР°РіРЅРёС‚Р° Рё РїРµСЂРµР¶РёРіР°
  */
 #pragma section("FLASH_code")
 static void check_magnet_request(DEV_STATE_ENUM * state)
@@ -2429,64 +2429,64 @@ static void check_magnet_request(DEV_STATE_ENUM * state)
 	log_write_log_file("INFO: Power off request\n");
 	if (*state >= DEV_REG_STATE) {
 
-	    gns110_param.gns110_burn_on_time = 0;	// Не пережигаем
+	    gns110_param.gns110_burn_on_time = 0;	// РќРµ РїРµСЂРµР¶РёРіР°РµРј
 	    gns110_param.gns110_burn_off_time = t0 + 1;
 	    gns110_param.gns110_gps_time = t0 + 3;
 
-	    /* Если регистрация идет */
+	    /* Р•СЃР»Рё СЂРµРіРёСЃС‚СЂР°С†РёСЏ РёРґРµС‚ */
 	    if (xShooseMode.u_reg.xCtrlReg.bBeginReg && !xShooseMode.u_reg.xCtrlReg.bFinish) {
 		gns110_param.gns110_finish_time = t0 + 2;
 		log_write_log_file("INFO: We need to shift times at 2 seconds\n");
 		print_set_times(&gns110_param);
 	    }
 	} else {
-	    *state = DEV_POWER_OFF_STATE;	/* Сменили состояние */
+	    *state = DEV_POWER_OFF_STATE;	/* РЎРјРµРЅРёР»Рё СЃРѕСЃС‚РѕСЏРЅРёРµ */
 	}
     }
 }
 
 /**
- * Сдвинуть времена регистратра, после сигнала пережига
+ * РЎРґРІРёРЅСѓС‚СЊ РІСЂРµРјРµРЅР° СЂРµРіРёСЃС‚СЂР°С‚СЂР°, РїРѕСЃР»Рµ СЃРёРіРЅР°Р»Р° РїРµСЂРµР¶РёРіР°
  */
 #pragma section("FLASH_code")
 static void shift_gns_time_after_burn(void)
 {
     int shift;
     int ticks;
-    ticks = get_sec_ticks();	/* Время сейчас */
+    ticks = get_sec_ticks();	/* Р’СЂРµРјСЏ СЃРµР№С‡Р°СЃ */
     log_write_log_file("WARN: we need to shift gns times after burn\n");
-    shift = gns110_param.gns110_gps_time - gns110_param.gns110_burn_off_time;	/* Продолжтельность всплытия */
+    shift = gns110_param.gns110_gps_time - gns110_param.gns110_burn_off_time;	/* РџСЂРѕРґРѕР»Р¶С‚РµР»СЊРЅРѕСЃС‚СЊ РІСЃРїР»С‹С‚РёСЏ */
 
-    /* Если регистрация начата */
+    /* Р•СЃР»Рё СЂРµРіРёСЃС‚СЂР°С†РёСЏ РЅР°С‡Р°С‚Р° */
     gns110_param.gns110_start_time = 0;
-    gns110_param.gns110_finish_time = ticks + 2;	/* время окончания регистрации */
-    gns110_param.gns110_gps_time = gns110_param.gns110_finish_time + shift;	/* время включения gps после времени всплытия */
+    gns110_param.gns110_finish_time = ticks + 2;	/* РІСЂРµРјСЏ РѕРєРѕРЅС‡Р°РЅРёСЏ СЂРµРіРёСЃС‚СЂР°С†РёРё */
+    gns110_param.gns110_gps_time = gns110_param.gns110_finish_time + shift;	/* РІСЂРµРјСЏ РІРєР»СЋС‡РµРЅРёСЏ gps РїРѕСЃР»Рµ РІСЂРµРјРµРЅРё РІСЃРїР»С‹С‚РёСЏ */
     print_set_times(&gns110_param);
 }
 
 /************************************************************************
- * Пережигание проволоки с помошью релюшки
+ * РџРµСЂРµР¶РёРіР°РЅРёРµ РїСЂРѕРІРѕР»РѕРєРё СЃ РїРѕРјРѕС€СЊСЋ СЂРµР»СЋС€РєРё
  ************************************************************************/
 #pragma section("FLASH_code")
 static void wait_burn_time(DEV_STATE_ENUM state)
 {
-    // Если есть бит внутреннео пережига - включить реле
+    // Р•СЃР»Рё РµСЃС‚СЊ Р±РёС‚ РІРЅСѓС‚СЂРµРЅРЅРµРѕ РїРµСЂРµР¶РёРіР° - РІРєР»СЋС‡РёС‚СЊ СЂРµР»Рµ
     if ((xShooseMode.u_burn.xCtrlBurn.bInnerBurnOn) && (!(xShooseMode.mode & MODE_BURN_ON_LOCK))) {
 	xShooseMode.mode |= MODE_BURN_ON_LOCK;
 	log_write_log_file("[-------- burn rele ON! --------------------]\n");
 	burn_wire_on();
     }
-    // если наступило время выключения реле - выключить
+    // РµСЃР»Рё РЅР°СЃС‚СѓРїРёР»Рѕ РІСЂРµРјСЏ РІС‹РєР»СЋС‡РµРЅРёСЏ СЂРµР»Рµ - РІС‹РєР»СЋС‡РёС‚СЊ
     if ((xShooseMode.u_burn.xCtrlBurn.bInnerBurnOff) && (!(xShooseMode.mode & MODE_BURN_OFF_LOCK))) {
-	xShooseMode.mode |= MODE_BURN_OFF_LOCK;	// бит выключения
+	xShooseMode.mode |= MODE_BURN_OFF_LOCK;	// Р±РёС‚ РІС‹РєР»СЋС‡РµРЅРёСЏ
 	log_write_log_file("[-------- burn rele OFF! -------------------]\n");
 	burn_wire_off();
     }
 }
 
 /************************************************************************
- * Функция callback для таймера 1 - просыпание
- * По будильникам ТОЛЬКО меняем состояние КА, за исключением старта
+ * Р¤СѓРЅРєС†РёСЏ callback РґР»СЏ С‚Р°Р№РјРµСЂР° 1 - РїСЂРѕСЃС‹РїР°РЅРёРµ
+ * РџРѕ Р±СѓРґРёР»СЊРЅРёРєР°Рј РўРћР›Р¬РљРћ РјРµРЅСЏРµРј СЃРѕСЃС‚РѕСЏРЅРёРµ РљРђ, Р·Р° РёСЃРєР»СЋС‡РµРЅРёРµРј СЃС‚Р°СЂС‚Р°
  ************************************************************************/
 section("L1_code")
 static void timer1_callback_func(u32 sec)
