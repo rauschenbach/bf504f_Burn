@@ -1,5 +1,5 @@
 /*******************************************************************************
- * В этом файле описываются инициализация PLL для нормального и спящего режима
+ * Р’ СЌС‚РѕРј С„Р°Р№Р»Рµ РѕРїРёСЃС‹РІР°СЋС‚СЃСЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ PLL РґР»СЏ РЅРѕСЂРјР°Р»СЊРЅРѕРіРѕ Рё СЃРїСЏС‰РµРіРѕ СЂРµР¶РёРјР°
  *******************************************************************************/
 #include <ccblkfn.h>
 #include <bfrom.h>
@@ -8,7 +8,7 @@
 #include "pll.h"
 
 
-/*  Инициализация PLL, на вариант в файле заголовка */
+/*  РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ PLL, РЅР° РІР°СЂРёР°РЅС‚ РІ С„Р°Р№Р»Рµ Р·Р°РіРѕР»РѕРІРєР° */
 #pragma section("FLASH_code")
 void PLL_init(void)
 {
@@ -16,11 +16,11 @@ void PLL_init(void)
 
 	/* use Blackfin ROM SysControl() to change the PLL */
 	ADI_SYSCTRL_VALUES sysctrl = {
-		PLLVRCTL_VALUE,   	/* Просыпаться по прерываниям на ногах PF8 и PF9 */
-		PLLCTL_VALUE,		/* MSEL[5:0] = 10 - получили VCO = 192МГц из 19.2 */
-		PLLDIV_VALUE,		/* CSEL[1:0] = 0  - получили CCLK = VSO/ 1 = 192МГц, SSEL[3:0] = 6  - получили SCLK = VSO/4 = 48МГц */
-		PLLLOCKCNT_VALUE,	/* Через 512 тактов заснуть */
-		PLLSTAT_VALUE		/* NB: Только чтение!!!  */
+		PLLVRCTL_VALUE,   	/* РџСЂРѕСЃС‹РїР°С‚СЊСЃСЏ РїРѕ РїСЂРµСЂС‹РІР°РЅРёСЏРј РЅР° РЅРѕРіР°С… PF8 Рё PF9 */
+		PLLCTL_VALUE,		/* MSEL[5:0] = 10 - РїРѕР»СѓС‡РёР»Рё VCO = 192РњР“С† РёР· 19.2 */
+		PLLDIV_VALUE,		/* CSEL[1:0] = 0  - РїРѕР»СѓС‡РёР»Рё CCLK = VSO/ 1 = 192РњР“С†, SSEL[3:0] = 6  - РїРѕР»СѓС‡РёР»Рё SCLK = VSO/4 = 48РњР“С† */
+		PLLLOCKCNT_VALUE,	/* Р§РµСЂРµР· 512 С‚Р°РєС‚РѕРІ Р·Р°СЃРЅСѓС‚СЊ */
+		PLLSTAT_VALUE		/* NB: РўРѕР»СЊРєРѕ С‡С‚РµРЅРёРµ!!!  */
 	};
 
 	SIC_IWR1_reg = *pSIC_IWR1;	/* save SIC_IWR1 due to anomaly 05-00-0432 */
@@ -33,7 +33,7 @@ void PLL_init(void)
 
 
 
-/* Перевести процессор в спящий режим  */
+/* РџРµСЂРµРІРµСЃС‚Рё РїСЂРѕС†РµСЃСЃРѕСЂ РІ СЃРїСЏС‰РёР№ СЂРµР¶РёРј  */
 #pragma section("L1_code")
 void PLL_sleep(DEV_STATE_ENUM state)
 {
@@ -41,41 +41,41 @@ void PLL_sleep(DEV_STATE_ENUM state)
      if(state != DEV_COMMAND_MODE_STATE && state != DEV_POWER_ON_STATE && state != DEV_CHOOSE_MODE_STATE) {
 	ADI_SYSCTRL_VALUES sleep;
 
-	/* прочитать */
+	/* РїСЂРѕС‡РёС‚Р°С‚СЊ */
 	bfrom_SysControl(SYSCTRL_EXTVOLTAGE | SYSCTRL_PLLCTL | SYSCTRL_READ, &sleep, NULL);
-        sleep.uwPllCtl |= STOPCK;       /* Изменим на Sleep режим */
+        sleep.uwPllCtl |= STOPCK;       /* РР·РјРµРЅРёРј РЅР° Sleep СЂРµР¶РёРј */
 
-         /* События, которые будут нас будить */
+         /* РЎРѕР±С‹С‚РёСЏ, РєРѕС‚РѕСЂС‹Рµ Р±СѓРґСѓС‚ РЅР°СЃ Р±СѓРґРёС‚СЊ */
 	*pSIC_IWR0 = IRQ_UART0_ERR | IRQ_UART1_ERR | IRQ_PFA_PORTF;
 
 #if QUARTZ_CLK_FREQ==(19200000)
 	*pSIC_IWR1 = IRQ_TIMER0 | IRQ_TIMER1 | IRQ_TIMER2 | IRQ_TIMER3 | IRQ_TIMER4 | IRQ_TIMER5 | IRQ_PFA_PORTG;
 #else
-        /* Нет 3-го таймера */
+        /* РќРµС‚ 3-РіРѕ С‚Р°Р№РјРµСЂР° */
 	*pSIC_IWR1 = IRQ_TIMER0 | IRQ_TIMER1 | IRQ_TIMER2 | IRQ_TIMER4 | IRQ_TIMER5 | IRQ_PFA_PORTG;
 #endif
 
-	/* и записать - все равно проснеца */
+	/* Рё Р·Р°РїРёСЃР°С‚СЊ - РІСЃРµ СЂР°РІРЅРѕ РїСЂРѕСЃРЅРµС†Р° */
 	bfrom_SysControl(SYSCTRL_WRITE | SYSCTRL_EXTVOLTAGE | SYSCTRL_PLLCTL, &sleep, NULL);
     }
 }
 
-/* Перевести процессор в рабочий режим */
+/* РџРµСЂРµРІРµСЃС‚Рё РїСЂРѕС†РµСЃСЃРѕСЂ РІ СЂР°Р±РѕС‡РёР№ СЂРµР¶РёРј */
 #pragma section("L1_code")
 void PLL_fullon(void)
 {
 	ADI_SYSCTRL_VALUES fullon;
 
-	/* прочитать */
+	/* РїСЂРѕС‡РёС‚Р°С‚СЊ */
 	bfrom_SysControl (SYSCTRL_READ | SYSCTRL_EXTVOLTAGE | SYSCTRL_PLLCTL, &fullon, NULL);
         fullon.uwPllCtl &= ~STOPCK; 
 
-	/* и записать, нет нужды избегать аномальности - все равно проснеца */
+	/* Рё Р·Р°РїРёСЃР°С‚СЊ, РЅРµС‚ РЅСѓР¶РґС‹ РёР·Р±РµРіР°С‚СЊ Р°РЅРѕРјР°Р»СЊРЅРѕСЃС‚Рё - РІСЃРµ СЂР°РІРЅРѕ РїСЂРѕСЃРЅРµС†Р° */
 	bfrom_SysControl(SYSCTRL_WRITE | SYSCTRL_EXTVOLTAGE | SYSCTRL_PLLCTL, &fullon, NULL);
 }
 
 
-/* Гибернация */
+/* Р“РёР±РµСЂРЅР°С†РёСЏ */
 #pragma section("L1_code")
 void PLL_hibernate(DEV_STATE_ENUM v)
 {
@@ -91,11 +91,13 @@ void PLL_hibernate(DEV_STATE_ENUM v)
 }
 
 
-/* сбросить процессор */
+/* СЃР±СЂРѕСЃРёС‚СЊ РїСЂРѕС†РµСЃСЃРѕСЂ */
 #pragma section("L1_code")
 void PLL_reset(void)
 {
 	bfrom_SysControl(SYSCTRL_SYSRESET, NULL, NULL); /* either */
 	bfrom_SysControl(SYSCTRL_SOFTRESET, NULL, NULL); /* or */
 }
+
+
 
