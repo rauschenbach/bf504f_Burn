@@ -14,37 +14,37 @@
 
 
 //#define 	UART_DEBUG_SPEED		115200
-//#define 	UART_DEBUG_SPEED		230400	/* Ñêîðîñòü ïîðòà äëÿ îáìåíà ñ PC  */
+//#define 	UART_DEBUG_SPEED		230400	/* Ð¡ÐºÐ¾Ñ€Ð¾ÑÑ‚ÑŒ Ð¿Ð¾Ñ€Ñ‚Ð° Ð´Ð»Ñ Ð¾Ð±Ð¼ÐµÐ½Ð° Ñ PC  */
 #define 	UART_DEBUG_SPEED		460800
 #define 	RX_BUF_LEN			255
 #define 	TX_BUF_LEN			255
 
 
 /************************************************************************
- * 	Ñòàòè÷åñêèå ïåðåìåííûå
+ * 	Ð¡Ñ‚Ð°Ñ‚Ð¸Ñ‡ÐµÑÐºÐ¸Ðµ Ð¿ÐµÑ€ÐµÐ¼ÐµÐ½Ð½Ñ‹Ðµ
  ************************************************************************/
-/* Óêàçàòåëü íà íàøó ñòðóêòóðó - ïàêåò íà ïðèåì */
+/* Ð£ÐºÐ°Ð·Ð°Ñ‚ÐµÐ»ÑŒ Ð½Ð° Ð½Ð°ÑˆÑƒ ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ñƒ - Ð¿Ð°ÐºÐµÑ‚ Ð½Ð° Ð¿Ñ€Ð¸ÐµÐ¼ */
 static struct RX_DATA_STRUCT {
-    u8 rx_buf[RX_BUF_LEN];	/* Íà ïðèåì */
-    u8 tx_buf[TX_BUF_LEN];	/* È íà ïåðåäà÷ó */
+    u8 rx_buf[RX_BUF_LEN];	/* ÐÐ° Ð¿Ñ€Ð¸ÐµÐ¼ */
+    u8 tx_buf[TX_BUF_LEN];	/* Ð˜ Ð½Ð° Ð¿ÐµÑ€ÐµÐ´Ð°Ñ‡Ñƒ */
 
-    u8 rx_beg;			/* Íà÷àëî ïàêåòà */
-    u8 rx_cmd;			/* Êîìàíäà  */
-    u8 rx_cnt;			/* Ñ÷åò÷èê ïðèíÿòîãî */
-    u8 rx_len;			/* Âñåãî ïðèíÿòî */
+    u8 rx_beg;			/* ÐÐ°Ñ‡Ð°Ð»Ð¾ Ð¿Ð°ÐºÐµÑ‚Ð° */
+    u8 rx_cmd;			/* ÐšÐ¾Ð¼Ð°Ð½Ð´Ð°  */
+    u8 rx_cnt;			/* Ð¡Ñ‡ÐµÑ‚Ñ‡Ð¸Ðº Ð¿Ñ€Ð¸Ð½ÑÑ‚Ð¾Ð³Ð¾ */
+    u8 rx_len;			/* Ð’ÑÐµÐ³Ð¾ Ð¿Ñ€Ð¸Ð½ÑÑ‚Ð¾ */
 
-    u8 rx_fin;			/* Êîíåö ïðèåìà */
+    u8 rx_fin;			/* ÐšÐ¾Ð½ÐµÑ† Ð¿Ñ€Ð¸ÐµÐ¼Ð° */
     u8 rx_ind;
     u8 tx_cnt;
     u8 tx_len;
 
     u8 tx_ind;
-    u8 tx_fin;			/* Êîíåö ïðèåìà */
-    u16 crc16;			/* Êîíòðîëüíàÿ ñóììà CRC16 */
+    u8 tx_fin;			/* ÐšÐ¾Ð½ÐµÑ† Ð¿Ñ€Ð¸ÐµÐ¼Ð° */
+    u16 crc16;			/* ÐšÐ¾Ð½Ñ‚Ñ€Ð¾Ð»ÑŒÐ½Ð°Ñ ÑÑƒÐ¼Ð¼Ð° CRC16 */
 } *xchg_buf;
 
 /************************************************************************
- * 	Ñòàòè÷åñêèå ôóíêöèè
+ * 	Ð¡Ñ‚Ð°Ñ‚Ð¸Ñ‡ÐµÑÐºÐ¸Ðµ Ñ„ÑƒÐ½ÐºÑ†Ð¸Ð¸
  ************************************************************************/
 static void comport_debug_write_ISR(void);
 static void comport_debug_read_ISR(u8);
@@ -52,7 +52,7 @@ static void comport_rx_end(int);
 
 
 /**
- * Description: Èíèöèàëèçèðóåò UART íà ïðèåì îáìåí äàííûìè
+ * Description: Ð˜Ð½Ð¸Ñ†Ð¸Ð°Ð»Ð¸Ð·Ð¸Ñ€ÑƒÐµÑ‚ UART Ð½Ð° Ð¿Ñ€Ð¸ÐµÐ¼ Ð¾Ð±Ð¼ÐµÐ½ Ð´Ð°Ð½Ð½Ñ‹Ð¼Ð¸
  */
 #pragma section("FLASH_code")
 int comport_init(void)
@@ -61,13 +61,13 @@ int comport_init(void)
     int res = -1;
 
 #if 1
-    select_debug_module();	/* Ïåðåêëþ÷àåì ñåëåêòîð íà îòëàäî÷íûé ïîðò  */
+    select_debug_module();	/* ÐŸÐµÑ€ÐµÐºÐ»ÑŽÑ‡Ð°ÐµÐ¼ ÑÐµÐ»ÐµÐºÑ‚Ð¾Ñ€ Ð½Ð° Ð¾Ñ‚Ð»Ð°Ð´Ð¾Ñ‡Ð½Ñ‹Ð¹ Ð¿Ð¾Ñ€Ñ‚  */
 #else
 
-    select_modem_module(); /* ÏÎÐÒ ÄËß ìîäåìà */
+    select_modem_module(); /* ÐŸÐžÐ Ð¢ Ð”Ð›Ð¯ Ð¼Ð¾Ð´ÐµÐ¼Ð° */
 #endif
 
-    /* Äëÿ îáñëóæèâàíèÿ îáìåíà ñîçäàåì áóôåð íà ïðèåì */
+    /* Ð”Ð»Ñ Ð¾Ð±ÑÐ»ÑƒÐ¶Ð¸Ð²Ð°Ð½Ð¸Ñ Ð¾Ð±Ð¼ÐµÐ½Ð° ÑÐ¾Ð·Ð´Ð°ÐµÐ¼ Ð±ÑƒÑ„ÐµÑ€ Ð½Ð° Ð¿Ñ€Ð¸ÐµÐ¼ */
     if (xchg_buf == NULL) {
 	xchg_buf = calloc(1, sizeof(struct RX_DATA_STRUCT));
 	if (xchg_buf == NULL) {
@@ -78,7 +78,7 @@ int comport_init(void)
 	log_write_log_file("WARN: comport buf dev already exists\n");
     }
 
-    /* Âûçûâàåì UART1 init */
+    /* Ð’Ñ‹Ð·Ñ‹Ð²Ð°ÐµÐ¼ UART1 init */
     com_par.baud = UART_DEBUG_SPEED;
     com_par.rx_call_back_func = comport_debug_read_ISR;
     com_par.tx_call_back_func = comport_debug_write_ISR;
@@ -88,24 +88,24 @@ int comport_init(void)
     }
 
     xchg_buf->crc16 = 0xAA;
-    return res;			// âñå îê
+    return res;			// Ð²ÑÐµ Ð¾Ðº
 }
 
-/* Çàêðûòü UART  */
+/* Ð—Ð°ÐºÑ€Ñ‹Ñ‚ÑŒ UART  */
 #pragma section("FLASH_code")
 void comport_close(void)
 {
     UART1_close();
 
     if (xchg_buf) {
-	free(xchg_buf);		/* Îñâîáîæäàåì áóôåð  */
+	free(xchg_buf);		/* ÐžÑÐ²Ð¾Ð±Ð¾Ð¶Ð´Ð°ÐµÐ¼ Ð±ÑƒÑ„ÐµÑ€  */
 	xchg_buf = NULL;
     }
 }
 
 
 
-/* Âûäàåì ïîëó÷åííóþ êîìóíäó èëè 0 */
+/* Ð’Ñ‹Ð´Ð°ÐµÐ¼ Ð¿Ð¾Ð»ÑƒÑ‡ÐµÐ½Ð½ÑƒÑŽ ÐºÐ¾Ð¼ÑƒÐ½Ð´Ñƒ Ð¸Ð»Ð¸ 0 */
 #pragma section("FLASH_code")
 u8 comport_get_command(void)
 {
@@ -117,7 +117,7 @@ u8 comport_get_command(void)
 
 
 
-/* Îáñëóæèâàíèå êîìàíäíîãî ðåæèìà */
+/* ÐžÐ±ÑÐ»ÑƒÐ¶Ð¸Ð²Ð°Ð½Ð¸Ðµ ÐºÐ¾Ð¼Ð°Ð½Ð´Ð½Ð¾Ð³Ð¾ Ñ€ÐµÐ¶Ð¸Ð¼Ð° */
 section("L1_code")
 static void comport_debug_read_ISR(u8 rx_byte)
 {
@@ -125,178 +125,178 @@ static void comport_debug_read_ISR(u8 rx_byte)
     u16 wPar;
     u32 lPar0, lPar1, lPar2;
     DEV_UART_COUNTS cnt;
-    DEV_UART_CMD uart_cmd;	/* Êîìàíäà ïðèøëà ñ UART */
+    DEV_UART_CMD uart_cmd;	/* ÐšÐ¾Ð¼Ð°Ð½Ð´Ð° Ð¿Ñ€Ð¸ÑˆÐ»Ð° Ñ UART */
 
-    /* Âû÷èñëÿåì CRC16. Ïðè ïðàâèëüíîì ïðèåìå ïîñëåäíèå ÷èñëà ä.á. = 0 */
+    /* Ð’Ñ‹Ñ‡Ð¸ÑÐ»ÑÐµÐ¼ CRC16. ÐŸÑ€Ð¸ Ð¿Ñ€Ð°Ð²Ð¸Ð»ÑŒÐ½Ð¾Ð¼ Ð¿Ñ€Ð¸ÐµÐ¼Ðµ Ð¿Ð¾ÑÐ»ÐµÐ´Ð½Ð¸Ðµ Ñ‡Ð¸ÑÐ»Ð° Ð´.Ð±. = 0 */
     xchg_buf->rx_ind = (u8) ((xchg_buf->crc16 >> 8) & 0xff);
     xchg_buf->crc16 = (u16) (((xchg_buf->crc16 & 0xff) << 8) | (rx_byte & 0xff));
     xchg_buf->crc16 ^= get_crc16_table(xchg_buf->rx_ind);
 
 
-    /* Ïðèøåë ñàìûé ïåðâûé áàéò ïîñûëêè è íàø àäðåñ */
-    if (xchg_buf->rx_beg == 0 && rx_byte == 0xFF) {	/* Ïåðâûé áàéò ïðèíÿëè: ÑÒÀÐÒ - FF */
-	xchg_buf->rx_beg = 1;	/* Îäèí áàéò ïðèíÿëè */
-	xchg_buf->crc16 = rx_byte;	/* Êîíòðîëüíàÿ ñóììà ðàâíà ïåðâîìó áàéòó */
-	xchg_buf->rx_cnt = 1;	/* Ñ÷åò÷èê ïàêåòîâ - ïåðâûé áàéò ïðèíÿëè */
-    } else {			/* Ïðèøëè ïîñëåäóþùèå áàéòû */
+    /* ÐŸÑ€Ð¸ÑˆÐµÐ» ÑÐ°Ð¼Ñ‹Ð¹ Ð¿ÐµÑ€Ð²Ñ‹Ð¹ Ð±Ð°Ð¹Ñ‚ Ð¿Ð¾ÑÑ‹Ð»ÐºÐ¸ Ð¸ Ð½Ð°Ñˆ Ð°Ð´Ñ€ÐµÑ */
+    if (xchg_buf->rx_beg == 0 && rx_byte == 0xFF) {	/* ÐŸÐµÑ€Ð²Ñ‹Ð¹ Ð±Ð°Ð¹Ñ‚ Ð¿Ñ€Ð¸Ð½ÑÐ»Ð¸: Ð¡Ð¢ÐÐ Ð¢ - FF */
+	xchg_buf->rx_beg = 1;	/* ÐžÐ´Ð¸Ð½ Ð±Ð°Ð¹Ñ‚ Ð¿Ñ€Ð¸Ð½ÑÐ»Ð¸ */
+	xchg_buf->crc16 = rx_byte;	/* ÐšÐ¾Ð½Ñ‚Ñ€Ð¾Ð»ÑŒÐ½Ð°Ñ ÑÑƒÐ¼Ð¼Ð° Ñ€Ð°Ð²Ð½Ð° Ð¿ÐµÑ€Ð²Ð¾Ð¼Ñƒ Ð±Ð°Ð¹Ñ‚Ñƒ */
+	xchg_buf->rx_cnt = 1;	/* Ð¡Ñ‡ÐµÑ‚Ñ‡Ð¸Ðº Ð¿Ð°ÐºÐµÑ‚Ð¾Ð² - Ð¿ÐµÑ€Ð²Ñ‹Ð¹ Ð±Ð°Ð¹Ñ‚ Ð¿Ñ€Ð¸Ð½ÑÐ»Ð¸ */
+    } else {			/* ÐŸÑ€Ð¸ÑˆÐ»Ð¸ Ð¿Ð¾ÑÐ»ÐµÐ´ÑƒÑŽÑ‰Ð¸Ðµ Ð±Ð°Ð¹Ñ‚Ñ‹ */
 	if (xchg_buf->rx_cnt == 1) {
-	    if (rx_byte != 0)	// ðâåì ïåðåäà÷ó
+	    if (rx_byte != 0)	// Ñ€Ð²ÐµÐ¼ Ð¿ÐµÑ€ÐµÐ´Ð°Ñ‡Ñƒ
 		comport_rx_end(3);
 	} else if (xchg_buf->rx_cnt == 2) {
-	    if (rx_byte == 0)	// ðâåì ïåðåäà÷ó-íóëÿ áûòü íå ìîæåò
+	    if (rx_byte == 0)	// Ñ€Ð²ÐµÐ¼ Ð¿ÐµÑ€ÐµÐ´Ð°Ñ‡Ñƒ-Ð½ÑƒÐ»Ñ Ð±Ñ‹Ñ‚ÑŒ Ð½Ðµ Ð¼Ð¾Ð¶ÐµÑ‚
 		comport_rx_end(3);
-	    xchg_buf->rx_len = rx_byte;	/* Âòîðîé áàéò ýòî äëèíà âñåé ñëåäóþùåé ïîñûëêè - íå ìîæåò áûòü 0! */
+	    xchg_buf->rx_len = rx_byte;	/* Ð’Ñ‚Ð¾Ñ€Ð¾Ð¹ Ð±Ð°Ð¹Ñ‚ ÑÑ‚Ð¾ Ð´Ð»Ð¸Ð½Ð° Ð²ÑÐµÐ¹ ÑÐ»ÐµÐ´ÑƒÑŽÑ‰ÐµÐ¹ Ð¿Ð¾ÑÑ‹Ð»ÐºÐ¸ - Ð½Ðµ Ð¼Ð¾Ð¶ÐµÑ‚ Ð±Ñ‹Ñ‚ÑŒ 0! */
 
-	    /* 3...âñå îñòàëüíîå ñ÷èòàåòñÿ êàê åäèíàÿ ïîñûëêà åñëè îíà åñòü. Èëè êàê êîìàíäà ìîäåìó è ïð. */
-	} else if (xchg_buf->rx_cnt > 2 && xchg_buf->rx_cnt < (xchg_buf->rx_len + 3)) {	/* Äàííûå íà÷èíàþòñÿ ñ 4-ãî áàéòà */
-	    xchg_buf->rx_buf[xchg_buf->rx_cnt - 3] = rx_byte;	/* Â ïðèåìíûé áóôåð ïðèíÿòóþ ïîñûëêó */
+	    /* 3...Ð²ÑÐµ Ð¾ÑÑ‚Ð°Ð»ÑŒÐ½Ð¾Ðµ ÑÑ‡Ð¸Ñ‚Ð°ÐµÑ‚ÑÑ ÐºÐ°Ðº ÐµÐ´Ð¸Ð½Ð°Ñ Ð¿Ð¾ÑÑ‹Ð»ÐºÐ° ÐµÑÐ»Ð¸ Ð¾Ð½Ð° ÐµÑÑ‚ÑŒ. Ð˜Ð»Ð¸ ÐºÐ°Ðº ÐºÐ¾Ð¼Ð°Ð½Ð´Ð° Ð¼Ð¾Ð´ÐµÐ¼Ñƒ Ð¸ Ð¿Ñ€. */
+	} else if (xchg_buf->rx_cnt > 2 && xchg_buf->rx_cnt < (xchg_buf->rx_len + 3)) {	/* Ð”Ð°Ð½Ð½Ñ‹Ðµ Ð½Ð°Ñ‡Ð¸Ð½Ð°ÑŽÑ‚ÑÑ Ñ 4-Ð³Ð¾ Ð±Ð°Ð¹Ñ‚Ð° */
+	    xchg_buf->rx_buf[xchg_buf->rx_cnt - 3] = rx_byte;	/* Ð’ Ð¿Ñ€Ð¸ÐµÐ¼Ð½Ñ‹Ð¹ Ð±ÑƒÑ„ÐµÑ€ Ð¿Ñ€Ð¸Ð½ÑÑ‚ÑƒÑŽ Ð¿Ð¾ÑÑ‹Ð»ÐºÑƒ */
 
-	} else if (xchg_buf->rx_cnt == (xchg_buf->rx_len + 3)) {	/* Ñò. áàéò êîíòðîëüíîé ñóììû  */
-	    asm("nop;");	/* íè÷åãî íå äåëàåì - íóæíî ÷òîáû íå âõîäèòü â ïîñë. óñëîâèå */
-	} else if (xchg_buf->rx_cnt == (xchg_buf->rx_len + 4)) {	/* Ìë. áàéò êîíòðîëüíîé ñóììû  */
+	} else if (xchg_buf->rx_cnt == (xchg_buf->rx_len + 3)) {	/* Ð¡Ñ‚. Ð±Ð°Ð¹Ñ‚ ÐºÐ¾Ð½Ñ‚Ñ€Ð¾Ð»ÑŒÐ½Ð¾Ð¹ ÑÑƒÐ¼Ð¼Ñ‹  */
+	    asm("nop;");	/* Ð½Ð¸Ñ‡ÐµÐ³Ð¾ Ð½Ðµ Ð´ÐµÐ»Ð°ÐµÐ¼ - Ð½ÑƒÐ¶Ð½Ð¾ Ñ‡Ñ‚Ð¾Ð±Ñ‹ Ð½Ðµ Ð²Ñ…Ð¾Ð´Ð¸Ñ‚ÑŒ Ð² Ð¿Ð¾ÑÐ». ÑƒÑÐ»Ð¾Ð²Ð¸Ðµ */
+	} else if (xchg_buf->rx_cnt == (xchg_buf->rx_len + 4)) {	/* ÐœÐ». Ð±Ð°Ð¹Ñ‚ ÐºÐ¾Ð½Ñ‚Ñ€Ð¾Ð»ÑŒÐ½Ð¾Ð¹ ÑÑƒÐ¼Ð¼Ñ‹  */
 
-	    /*  Crc16 ïðàâèëüíàÿ ? */
+	    /*  Crc16 Ð¿Ñ€Ð°Ð²Ð¸Ð»ÑŒÐ½Ð°Ñ ? */
 	    if (xchg_buf->crc16 == 0) {
 		comport_rx_end(0);
 
-		// êàêàÿ ïîä-êîìàíäà?
+		// ÐºÐ°ÐºÐ°Ñ Ð¿Ð¾Ð´-ÐºÐ¾Ð¼Ð°Ð½Ð´Ð°?
 		xchg_buf->rx_cmd = xchg_buf->rx_buf[0];
 
-		/* Ðàçáîð êîìàíä  */
+		/* Ð Ð°Ð·Ð±Ð¾Ñ€ ÐºÐ¾Ð¼Ð°Ð½Ð´  */
 		switch (xchg_buf->rx_cmd) {
 
 /************************************************************************************************
- * Îäíîáàéòíûå êîìàíäû 
+ * ÐžÐ´Ð½Ð¾Ð±Ð°Ð¹Ñ‚Ð½Ñ‹Ðµ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñ‹ 
  ************************************************************************************************/
-		    /* Ïåðåäàåì ñâîå èìÿ - áóäåò â áóôåðå ïåðåäà÷è */
+		    /* ÐŸÐµÑ€ÐµÐ´Ð°ÐµÐ¼ ÑÐ²Ð¾Ðµ Ð¸Ð¼Ñ - Ð±ÑƒÐ´ÐµÑ‚ Ð² Ð±ÑƒÑ„ÐµÑ€Ðµ Ð¿ÐµÑ€ÐµÐ´Ð°Ñ‡Ð¸ */
 		case UART_CMD_COMMAND_PC:
 		    cmd_get_dsp_addr(xchg_buf->tx_buf);
 		    UART1_start_tx();
 		    break;
 
-		    /* Âûäàòü ñòàòóñ óñòðîéòñòâà - áóäåò â áóôåðå ïåðåäà÷è */
+		    /* Ð’Ñ‹Ð´Ð°Ñ‚ÑŒ ÑÑ‚Ð°Ñ‚ÑƒÑ ÑƒÑÑ‚Ñ€Ð¾Ð¹Ñ‚ÑÑ‚Ð²Ð° - Ð±ÑƒÐ´ÐµÑ‚ Ð² Ð±ÑƒÑ„ÐµÑ€Ðµ Ð¿ÐµÑ€ÐµÐ´Ð°Ñ‡Ð¸ */
 		case UART_CMD_GET_DSP_STATUS:
 		    cmd_get_dsp_status(xchg_buf->tx_buf);
 		    UART1_start_tx();
 		    break;
 
-		    /* Ïîëó÷èòü âðåìÿ GNS110 - áóäåò â áóôåðå ïåðåäà÷è */
+		    /* ÐŸÐ¾Ð»ÑƒÑ‡Ð¸Ñ‚ÑŒ Ð²Ñ€ÐµÐ¼Ñ GNS110 - Ð±ÑƒÐ´ÐµÑ‚ Ð² Ð±ÑƒÑ„ÐµÑ€Ðµ Ð¿ÐµÑ€ÐµÐ´Ð°Ñ‡Ð¸ */
 		case UART_CMD_GET_RTC_CLOCK:
 		    cmd_get_gns110_rtc(xchg_buf->tx_buf);
 		    UART1_start_tx();
 		    break;
 
-		    /* Âûäàòü ñ÷åò÷èêè îáìåíîâ - äëèíà íàøåé ñòðóêòóðû (òàì íåò CRC è íà÷àëüíîé len, ïîýòîìó -3 íå äåëàåì  */
+		    /* Ð’Ñ‹Ð´Ð°Ñ‚ÑŒ ÑÑ‡ÐµÑ‚Ñ‡Ð¸ÐºÐ¸ Ð¾Ð±Ð¼ÐµÐ½Ð¾Ð² - Ð´Ð»Ð¸Ð½Ð° Ð½Ð°ÑˆÐµÐ¹ ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ñ‹ (Ñ‚Ð°Ð¼ Ð½ÐµÑ‚ CRC Ð¸ Ð½Ð°Ñ‡Ð°Ð»ÑŒÐ½Ð¾Ð¹ len, Ð¿Ð¾ÑÑ‚Ð¾Ð¼Ñƒ -3 Ð½Ðµ Ð´ÐµÐ»Ð°ÐµÐ¼  */
 		case UART_CMD_GET_COUNTS:
-		    UART1_get_count(&cnt);	/* Ïîëó÷èòü ñ÷åò÷èêè îáìåíà */
+		    UART1_get_count(&cnt);	/* ÐŸÐ¾Ð»ÑƒÑ‡Ð¸Ñ‚ÑŒ ÑÑ‡ÐµÑ‚Ñ‡Ð¸ÐºÐ¸ Ð¾Ð±Ð¼ÐµÐ½Ð° */
 		    xchg_buf->tx_buf[0] = sizeof(DEV_UART_COUNTS);
 		    memcpy(&xchg_buf->tx_buf[1], &cnt, sizeof(DEV_UART_COUNTS));
 		    UART1_start_tx();
 		    break;
 
 
-		    /* Î÷èñòèòü áóôåð äàííûõ */
+		    /* ÐžÑ‡Ð¸ÑÑ‚Ð¸Ñ‚ÑŒ Ð±ÑƒÑ„ÐµÑ€ Ð´Ð°Ð½Ð½Ñ‹Ñ… */
 		case UART_CMD_CLR_BUF:
 		    cmd_clear_adc_buf(xchg_buf->tx_buf);
 		    UART1_start_tx();
 		    break;
 
-		    /* Çàïóñê òåñòèðîâàíèÿ */
+		    /* Ð—Ð°Ð¿ÑƒÑÐº Ñ‚ÐµÑÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ñ */
 		case UART_CMD_INIT_TEST:
-		    uart_cmd.cmd = UART_CMD_INIT_TEST;	// êîìàíäà
+		    uart_cmd.cmd = UART_CMD_INIT_TEST;	// ÐºÐ¾Ð¼Ð°Ð½Ð´Ð°
 		    make_extern_uart_cmd(&uart_cmd, xchg_buf->tx_buf);
 		    UART1_start_tx();
 		    break;
 
-		    /* Ïîëó÷èòü âñå âðåìåíà ðàáîòû DSP */
+		    /* ÐŸÐ¾Ð»ÑƒÑ‡Ð¸Ñ‚ÑŒ Ð²ÑÐµ Ð²Ñ€ÐµÐ¼ÐµÐ½Ð° Ñ€Ð°Ð±Ð¾Ñ‚Ñ‹ DSP */
 		case UART_CMD_GET_WORK_TIME:
 		    cmd_get_work_time(xchg_buf->tx_buf);
 		    UART1_start_tx();
 		    break;
 
-		    /* Îáíóëèòü EEPROM */
+		    /* ÐžÐ±Ð½ÑƒÐ»Ð¸Ñ‚ÑŒ EEPROM */
 		case UART_CMD_ZERO_ALL_EEPROM:
-		    uart_cmd.cmd = UART_CMD_ZERO_ALL_EEPROM;	// êîìàíäà
+		    uart_cmd.cmd = UART_CMD_ZERO_ALL_EEPROM;	// ÐºÐ¾Ð¼Ð°Ð½Ð´Ð°
 		    make_extern_uart_cmd(&uart_cmd, xchg_buf->tx_buf);
-		    UART1_start_tx();	/* Ïåðåäà÷à */
+		    UART1_start_tx();	/* ÐŸÐµÑ€ÐµÐ´Ð°Ñ‡Ð° */
 		    break;
 
-		    /* Óïðàâëåíèå reset DSP */
+		    /* Ð£Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ reset DSP */
 		case UART_CMD_DSP_RESET:
-		    uart_cmd.cmd = UART_CMD_DSP_RESET;	// êîìàíäà
+		    uart_cmd.cmd = UART_CMD_DSP_RESET;	// ÐºÐ¾Ð¼Ð°Ð½Ð´Ð°
 		    make_extern_uart_cmd(&uart_cmd, xchg_buf->tx_buf);
 		    UART1_start_tx();
 		    break;
 
-		    /* Óïðàâëåíèå ïèòàíèå DSP: poweroff */
+		    /* Ð£Ð¿Ñ€Ð°Ð²Ð»ÐµÐ½Ð¸Ðµ Ð¿Ð¸Ñ‚Ð°Ð½Ð¸Ðµ DSP: poweroff */
 		case UART_CMD_POWER_OFF:
-		    uart_cmd.cmd = UART_CMD_POWER_OFF;	// êîìàíäà
+		    uart_cmd.cmd = UART_CMD_POWER_OFF;	// ÐºÐ¾Ð¼Ð°Ð½Ð´Ð°
 		    make_extern_uart_cmd(&uart_cmd, xchg_buf->tx_buf);
 		    UART1_start_tx();
 		    break;
 
-		    /* êîìàíäà âêëþ÷èòü ðåëå ìîäåìà */
+		    /* ÐºÐ¾Ð¼Ð°Ð½Ð´Ð° Ð²ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒ Ñ€ÐµÐ»Ðµ Ð¼Ð¾Ð´ÐµÐ¼Ð° */
 		case UART_CMD_MODEM_ON:
 		    uart_cmd.cmd = UART_CMD_MODEM_ON;
 		    make_extern_uart_cmd(&uart_cmd, xchg_buf->tx_buf);
-		    UART1_start_tx();	/* Ïåðåäà÷à */
+		    UART1_start_tx();	/* ÐŸÐµÑ€ÐµÐ´Ð°Ñ‡Ð° */
 		    break;
 
-		    /* êîìàíäà âÛêëþ÷èòü ðåëå ìîäåìà */
+		    /* ÐºÐ¾Ð¼Ð°Ð½Ð´Ð° Ð²Ð«ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒ Ñ€ÐµÐ»Ðµ Ð¼Ð¾Ð´ÐµÐ¼Ð° */
 		case UART_CMD_MODEM_OFF:
 		    uart_cmd.cmd = UART_CMD_MODEM_OFF;
 		    make_extern_uart_cmd(&uart_cmd, xchg_buf->tx_buf);
-		    UART1_start_tx();	/* Ïåðåäà÷à */
+		    UART1_start_tx();	/* ÐŸÐµÑ€ÐµÐ´Ð°Ñ‡Ð° */
 		    break;
 
-		    /* Ïåðåæûã âêëþ÷èòü */
+		    /* ÐŸÐµÑ€ÐµÐ¶Ñ‹Ð³ Ð²ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒ */
 		case UART_CMD_BURN_ON:
 		    uart_cmd.cmd = UART_CMD_BURN_ON;
 		    make_extern_uart_cmd(&uart_cmd, xchg_buf->tx_buf);
-		    UART1_start_tx();	/* Ïåðåäà÷à */
+		    UART1_start_tx();	/* ÐŸÐµÑ€ÐµÐ´Ð°Ñ‡Ð° */
 		    break;
 
-		    /* Ïåðåæûã âÛêëþ÷èòü */
+		    /* ÐŸÐµÑ€ÐµÐ¶Ñ‹Ð³ Ð²Ð«ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒ */
 		case UART_CMD_BURN_OFF:
 		    uart_cmd.cmd = UART_CMD_BURN_OFF;
 		    make_extern_uart_cmd(&uart_cmd, xchg_buf->tx_buf);
-		    UART1_start_tx();	/* Ïåðåäà÷à */
+		    UART1_start_tx();	/* ÐŸÐµÑ€ÐµÐ´Ð°Ñ‡Ð° */
 		    break;
 
-		    /* êîìàíäà âêëþ÷èòü GPS */
+		    /* ÐºÐ¾Ð¼Ð°Ð½Ð´Ð° Ð²ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒ GPS */
 		case UART_CMD_GPS_ON:
 		    uart_cmd.cmd = UART_CMD_GPS_ON;
 		    make_extern_uart_cmd(&uart_cmd, xchg_buf->tx_buf);
-		    UART1_start_tx();	/* Ïåðåäà÷à */
+		    UART1_start_tx();	/* ÐŸÐµÑ€ÐµÐ´Ð°Ñ‡Ð° */
 		    break;
 
-		    /* êîìàíäà âÛêëþ÷èòü GPS */
+		    /* ÐºÐ¾Ð¼Ð°Ð½Ð´Ð° Ð²Ð«ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒ GPS */
 		case UART_CMD_GPS_OFF:
 		    uart_cmd.cmd = UART_CMD_GPS_OFF;
 		    make_extern_uart_cmd(&uart_cmd, xchg_buf->tx_buf);
-		    UART1_start_tx();	/* Ïåðåäà÷à */
+		    UART1_start_tx();	/* ÐŸÐµÑ€ÐµÐ´Ð°Ñ‡Ð° */
 		    break;
 
-		    /* êîìàíäà âûäàòü ñòðîêó NMEA */
+		    /* ÐºÐ¾Ð¼Ð°Ð½Ð´Ð° Ð²Ñ‹Ð´Ð°Ñ‚ÑŒ ÑÑ‚Ñ€Ð¾ÐºÑƒ NMEA */
 		case UART_CMD_NMEA_GET:
 		    if (gps_get_nmea_string((c8 *) xchg_buf->tx_buf + 1, NMEA_GPRMC_STRING_SIZE) > 0) {
 			xchg_buf->tx_buf[0] = NMEA_GPRMC_STRING_SIZE;
 		    } else {
 			cmd_get_dsp_status(xchg_buf->tx_buf);
-			xchg_buf->tx_buf[0] = 2;	// 2 áàéòà - íå ãîòîâî åùå!
+			xchg_buf->tx_buf[0] = 2;	// 2 Ð±Ð°Ð¹Ñ‚Ð° - Ð½Ðµ Ð³Ð¾Ñ‚Ð¾Ð²Ð¾ ÐµÑ‰Ðµ!
 		    }
-		    UART1_start_tx();	/* Ïåðåäà÷à */
+		    UART1_start_tx();	/* ÐŸÐµÑ€ÐµÐ´Ð°Ñ‡Ð° */
 		    break;
 
 
-		    /*  Âûäàòü äàííûå */
+		    /*  Ð’Ñ‹Ð´Ð°Ñ‚ÑŒ Ð´Ð°Ð½Ð½Ñ‹Ðµ */
 		case UART_CMD_GET_DATA:
 		    cmd_get_adc_data(xchg_buf->tx_buf);
-		    UART1_start_tx();	/* Ïåðåäà÷à */
+		    UART1_start_tx();	/* ÐŸÐµÑ€ÐµÐ´Ð°Ñ‡Ð° */
 		    break;
 
 
-		    /* Ïåðåäàåì ñâîå èìÿ è àäðåñ. ïàðàìåòð u16 â ïðèåìíîì áóôåðå ñ àäðåñà + 1 */
+		    /* ÐŸÐµÑ€ÐµÐ´Ð°ÐµÐ¼ ÑÐ²Ð¾Ðµ Ð¸Ð¼Ñ Ð¸ Ð°Ð´Ñ€ÐµÑ. Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€ u16 Ð² Ð¿Ñ€Ð¸ÐµÐ¼Ð½Ð¾Ð¼ Ð±ÑƒÑ„ÐµÑ€Ðµ Ñ Ð°Ð´Ñ€ÐµÑÐ° + 1 */
 		case UART_CMD_SET_DSP_ADDR:
 		    wPar = get_short_from_buf(xchg_buf->rx_buf, 1);
 		    cmd_set_dsp_addr(wPar, xchg_buf->tx_buf);
@@ -304,89 +304,89 @@ static void comport_debug_read_ISR(u8 rx_byte)
 		    break;
 
 /***********************************************************************************************
- * 	Ïÿòèáàéòíûå êîìàíäû  
+ * 	ÐŸÑÑ‚Ð¸Ð±Ð°Ð¹Ñ‚Ð½Ñ‹Ðµ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñ‹  
  ************************************************************************************************/
-		    /* Ñèíõðîíèçàöèÿ RTC, ïàðàìåòð â ïðèåìíîì áóôåðå + 1 áàéò */
+		    /* Ð¡Ð¸Ð½Ñ…Ñ€Ð¾Ð½Ð¸Ð·Ð°Ñ†Ð¸Ñ RTC, Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€ Ð² Ð¿Ñ€Ð¸ÐµÐ¼Ð½Ð¾Ð¼ Ð±ÑƒÑ„ÐµÑ€Ðµ + 1 Ð±Ð°Ð¹Ñ‚ */
 		case UART_CMD_SYNC_RTC_CLOCK:
 		    lPar0 = get_long_from_buf(xchg_buf->rx_buf, 1);
 		    cmd_set_gns110_rtc(lPar0, xchg_buf->tx_buf);
-		    UART1_start_tx();	/* Ïåðåäà÷à */
+		    UART1_start_tx();	/* ÐŸÐµÑ€ÐµÐ´Ð°Ñ‡Ð° */
 		    break;
 
 /***********************************************************************************************
- * 	12 - áàéòíûå êîìàíäû  
+ * 	12 - Ð±Ð°Ð¹Ñ‚Ð½Ñ‹Ðµ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñ‹  
  ************************************************************************************************/
-		    /* Óñòàíîâèòü / ñáðîñèòü âñå âðåìåíà ðàáîòû DSP */
+		    /* Ð£ÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ / ÑÐ±Ñ€Ð¾ÑÐ¸Ñ‚ÑŒ Ð²ÑÐµ Ð²Ñ€ÐµÐ¼ÐµÐ½Ð° Ñ€Ð°Ð±Ð¾Ñ‚Ñ‹ DSP */
 		case UART_CMD_SET_WORK_TIME:
 		    lPar0 = get_long_from_buf(xchg_buf->rx_buf, 1);
 		    lPar1 = get_long_from_buf(xchg_buf->rx_buf, 5);
 		    lPar2 = get_long_from_buf(xchg_buf->rx_buf, 9);
 		    cmd_set_work_time(lPar0, lPar1, lPar2, xchg_buf->tx_buf);
-		    UART1_start_tx();	/* Ïåðåäà÷à */
+		    UART1_start_tx();	/* ÐŸÐµÑ€ÐµÐ´Ð°Ñ‡Ð° */
 		    break;
 
 /***********************************************************************************************
- * 	ìíîãîáàéòíûå êîìàíäû  
+ * 	Ð¼Ð½Ð¾Ð³Ð¾Ð±Ð°Ð¹Ñ‚Ð½Ñ‹Ðµ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñ‹  
  ************************************************************************************************/
-		    /* Óñòàíîâèòü / Çàïèñàòü â EEPROM êîíñòàíòû */
+		    /* Ð£ÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ / Ð—Ð°Ð¿Ð¸ÑÐ°Ñ‚ÑŒ Ð² EEPROM ÐºÐ¾Ð½ÑÑ‚Ð°Ð½Ñ‚Ñ‹ */
 		case UART_CMD_SET_ADC_CONST:
-		    cmd_set_adc_const(&xchg_buf->rx_buf[1], xchg_buf->tx_buf);	/* Êîïèðóåì áóôåð â íàñòðîéêè. ïåðâûé áàéò áóäåò êîìàíäà - ñî ñìåùåíèåì! */
-		    UART1_start_tx();	/* Ïåðåäà÷à */
+		    cmd_set_adc_const(&xchg_buf->rx_buf[1], xchg_buf->tx_buf);	/* ÐšÐ¾Ð¿Ð¸Ñ€ÑƒÐµÐ¼ Ð±ÑƒÑ„ÐµÑ€ Ð² Ð½Ð°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸. Ð¿ÐµÑ€Ð²Ñ‹Ð¹ Ð±Ð°Ð¹Ñ‚ Ð±ÑƒÐ´ÐµÑ‚ ÐºÐ¾Ð¼Ð°Ð½Ð´Ð° - ÑÐ¾ ÑÐ¼ÐµÑ‰ÐµÐ½Ð¸ÐµÐ¼! */
+		    UART1_start_tx();	/* ÐŸÐµÑ€ÐµÐ´Ð°Ñ‡Ð° */
 		    break;
 
-		    /* Ïîëó÷èòü Êîíñòàíòû âñåõ êàíàëîâ. Ïåðâûé áàéò áóäåò äëèíà ïîñûëêè  */
+		    /* ÐŸÐ¾Ð»ÑƒÑ‡Ð¸Ñ‚ÑŒ ÐšÐ¾Ð½ÑÑ‚Ð°Ð½Ñ‚Ñ‹ Ð²ÑÐµÑ… ÐºÐ°Ð½Ð°Ð»Ð¾Ð². ÐŸÐµÑ€Ð²Ñ‹Ð¹ Ð±Ð°Ð¹Ñ‚ Ð±ÑƒÐ´ÐµÑ‚ Ð´Ð»Ð¸Ð½Ð° Ð¿Ð¾ÑÑ‹Ð»ÐºÐ¸  */
 		case UART_CMD_GET_ADC_CONST:
 		    cmd_get_adc_const(xchg_buf->tx_buf);
-		    UART1_start_tx();	/* Ïåðåäà÷à */
+		    UART1_start_tx();	/* ÐŸÐµÑ€ÐµÐ´Ð°Ñ‡Ð° */
 		    break;
 
 
-		    /* Ñòàðò èçìåðåíèé. Ïåðâûé áàéò áóäåò êîìàíäà - ñî ñìåùåíèåì! */
+		    /* Ð¡Ñ‚Ð°Ñ€Ñ‚ Ð¸Ð·Ð¼ÐµÑ€ÐµÐ½Ð¸Ð¹. ÐŸÐµÑ€Ð²Ñ‹Ð¹ Ð±Ð°Ð¹Ñ‚ Ð±ÑƒÐ´ÐµÑ‚ ÐºÐ¾Ð¼Ð°Ð½Ð´Ð° - ÑÐ¾ ÑÐ¼ÐµÑ‰ÐµÐ½Ð¸ÐµÐ¼! */
 		case UART_CMD_DEV_START:
-		    uart_cmd.cmd = UART_CMD_DEV_START;	/* ñêîëüêî áàéò ïðèøëî äëÿ ýòîé êîìàíäû? 24 áàéòà */
+		    uart_cmd.cmd = UART_CMD_DEV_START;	/* ÑÐºÐ¾Ð»ÑŒÐºÐ¾ Ð±Ð°Ð¹Ñ‚ Ð¿Ñ€Ð¸ÑˆÐ»Ð¾ Ð´Ð»Ñ ÑÑ‚Ð¾Ð¹ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñ‹? 24 Ð±Ð°Ð¹Ñ‚Ð° */
 		    memcpy(uart_cmd.u.cPar, &xchg_buf->rx_buf[1], 24);
 		    make_extern_uart_cmd(&uart_cmd, xchg_buf->tx_buf);
-		    UART1_start_tx();	/* Ïåðåäà÷à */
+		    UART1_start_tx();	/* ÐŸÐµÑ€ÐµÐ´Ð°Ñ‡Ð° */
 		    break;
 
-		    /* êîìàíäà còîï èçìåðåíèÿ */
+		    /* ÐºÐ¾Ð¼Ð°Ð½Ð´Ð° cÑ‚Ð¾Ð¿ Ð¸Ð·Ð¼ÐµÑ€ÐµÐ½Ð¸Ñ */
 		case UART_CMD_DEV_STOP:
-		    uart_cmd.cmd = UART_CMD_DEV_STOP;	/* Ñòîï, ïàðàìåòðîâ íåò */
+		    uart_cmd.cmd = UART_CMD_DEV_STOP;	/* Ð¡Ñ‚Ð¾Ð¿, Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚Ñ€Ð¾Ð² Ð½ÐµÑ‚ */
 		    make_extern_uart_cmd(&uart_cmd, xchg_buf->tx_buf);
 		    UART1_start_tx();
 		    break;
 
 
 /***********************************************************************************************
- * 	ìíîãîáàéòíûå êîìàíäû - êîìàíäû ìîäåìó
+ * 	Ð¼Ð½Ð¾Ð³Ð¾Ð±Ð°Ð¹Ñ‚Ð½Ñ‹Ðµ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñ‹ - ÐºÐ¾Ð¼Ð°Ð½Ð´Ñ‹ Ð¼Ð¾Ð´ÐµÐ¼Ñƒ
  ************************************************************************************************/
 
-		    /* Ïåðåòðàíñëèðóåì êîìàíäó ìîäåìó - â áóôåðå ïðèåìà ñ 2 ãî áàéò íàõîäèòñÿ êîìàíäà ìîäåìó. 
-		     * Ñ ïåðåâîäîì ñòðîêè, CRC16.
-		     * ïîñëå ïîñûëêè ýòîé êîìàíäû - ïîðò äîëæåí îòêëþ÷èòüñÿ íà íåê. âðåìÿ */
+		    /* ÐŸÐµÑ€ÐµÑ‚Ñ€Ð°Ð½ÑÐ»Ð¸Ñ€ÑƒÐµÐ¼ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñƒ Ð¼Ð¾Ð´ÐµÐ¼Ñƒ - Ð² Ð±ÑƒÑ„ÐµÑ€Ðµ Ð¿Ñ€Ð¸ÐµÐ¼Ð° Ñ 2 Ð³Ð¾ Ð±Ð°Ð¹Ñ‚ Ð½Ð°Ñ…Ð¾Ð´Ð¸Ñ‚ÑÑ ÐºÐ¾Ð¼Ð°Ð½Ð´Ð° Ð¼Ð¾Ð´ÐµÐ¼Ñƒ. 
+		     * Ð¡ Ð¿ÐµÑ€ÐµÐ²Ð¾Ð´Ð¾Ð¼ ÑÑ‚Ñ€Ð¾ÐºÐ¸, CRC16.
+		     * Ð¿Ð¾ÑÐ»Ðµ Ð¿Ð¾ÑÑ‹Ð»ÐºÐ¸ ÑÑ‚Ð¾Ð¹ ÐºÐ¾Ð¼Ð°Ð½Ð´Ñ‹ - Ð¿Ð¾Ñ€Ñ‚ Ð´Ð¾Ð»Ð¶ÐµÐ½ Ð¾Ñ‚ÐºÐ»ÑŽÑ‡Ð¸Ñ‚ÑŒÑÑ Ð½Ð° Ð½ÐµÐº. Ð²Ñ€ÐµÐ¼Ñ */
 		case UART_CMD_MODEM_REQUEST:
-		    uart_cmd.cmd = UART_CMD_MODEM_REQUEST;	// Êîìàíäó ïîñòàâèëè
-		    cPar = xchg_buf->rx_buf[0] - 1;	// äëèíà ñòðîêè ÁÅÇ êîìàíäû
-		    uart_cmd.len = cPar % MODEM_BUF_LEN;	// çàïèøåì â ýòî ìåñòî äëèíó
-		    memcpy(&uart_cmd.u.cPar, xchg_buf->rx_buf + 1, cPar % MODEM_BUF_LEN);	// Ñêîïèðîâàëè äëÿ main.c
-		    make_extern_uart_cmd(&uart_cmd, xchg_buf->tx_buf);	// â tx_buf ëåæèò îòâåò
-		    UART1_start_tx();	/* Ïåðåäà÷à */
+		    uart_cmd.cmd = UART_CMD_MODEM_REQUEST;	// ÐšÐ¾Ð¼Ð°Ð½Ð´Ñƒ Ð¿Ð¾ÑÑ‚Ð°Ð²Ð¸Ð»Ð¸
+		    cPar = xchg_buf->rx_buf[0] - 1;	// Ð´Ð»Ð¸Ð½Ð° ÑÑ‚Ñ€Ð¾ÐºÐ¸ Ð‘Ð•Ð— ÐºÐ¾Ð¼Ð°Ð½Ð´Ñ‹
+		    uart_cmd.len = cPar % MODEM_BUF_LEN;	// Ð·Ð°Ð¿Ð¸ÑˆÐµÐ¼ Ð² ÑÑ‚Ð¾ Ð¼ÐµÑÑ‚Ð¾ Ð´Ð»Ð¸Ð½Ñƒ
+		    memcpy(&uart_cmd.u.cPar, xchg_buf->rx_buf + 1, cPar % MODEM_BUF_LEN);	// Ð¡ÐºÐ¾Ð¿Ð¸Ñ€Ð¾Ð²Ð°Ð»Ð¸ Ð´Ð»Ñ main.c
+		    make_extern_uart_cmd(&uart_cmd, xchg_buf->tx_buf);	// Ð² tx_buf Ð»ÐµÐ¶Ð¸Ñ‚ Ð¾Ñ‚Ð²ÐµÑ‚
+		    UART1_start_tx();	/* ÐŸÐµÑ€ÐµÐ´Ð°Ñ‡Ð° */
 		    break;
 
-		    /* Ïîëó÷èòü îòâåò ìîäåìà - èç áóôåðà ìîäåìà */
+		    /* ÐŸÐ¾Ð»ÑƒÑ‡Ð¸Ñ‚ÑŒ Ð¾Ñ‚Ð²ÐµÑ‚ Ð¼Ð¾Ð´ÐµÐ¼Ð° - Ð¸Ð· Ð±ÑƒÑ„ÐµÑ€Ð° Ð¼Ð¾Ð´ÐµÐ¼Ð° */
 		case UART_CMD_GET_MODEM_REPLY:
-		    get_uart_cmd_buf(&uart_cmd);	// îòâåò
-		    cPar = uart_cmd.len % MODEM_BUF_LEN;	// äëèíà ñîîáùåíèÿ (íå áîëåå 64)
+		    get_uart_cmd_buf(&uart_cmd);	// Ð¾Ñ‚Ð²ÐµÑ‚
+		    cPar = uart_cmd.len % MODEM_BUF_LEN;	// Ð´Ð»Ð¸Ð½Ð° ÑÐ¾Ð¾Ð±Ñ‰ÐµÐ½Ð¸Ñ (Ð½Ðµ Ð±Ð¾Ð»ÐµÐµ 64)
 		    if (cPar > 0) {
-			memcpy(&xchg_buf->tx_buf[1], uart_cmd.u.cPar, cPar);	// Êîïèðóåì â áóôåð UART
-			xchg_buf->tx_buf[0] = cPar;	// Äëèíà ñîîáùåíèÿ
+			memcpy(&xchg_buf->tx_buf[1], uart_cmd.u.cPar, cPar);	// ÐšÐ¾Ð¿Ð¸Ñ€ÑƒÐµÐ¼ Ð² Ð±ÑƒÑ„ÐµÑ€ UART
+			xchg_buf->tx_buf[0] = cPar;	// Ð”Ð»Ð¸Ð½Ð° ÑÐ¾Ð¾Ð±Ñ‰ÐµÐ½Ð¸Ñ
 			memset(&uart_cmd, 0, sizeof(uart_cmd));
 		    } else {
 			cmd_get_dsp_status(xchg_buf->tx_buf);
 			xchg_buf->tx_buf[0] = 2;
-			xchg_buf->tx_buf[1] |= 0x08;	// äàííûå íå ãîòîâû åùå
+			xchg_buf->tx_buf[1] |= 0x08;	// Ð´Ð°Ð½Ð½Ñ‹Ðµ Ð½Ðµ Ð³Ð¾Ñ‚Ð¾Ð²Ñ‹ ÐµÑ‰Ðµ
 		    }
-		    UART1_start_tx();	/* Ïåðåäà÷à */
+		    UART1_start_tx();	/* ÐŸÐµÑ€ÐµÐ´Ð°Ñ‡Ð° */
 		    break;
 
 
@@ -395,20 +395,20 @@ static void comport_debug_read_ISR(u8 rx_byte)
 		    break;
 		}
 
-	    } else {		/* Êîíòðîëüíàÿ ñóììà íåâåðíà-íà÷èíàåì ïðèåì çàíîâî */
+	    } else {		/* ÐšÐ¾Ð½Ñ‚Ñ€Ð¾Ð»ÑŒÐ½Ð°Ñ ÑÑƒÐ¼Ð¼Ð° Ð½ÐµÐ²ÐµÑ€Ð½Ð°-Ð½Ð°Ñ‡Ð¸Ð½Ð°ÐµÐ¼ Ð¿Ñ€Ð¸ÐµÐ¼ Ð·Ð°Ð½Ð¾Ð²Ð¾ */
 		comport_rx_end(1);
 	    }
 
-	} else {		/* Åñëè ÷òî-òî ïîøëî íå òàê */
+	} else {		/* Ð•ÑÐ»Ð¸ Ñ‡Ñ‚Ð¾-Ñ‚Ð¾ Ð¿Ð¾ÑˆÐ»Ð¾ Ð½Ðµ Ñ‚Ð°Ðº */
 	    comport_rx_end(2);
 	}
-	xchg_buf->rx_cnt++;	/* Ñ÷åò÷èê ïàêåòîâ */
+	xchg_buf->rx_cnt++;	/* Ð¡Ñ‡ÐµÑ‚Ñ‡Ð¸Ðº Ð¿Ð°ÐºÐµÑ‚Ð¾Ð² */
     }
 }
 
 
 /**
- * Êîíåö ïðèåìà
+ * ÐšÐ¾Ð½ÐµÑ† Ð¿Ñ€Ð¸ÐµÐ¼Ð°
  */
 section("L1_code")
 static void comport_rx_end(int err)
@@ -417,37 +417,37 @@ static void comport_rx_end(int err)
     xchg_buf->rx_cnt = 0;
 
     if (err == 0) {
-	xchg_buf->rx_fin = 1;	/* Ïîñûëêà ïðèíÿòà OK */
-	xchg_buf->tx_cnt = 0;	/* ìîæíî ïåðåäàâàòü */
-	xchg_buf->tx_fin = 0;	/* Íà÷àëî ïåðåäà÷è */
-    } else if (err == 1) {	/* Êîíòðîëüíàÿ ñóììà íåâåðíà-íà÷èíàåì ïðèåì çàíîâî */
-	xchg_buf->rx_fin = 0;	/* Ïîñûëêà ïðèÿíÿòà Error */
-    } else {			/* Åñëè ÷òî-òî ïîøëî íå òàê */
+	xchg_buf->rx_fin = 1;	/* ÐŸÐ¾ÑÑ‹Ð»ÐºÐ° Ð¿Ñ€Ð¸Ð½ÑÑ‚Ð° OK */
+	xchg_buf->tx_cnt = 0;	/* Ð¼Ð¾Ð¶Ð½Ð¾ Ð¿ÐµÑ€ÐµÐ´Ð°Ð²Ð°Ñ‚ÑŒ */
+	xchg_buf->tx_fin = 0;	/* ÐÐ°Ñ‡Ð°Ð»Ð¾ Ð¿ÐµÑ€ÐµÐ´Ð°Ñ‡Ð¸ */
+    } else if (err == 1) {	/* ÐšÐ¾Ð½Ñ‚Ñ€Ð¾Ð»ÑŒÐ½Ð°Ñ ÑÑƒÐ¼Ð¼Ð° Ð½ÐµÐ²ÐµÑ€Ð½Ð°-Ð½Ð°Ñ‡Ð¸Ð½Ð°ÐµÐ¼ Ð¿Ñ€Ð¸ÐµÐ¼ Ð·Ð°Ð½Ð¾Ð²Ð¾ */
+	xchg_buf->rx_fin = 0;	/* ÐŸÐ¾ÑÑ‹Ð»ÐºÐ° Ð¿Ñ€Ð¸ÑÐ½ÑÑ‚Ð° Error */
+    } else {			/* Ð•ÑÐ»Ð¸ Ñ‡Ñ‚Ð¾-Ñ‚Ð¾ Ð¿Ð¾ÑˆÐ»Ð¾ Ð½Ðµ Ñ‚Ð°Ðº */
     }
 }
 
 
-/* Îáñëóæèâàíèå êîìàíäíîãî ðåæèìà (çàïèñü) */
+/* ÐžÐ±ÑÐ»ÑƒÐ¶Ð¸Ð²Ð°Ð½Ð¸Ðµ ÐºÐ¾Ð¼Ð°Ð½Ð´Ð½Ð¾Ð³Ð¾ Ñ€ÐµÐ¶Ð¸Ð¼Ð° (Ð·Ð°Ð¿Ð¸ÑÑŒ) */
 section("L1_code")
 static void comport_debug_write_ISR(void)
 {
     register u8 tx_byte;
 
     if (xchg_buf->tx_cnt == 0) {
-	xchg_buf->tx_len = xchg_buf->tx_buf[0];	// Äëèíà îòâåòíîé ïîñûëêè
+	xchg_buf->tx_len = xchg_buf->tx_buf[0];	// Ð”Ð»Ð¸Ð½Ð° Ð¾Ñ‚Ð²ÐµÑ‚Ð½Ð¾Ð¹ Ð¿Ð¾ÑÑ‹Ð»ÐºÐ¸
 
 	if (xchg_buf->tx_len == 0)
 	    return;
 
 	tx_byte = xchg_buf->tx_len;
-	xchg_buf->crc16 = tx_byte;	/* Ïåðâûé áàéò è crc - äëèíà */
+	xchg_buf->crc16 = tx_byte;	/* ÐŸÐµÑ€Ð²Ñ‹Ð¹ Ð±Ð°Ð¹Ñ‚ Ð¸ crc - Ð´Ð»Ð¸Ð½Ð° */
 	xchg_buf->tx_ind = 0;
     } else if (xchg_buf->tx_cnt <= xchg_buf->tx_len) {
 	tx_byte = xchg_buf->tx_buf[xchg_buf->tx_cnt];
 	xchg_buf->tx_ind = (u8) ((xchg_buf->crc16 >> 8) & 0xff);
 	xchg_buf->crc16 = (u16) (((xchg_buf->crc16 & 0xff) << 8) | (tx_byte & 0xff));
 	xchg_buf->crc16 ^= get_crc16_table(xchg_buf->tx_ind);
-    } else if (xchg_buf->tx_cnt == xchg_buf->tx_len + 1) {	/* Ñ÷èòàåì êîíòðîëüíóþ ñóììó ïåðåäà÷è 2 ðàçà! */
+    } else if (xchg_buf->tx_cnt == xchg_buf->tx_len + 1) {	/* Ð¡Ñ‡Ð¸Ñ‚Ð°ÐµÐ¼ ÐºÐ¾Ð½Ñ‚Ñ€Ð¾Ð»ÑŒÐ½ÑƒÑŽ ÑÑƒÐ¼Ð¼Ñƒ Ð¿ÐµÑ€ÐµÐ´Ð°Ñ‡Ð¸ 2 Ñ€Ð°Ð·Ð°! */
 	xchg_buf->tx_ind = (u8) ((xchg_buf->crc16 >> 8) & 0xff);
 	xchg_buf->crc16 = (u16) ((xchg_buf->crc16 & 0xff) << 8);
 	xchg_buf->crc16 ^= get_crc16_table(xchg_buf->tx_ind);
@@ -456,13 +456,13 @@ static void comport_debug_write_ISR(void)
 	xchg_buf->crc16 = (u16) ((xchg_buf->crc16 & 0xff) << 8);
 	xchg_buf->crc16 ^= get_crc16_table(xchg_buf->tx_ind);
 
-	tx_byte = (xchg_buf->crc16 >> 8) & 0xff;	/* Ñò. áàéò CRC16 */
+	tx_byte = (xchg_buf->crc16 >> 8) & 0xff;	/* Ð¡Ñ‚. Ð±Ð°Ð¹Ñ‚ CRC16 */
     } else if (xchg_buf->tx_cnt == xchg_buf->tx_len + 2) {
-	tx_byte = xchg_buf->crc16 & 0xff;	/* Ìë. áàéò CRC16 */
+	tx_byte = xchg_buf->crc16 & 0xff;	/* ÐœÐ». Ð±Ð°Ð¹Ñ‚ CRC16 */
 	xchg_buf->tx_fin = 1;
-	UART1_stop_tx();	/* Âûêëþ÷àåì ïåðåäàò÷èê */
+	UART1_stop_tx();	/* Ð’Ñ‹ÐºÐ»ÑŽÑ‡Ð°ÐµÐ¼ Ð¿ÐµÑ€ÐµÐ´Ð°Ñ‚Ñ‡Ð¸Ðº */
     } else {
-	UART1_stop_tx();	/* Âûêëþ÷àåì ïåðåäàò÷èê. Íà âñÿêèé... */
+	UART1_stop_tx();	/* Ð’Ñ‹ÐºÐ»ÑŽÑ‡Ð°ÐµÐ¼ Ð¿ÐµÑ€ÐµÐ´Ð°Ñ‚Ñ‡Ð¸Ðº. ÐÐ° Ð²ÑÑÐºÐ¸Ð¹... */
     }
     UART1_tx_byte(tx_byte);
     xchg_buf->tx_cnt++;
