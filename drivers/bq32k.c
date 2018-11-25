@@ -1,12 +1,12 @@
 /*******************************************************************************************************************
- * Часы точного времени BQ32000
- *  в FAST режиме:
- * SCL clock low time - 1.3 мкс минимум
- * SCL clock hi  time - 0.6 мкс минимум
+ * Р§Р°СЃС‹ С‚РѕС‡РЅРѕРіРѕ РІСЂРµРјРµРЅРё BQ32000
+ *  РІ FAST СЂРµР¶РёРјРµ:
+ * SCL clock low time - 1.3 РјРєСЃ РјРёРЅРёРјСѓРј
+ * SCL clock hi  time - 0.6 РјРєСЃ РјРёРЅРёРјСѓРј
  *
- *  в стандартном режиме:
- * SCL clock low time - 4.7 мкс минимум
- * SCL clock hi  time - 4.0 мкс минимум
+ *  РІ СЃС‚Р°РЅРґР°СЂС‚РЅРѕРј СЂРµР¶РёРјРµ:
+ * SCL clock low time - 4.7 РјРєСЃ РјРёРЅРёРјСѓРј
+ * SCL clock hi  time - 4.0 РјРєСЃ РјРёРЅРёРјСѓРј
  *
  *******************************************************************************************************************/
 
@@ -27,7 +27,7 @@
 
 
 /**
- * Настройки интерфейса TWI
+ * РќР°СЃС‚СЂРѕР№РєРё РёРЅС‚РµСЂС„РµР№СЃР° TWI
  */
 section("FLASH_data")
 static const twi_clock_div bq32_val = {
@@ -37,11 +37,11 @@ static const twi_clock_div bq32_val = {
 };
 
 
-/* Адрес часов на запись и на чтение */
+/* РђРґСЂРµСЃ С‡Р°СЃРѕРІ РЅР° Р·Р°РїРёСЃСЊ Рё РЅР° С‡С‚РµРЅРёРµ */
 #define BQ32K_ADDR	0x68
 
 
-/* Регистры bq32000.  Нормальные */
+/* Р РµРіРёСЃС‚СЂС‹ bq32000.  РќРѕСЂРјР°Р»СЊРЅС‹Рµ */
 #define BQ32K_SECONDS           0x00	/* Seconds register address */
 #define BQ32K_SECONDS_MASK      0x7F	/* Mask over seconds value */
 #define BQ32K_STOP              0x80	/* Oscillator Stop flag */
@@ -65,12 +65,12 @@ static const twi_clock_div bq32_val = {
 #define BQ32K_TCH2		0x08
 #define BQ32K_CFG2		0x09
 
-/* Специальные */
+/* РЎРїРµС†РёР°Р»СЊРЅС‹Рµ */
 #define BQ32K_SFKEY1		0x20
 #define BQ32K_SFKEY2		0x21
 #define BQ32K_SFR		0x22
 
-/* Описание регистров часов */
+/* РћРїРёСЃР°РЅРёРµ СЂРµРіРёСЃС‚СЂРѕРІ С‡Р°СЃРѕРІ */
 typedef struct {
     u8 seconds;
     u8 minutes;
@@ -82,7 +82,7 @@ typedef struct {
 } bq32k_regs;
 
 
-/* Быстрые функции для перевода в десятичный вид и наоборот */
+/* Р‘С‹СЃС‚СЂС‹Рµ С„СѓРЅРєС†РёРё РґР»СЏ РїРµСЂРµРІРѕРґР° РІ РґРµСЃСЏС‚РёС‡РЅС‹Р№ РІРёРґ Рё РЅР°РѕР±РѕСЂРѕС‚ */
 #pragma section("FLASH_code")
 static unsigned bcd2bin(u8 val)
 {
@@ -96,14 +96,14 @@ static u8 bin2bcd(unsigned val)
 }
 
 
-/* Установить дату в RTC */
+/* РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РґР°С‚Сѓ РІ RTC */
 #pragma section("FLASH_code")
 void set_rtc_sec_ticks(long sec)
 {
     struct tm *tm_ptr;
     bq32k_regs regs;
 
-    tm_ptr = gmtime(&sec);	/* Переведем время в tm_time */
+    tm_ptr = gmtime(&sec);	/* РџРµСЂРµРІРµРґРµРј РІСЂРµРјСЏ РІ tm_time */
 
     if (tm_ptr != NULL) {
 	regs.seconds = bin2bcd(tm_ptr->tm_sec) & BQ32K_SECONDS_MASK;
@@ -121,12 +121,12 @@ void set_rtc_sec_ticks(long sec)
 	} else
 	    regs.years = bin2bcd(tm_ptr->tm_year);
 
-	/* Записываем через I2C в часы */
+	/* Р—Р°РїРёСЃС‹РІР°РµРј С‡РµСЂРµР· I2C РІ С‡Р°СЃС‹ */
 	TWI_write_pack(BQ32K_ADDR, 0, (u8 *) & regs, sizeof(bq32k_regs), &bq32_val);
     }
 }
 
-/* Получить дату из RTC в секундах */
+/* РџРѕР»СѓС‡РёС‚СЊ РґР°С‚Сѓ РёР· RTC РІ СЃРµРєСѓРЅРґР°С… */
 #pragma section("FLASH_code")
 long get_rtc_sec_ticks(void)
 {
@@ -134,10 +134,10 @@ long get_rtc_sec_ticks(void)
     struct tm tm;
     long t0 = -1;
 
-    /* Читаем дату из RTC по I2C */
+    /* Р§РёС‚Р°РµРј РґР°С‚Сѓ РёР· RTC РїРѕ I2C */
     if (TWI_read_pack(BQ32K_ADDR, 0, (u8 *) & regs, sizeof(bq32k_regs), &bq32_val) == true) {
 
-	tm.tm_isdst = 0;	/* Обязательно - иначе будет гулять час */
+	tm.tm_isdst = 0;	/* РћР±СЏР·Р°С‚РµР»СЊРЅРѕ - РёРЅР°С‡Рµ Р±СѓРґРµС‚ РіСѓР»СЏС‚СЊ С‡Р°СЃ */
 	tm.tm_sec = bcd2bin(regs.seconds & BQ32K_SECONDS_MASK);
 	tm.tm_min = bcd2bin(regs.minutes & BQ32K_MINUTES_MASK);
 	tm.tm_hour = bcd2bin(regs.cent_hours & BQ32K_HOURS_MASK);
@@ -147,7 +147,7 @@ long get_rtc_sec_ticks(void)
 	tm.tm_year = bcd2bin(regs.years) + ((regs.cent_hours & BQ32K_CENT) ? 100 : 0);
 	t0 = mktime(&tm);
 
-	/* не могу прочитать часы - какая то ошибка */
+	/* РЅРµ РјРѕРіСѓ РїСЂРѕС‡РёС‚Р°С‚СЊ С‡Р°СЃС‹ - РєР°РєР°СЏ С‚Рѕ РѕС€РёР±РєР° */
 	if(t0 < 10)
             t0 = -1;
     }
