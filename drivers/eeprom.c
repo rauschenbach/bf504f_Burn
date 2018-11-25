@@ -12,10 +12,10 @@
 
 
 /**
- * Что будем хранить в eeprom в виде u32
- * Внутри eeprom овских функций - адрес * 2 и + 1 2-е слово
- * Дописывать ТОЛЬКО с предпоследнего места!!!
- * Или стирать послностью флеш перед работой!
+ * Р§С‚Рѕ Р±СѓРґРµРј С…СЂР°РЅРёС‚СЊ РІ eeprom РІ РІРёРґРµ u32
+ * Р’РЅСѓС‚СЂРё eeprom РѕРІСЃРєРёС… С„СѓРЅРєС†РёР№ - Р°РґСЂРµСЃ * 2 Рё + 1 2-Рµ СЃР»РѕРІРѕ
+ * Р”РѕРїРёСЃС‹РІР°С‚СЊ РўРћР›Р¬РљРћ СЃ РїСЂРµРґРїРѕСЃР»РµРґРЅРµРіРѕ РјРµСЃС‚Р°!!!
+ * РР»Рё СЃС‚РёСЂР°С‚СЊ РїРѕСЃР»РЅРѕСЃС‚СЊСЋ С„Р»РµС€ РїРµСЂРµРґ СЂР°Р±РѕС‚РѕР№!
  */
 enum eeprom_id {
     EEPROM_MOD_ID = 0,
@@ -41,27 +41,27 @@ enum eeprom_id {
 
 
 /**
- * Данные, которые храним в eeprom
+ * Р”Р°РЅРЅС‹Рµ, РєРѕС‚РѕСЂС‹Рµ С…СЂР°РЅРёРј РІ eeprom
  */
 static struct {
-    EEPROM_VALUE mod_id;	/* Номер прибора */
-    EEPROM_VALUE rsvd0;		/* резерв 0 */
-    EEPROM_VALUE rsvd1;		/* резерв 1 */
-    EEPROM_VALUE time_work;	/* Время работы в режиме сбора данных */
-    EEPROM_VALUE time_cmd;	/* Время работы в режиме PC */
-    EEPROM_VALUE time_modem;	/* Время работы модема */
-    EEPROM_VALUE dac19_coef;	/* Начальный коэффициент для кварца 19 МГц  */
-    EEPROM_VALUE dac4_coef;	/* Начальный коэффициент для кварца 4 МГц  */
-    EEPROM_VALUE rsvd2;		/* резерв 2  */
-    EEPROM_VALUE adc_ofs0;	/* Коэффициент смещения 0 для 1-го АЦП  */
-    EEPROM_VALUE adc_fsc0;	/* Коэффициент передачи для 1-го АЦП  */
-    EEPROM_VALUE adc_ofs1;	/* Коэффициент смещения 0 для 2-го АЦП  */
-    EEPROM_VALUE adc_fsc1;	/* Коэффициент передачи для 2-го АЦП  */
-    EEPROM_VALUE adc_ofs2;	/* Коэффициент смещения 0 для 3-го АЦП  */
-    EEPROM_VALUE adc_fsc2;	/* Коэффициент передачи для 3-го АЦП  */
-    EEPROM_VALUE adc_ofs3;	/* Коэффициент смещения 0 для 4-го АЦП  */
-    EEPROM_VALUE adc_fsc3;	/* Коэффициент передачи для 4-го АЦП  */
-    EEPROM_VALUE reset_cause;	/* Результат последней перезагрузки  */
+    EEPROM_VALUE mod_id;	/* РќРѕРјРµСЂ РїСЂРёР±РѕСЂР° */
+    EEPROM_VALUE rsvd0;		/* СЂРµР·РµСЂРІ 0 */
+    EEPROM_VALUE rsvd1;		/* СЂРµР·РµСЂРІ 1 */
+    EEPROM_VALUE time_work;	/* Р’СЂРµРјСЏ СЂР°Р±РѕС‚С‹ РІ СЂРµР¶РёРјРµ СЃР±РѕСЂР° РґР°РЅРЅС‹С… */
+    EEPROM_VALUE time_cmd;	/* Р’СЂРµРјСЏ СЂР°Р±РѕС‚С‹ РІ СЂРµР¶РёРјРµ PC */
+    EEPROM_VALUE time_modem;	/* Р’СЂРµРјСЏ СЂР°Р±РѕС‚С‹ РјРѕРґРµРјР° */
+    EEPROM_VALUE dac19_coef;	/* РќР°С‡Р°Р»СЊРЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ РґР»СЏ РєРІР°СЂС†Р° 19 РњР“С†  */
+    EEPROM_VALUE dac4_coef;	/* РќР°С‡Р°Р»СЊРЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ РґР»СЏ РєРІР°СЂС†Р° 4 РњР“С†  */
+    EEPROM_VALUE rsvd2;		/* СЂРµР·РµСЂРІ 2  */
+    EEPROM_VALUE adc_ofs0;	/* РљРѕСЌС„С„РёС†РёРµРЅС‚ СЃРјРµС‰РµРЅРёСЏ 0 РґР»СЏ 1-РіРѕ РђР¦Рџ  */
+    EEPROM_VALUE adc_fsc0;	/* РљРѕСЌС„С„РёС†РёРµРЅС‚ РїРµСЂРµРґР°С‡Рё РґР»СЏ 1-РіРѕ РђР¦Рџ  */
+    EEPROM_VALUE adc_ofs1;	/* РљРѕСЌС„С„РёС†РёРµРЅС‚ СЃРјРµС‰РµРЅРёСЏ 0 РґР»СЏ 2-РіРѕ РђР¦Рџ  */
+    EEPROM_VALUE adc_fsc1;	/* РљРѕСЌС„С„РёС†РёРµРЅС‚ РїРµСЂРµРґР°С‡Рё РґР»СЏ 2-РіРѕ РђР¦Рџ  */
+    EEPROM_VALUE adc_ofs2;	/* РљРѕСЌС„С„РёС†РёРµРЅС‚ СЃРјРµС‰РµРЅРёСЏ 0 РґР»СЏ 3-РіРѕ РђР¦Рџ  */
+    EEPROM_VALUE adc_fsc2;	/* РљРѕСЌС„С„РёС†РёРµРЅС‚ РїРµСЂРµРґР°С‡Рё РґР»СЏ 3-РіРѕ РђР¦Рџ  */
+    EEPROM_VALUE adc_ofs3;	/* РљРѕСЌС„С„РёС†РёРµРЅС‚ СЃРјРµС‰РµРЅРёСЏ 0 РґР»СЏ 4-РіРѕ РђР¦Рџ  */
+    EEPROM_VALUE adc_fsc3;	/* РљРѕСЌС„С„РёС†РёРµРЅС‚ РїРµСЂРµРґР°С‡Рё РґР»СЏ 4-РіРѕ РђР¦Рџ  */
+    EEPROM_VALUE reset_cause;	/* Р РµР·СѓР»СЊС‚Р°С‚ РїРѕСЃР»РµРґРЅРµР№ РїРµСЂРµР·Р°РіСЂСѓР·РєРё  */
 } eeprom_data = {  
     .mod_id = { EEPROM_MOD_ID, 0, 0},
     .rsvd0 = {        EEPROM_RSVD0, 0, 0},
@@ -84,7 +84,7 @@ static struct {
 };
 
 /**
- * Подсчет количества обращений к eeprom за сеанс
+ * РџРѕРґСЃС‡РµС‚ РєРѕР»РёС‡РµСЃС‚РІР° РѕР±СЂР°С‰РµРЅРёР№ Рє eeprom Р·Р° СЃРµР°РЅСЃ
  */
 static struct {
     long formated;
@@ -102,7 +102,7 @@ void eeprom_get_status(long *f, long *e0, long *e1)
 }
 
 
-/* Объявлено в globdefs.h   */
+/* РћР±СЉСЏРІР»РµРЅРѕ РІ globdefs.h   */
 #define 	VAR_IN_EEPROM  	(EEPROM_END_OF_VAR * 2)
 
 
@@ -135,15 +135,15 @@ uint16_t eeprom_init(void)
     u16 EepromStatus = 0, ReadStatus = 0;
     uint16_t DataVar = 0;	/* Global variable used to store variable value in read sequence */
 
-/* "Открыть" flash один раз */
+/* "РћС‚РєСЂС‹С‚СЊ" flash РѕРґРёРЅ СЂР°Р· */
 /*    FLASH_init();		*/ 
 
-    memset(&EEPROM_ERASE_STATUS, 0, sizeof(EEPROM_ERASE_STATUS));	/* Сотрем данные если есть */
+    memset(&EEPROM_ERASE_STATUS, 0, sizeof(EEPROM_ERASE_STATUS));	/* РЎРѕС‚СЂРµРј РґР°РЅРЅС‹Рµ РµСЃР»Рё РµСЃС‚СЊ */
 
     PageStatus0 = (*(volatile uint16_t *) PAGE0_BASE_ADDRESS);	/* Get Page0 status */
     PageStatus1 = (*(volatile uint16_t *) PAGE1_BASE_ADDRESS);	/* Get Page1 status */
 
-    /* Если необходимо - стереть сектор (страницу) */
+    /* Р•СЃР»Рё РЅРµРѕР±С…РѕРґРёРјРѕ - СЃС‚РµСЂРµС‚СЊ СЃРµРєС‚РѕСЂ (СЃС‚СЂР°РЅРёС†Сѓ) */
     switch (PageStatus0) {
 
     case ERASED:
@@ -170,7 +170,7 @@ uint16_t eeprom_init(void)
 	    if (FlashStatus != 0) {
 		return FlashStatus;
 	    }
-	} else {		/* Самый First EEPROM access (Page0 & Page1 are erased) or invalid state -> format EEPROM */
+	} else {		/* РЎР°РјС‹Р№ First EEPROM access (Page0 & Page1 are erased) or invalid state -> format EEPROM */
 
 	    FlashStatus = EE_Format();	/* Erase both Page0 and Page1 and set Page0 as valid page */
 
@@ -316,7 +316,7 @@ uint16_t eeprom_init(void)
 	break;
     }
 
-    return 0;			/* Все OK */
+    return 0;			/* Р’СЃРµ OK */
 }
 
 
@@ -430,8 +430,8 @@ static uint16_t EE_Format(void)
 
 
 /**
- * Форматировать 1 сектор нашего псевдо eeprom
- * подсчитать количество вызовов за 1 запуск
+ * Р¤РѕСЂРјР°С‚РёСЂРѕРІР°С‚СЊ 1 СЃРµРєС‚РѕСЂ РЅР°С€РµРіРѕ РїСЃРµРІРґРѕ eeprom
+ * РїРѕРґСЃС‡РёС‚Р°С‚СЊ РєРѕР»РёС‡РµСЃС‚РІРѕ РІС‹Р·РѕРІРѕРІ Р·Р° 1 Р·Р°РїСѓСЃРє
  */
 #pragma section("FLASH_code")
 static uint16_t EE_ErasePage(u32 page)
@@ -648,13 +648,13 @@ static uint16_t EE_PageTransfer(uint16_t VirtAddress, uint16_t Data)
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * Запись значения (адрес должен быть кратен 4!)
+ * Р—Р°РїРёСЃСЊ Р·РЅР°С‡РµРЅРёСЏ (Р°РґСЂРµСЃ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РєСЂР°С‚РµРЅ 4!)
  */
 #pragma section("FLASH_code")
 uint16_t eeprom_write(EEPROM_VALUE * val)
 {
     u16 res;
-    u16 addr = val->Addr * 2;	// пишем по 4 байта (2 слова)
+    u16 addr = val->Addr * 2;	// РїРёС€РµРј РїРѕ 4 Р±Р°Р№С‚Р° (2 СЃР»РѕРІР°)
     u32 data = val->Data;
 
     res = EE_WriteVariable(addr, data & 0xffff);
@@ -664,7 +664,7 @@ uint16_t eeprom_write(EEPROM_VALUE * val)
 
 
 /**
- * Чтение значения 
+ * Р§С‚РµРЅРёРµ Р·РЅР°С‡РµРЅРёСЏ 
   *           - 0: if variable was found
   *           - 1: if the variable was not found
   *           - NO_VALID_PAGE: if no valid page was found.
@@ -674,20 +674,20 @@ uint16_t eeprom_read(EEPROM_VALUE * val)
 {
     u16 res;
     u16 d0, d1;
-    u16 addr = val->Addr * 2;	// пишем по 4 байта (2 слова)
+    u16 addr = val->Addr * 2;	// РїРёС€РµРј РїРѕ 4 Р±Р°Р№С‚Р° (2 СЃР»РѕРІР°)
 
-    res = EE_ReadVariable(addr, &d0);	// младший
-    res += EE_ReadVariable(addr + 1, &d1);	// старший
+    res = EE_ReadVariable(addr, &d0);	// РјР»Р°РґС€РёР№
+    res += EE_ReadVariable(addr + 1, &d1);	// СЃС‚Р°СЂС€РёР№
     val->Data = (u32) d0 | ((u32) d1 << 16);
     val->Exist = res;
     return res;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Видно снаружи - запись
+// Р’РёРґРЅРѕ СЃРЅР°СЂСѓР¶Рё - Р·Р°РїРёСЃСЊ
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/* Обнулить все параметры EEPROM */
+/* РћР±РЅСѓР»РёС‚СЊ РІСЃРµ РїР°СЂР°РјРµС‚СЂС‹ EEPROM */
 #pragma section("FLASH_code")
 void write_zero_to_eeprom(void)
 {
@@ -701,7 +701,7 @@ void write_zero_to_eeprom(void)
 }
 
 /**
- * Записать причину сброса
+ * Р—Р°РїРёСЃР°С‚СЊ РїСЂРёС‡РёРЅСѓ СЃР±СЂРѕСЃР°
  */
 #pragma section("FLASH_code")
 void write_reset_cause_to_eeprom(u32 cause)
@@ -713,7 +713,7 @@ void write_reset_cause_to_eeprom(u32 cause)
 }
 
 /**  
- *  Скинуть коэффициент 19.2 ЦАП на flash
+ *  РЎРєРёРЅСѓС‚СЊ РєРѕСЌС„С„РёС†РёРµРЅС‚ 19.2 Р¦РђРџ РЅР° flash
  */
 #pragma section("FLASH_code")
 int write_dac19_coef_to_eeprom(u16 data)
@@ -726,7 +726,7 @@ int write_dac19_coef_to_eeprom(u16 data)
 
 
 /**  
- *  Скинуть все коэффициенты 4.096 ЦАП на flash
+ *  РЎРєРёРЅСѓС‚СЊ РІСЃРµ РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ 4.096 Р¦РђРџ РЅР° flash
  */
 #pragma section("FLASH_code")
 int write_dac4_coef_to_eeprom(u16 data)
@@ -739,7 +739,7 @@ int write_dac4_coef_to_eeprom(u16 data)
 
 
 /**  
- *  Скинуть все коэффициенты АЦП на flash
+ *  РЎРєРёРЅСѓС‚СЊ РІСЃРµ РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ РђР¦Рџ РЅР° flash
  */
 #pragma section("FLASH_code")
 int write_all_ads1282_coefs_to_eeprom(void *par)
@@ -761,7 +761,7 @@ int write_all_ads1282_coefs_to_eeprom(void *par)
     eeprom_data.adc_ofs3.Data = regs->chan[3].offset;
     eeprom_data.adc_fsc3.Data = regs->chan[3].gain;
 
-    /* пишем данные */
+    /* РїРёС€РµРј РґР°РЅРЅС‹Рµ */
     res = eeprom_write(&eeprom_data.adc_ofs0);
     res += eeprom_write(&eeprom_data.adc_fsc0);
     res += eeprom_write(&eeprom_data.adc_ofs1);
@@ -776,7 +776,7 @@ int write_all_ads1282_coefs_to_eeprom(void *par)
 
 
 /**
- *  Записывает номер прибора в eeprom
+ *  Р—Р°РїРёСЃС‹РІР°РµС‚ РЅРѕРјРµСЂ РїСЂРёР±РѕСЂР° РІ eeprom
  */
 #pragma section("FLASH_code")
 void write_mod_id_to_eeprom(u16 addr)
@@ -786,7 +786,7 @@ void write_mod_id_to_eeprom(u16 addr)
 }
 
 /**
- *  Записывает rsvd0
+ *  Р—Р°РїРёСЃС‹РІР°РµС‚ rsvd0
  */
 #pragma section("FLASH_code")
 void write_rsvd0_to_eeprom(u32 r)
@@ -797,7 +797,7 @@ void write_rsvd0_to_eeprom(u32 r)
 
 
 /**
- *  Записывает rsvd1
+ *  Р—Р°РїРёСЃС‹РІР°РµС‚ rsvd1
  */
 #pragma section("FLASH_code")
 void write_rsvd1_to_eeprom(u32 r)
@@ -807,7 +807,7 @@ void write_rsvd1_to_eeprom(u32 r)
 }
 
 /**  
- *  Скинуть rsvd2
+ *  РЎРєРёРЅСѓС‚СЊ rsvd2
  */
 #pragma section("FLASH_code")
 void write_rsvd2_to_eeprom(u32 d)
@@ -818,7 +818,7 @@ void write_rsvd2_to_eeprom(u32 d)
 }
 
 /**
- *  Записывает время работы  в режиме сбора данных
+ *  Р—Р°РїРёСЃС‹РІР°РµС‚ РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹  РІ СЂРµР¶РёРјРµ СЃР±РѕСЂР° РґР°РЅРЅС‹С…
  */
 #pragma section("FLASH_code")
 int write_time_work_to_eeprom(u32 t)
@@ -831,7 +831,7 @@ int write_time_work_to_eeprom(u32 t)
 
 
 /**
- *  Записывает время работы в командном режиме
+ *  Р—Р°РїРёСЃС‹РІР°РµС‚ РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ РІ РєРѕРјР°РЅРґРЅРѕРј СЂРµР¶РёРјРµ
  */
 #pragma section("FLASH_code")
 int write_time_cmd_to_eeprom(u32 t)
@@ -843,7 +843,7 @@ int write_time_cmd_to_eeprom(u32 t)
 }
 
 /**
- *  Записывает время работы
+ *  Р—Р°РїРёСЃС‹РІР°РµС‚ РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹
  */
 #pragma section("FLASH_code")
 int write_time_modem_to_eeprom(u32 t)
@@ -855,11 +855,11 @@ int write_time_modem_to_eeprom(u32 t)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Видно снаружи - чтение
+// Р’РёРґРЅРѕ СЃРЅР°СЂСѓР¶Рё - С‡С‚РµРЅРёРµ
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
- * Причина последнего сброса. Читаем значение, возвращаем и стираем в EEPROM
- * При непредвиденном сбросе будет 0, в других случаях прогорамма поставит значение
+ * РџСЂРёС‡РёРЅР° РїРѕСЃР»РµРґРЅРµРіРѕ СЃР±СЂРѕСЃР°. Р§РёС‚Р°РµРј Р·РЅР°С‡РµРЅРёРµ, РІРѕР·РІСЂР°С‰Р°РµРј Рё СЃС‚РёСЂР°РµРј РІ EEPROM
+ * РџСЂРё РЅРµРїСЂРµРґРІРёРґРµРЅРЅРѕРј СЃР±СЂРѕСЃРµ Р±СѓРґРµС‚ 0, РІ РґСЂСѓРіРёС… СЃР»СѓС‡Р°СЏС… РїСЂРѕРіРѕСЂР°РјРјР° РїРѕСЃС‚Р°РІРёС‚ Р·РЅР°С‡РµРЅРёРµ
  */
 #pragma section("FLASH_code")
 u32 read_reset_cause_from_eeprom(void)
@@ -868,22 +868,22 @@ u32 read_reset_cause_from_eeprom(void)
 #if 1
     static u8 read = false;
 
-    // Читаем причину
+    // Р§РёС‚Р°РµРј РїСЂРёС‡РёРЅСѓ
     if (read == false) {
 	EEPROM_VALUE val;
 	read = true;
 
-	// Читаем в причину
+	// Р§РёС‚Р°РµРј РІ РїСЂРёС‡РёРЅСѓ
 	eeprom_read(&eeprom_data.reset_cause);
 
-	// В любом случае стираем значение
+	// Р’ Р»СЋР±РѕРј СЃР»СѓС‡Р°Рµ СЃС‚РёСЂР°РµРј Р·РЅР°С‡РµРЅРёРµ
 	val.Addr = EEPROM_RESET_CAUSE;
 	val.Data = CAUSE_UNKNOWN_RESET;
 	eeprom_write(&val);
     }
 #else
 
-    // Читаем в причину
+    // Р§РёС‚Р°РµРј РІ РїСЂРёС‡РёРЅСѓ
     eeprom_read(&eeprom_data.reset_cause);
 
 #endif
@@ -894,7 +894,7 @@ u32 read_reset_cause_from_eeprom(void)
 
 
 /**
- * Получить коэффициенты ЦАП с flash
+ * РџРѕР»СѓС‡РёС‚СЊ РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ Р¦РђРџ СЃ flash
  */
 #pragma section("FLASH_code")
 int read_dac_coefs_from_eeprom(void *par)
@@ -929,9 +929,9 @@ int read_dac_coefs_from_eeprom(void *par)
 
 
 /**
- * Получить ВСЕ коэффициенты АЦП с flash - знаем с какой структурой работаем (несмотря на int len)
- * Переделать по образцу STM32. Ошибки исправлять прямо здесь!
- * Прочитать можно и из FLASH code 
+ * РџРѕР»СѓС‡РёС‚СЊ Р’РЎР• РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ РђР¦Рџ СЃ flash - Р·РЅР°РµРј СЃ РєР°РєРѕР№ СЃС‚СЂСѓРєС‚СѓСЂРѕР№ СЂР°Р±РѕС‚Р°РµРј (РЅРµСЃРјРѕС‚СЂСЏ РЅР° int len)
+ * РџРµСЂРµРґРµР»Р°С‚СЊ РїРѕ РѕР±СЂР°Р·С†Сѓ STM32. РћС€РёР±РєРё РёСЃРїСЂР°РІР»СЏС‚СЊ РїСЂСЏРјРѕ Р·РґРµСЃСЊ!
+ * РџСЂРѕС‡РёС‚Р°С‚СЊ РјРѕР¶РЅРѕ Рё РёР· FLASH code 
  */
 #pragma section("FLASH_code")
 int read_ads1282_coefs_from_eeprom(void *par)
@@ -944,7 +944,7 @@ int read_ads1282_coefs_from_eeprom(void *par)
 
     regs = (ADS1282_Regs *) par;
 
-    // Читаем данные
+    // Р§РёС‚Р°РµРј РґР°РЅРЅС‹Рµ
     regs->chan[0].offset = eeprom_data.adc_ofs0.Data;
     regs->chan[0].gain = eeprom_data.adc_fsc0.Data;
 
@@ -961,13 +961,13 @@ int read_ads1282_coefs_from_eeprom(void *par)
 	if (regs->chan[i].offset == 0xffffffff) {
 	    log_write_log_file("ERROR: bad offset(%d). Set to default 64000\n", i);
 	    regs->chan[i].offset = 64000;
-	    res = -1;		/* Нет констант в EEPROM */
+	    res = -1;		/* РќРµС‚ РєРѕРЅСЃС‚Р°РЅС‚ РІ EEPROM */
 	}
 
 	if (regs->chan[i].gain == 0) {
 	    log_write_log_file("ERROR: bad gain(%d). Set to default 0x400000\n", i);
 	    regs->chan[i].gain = 0x400000;
-	    res = -1;		/* Нет констант в EEPROM */
+	    res = -1;		/* РќРµС‚ РєРѕРЅСЃС‚Р°РЅС‚ РІ EEPROM */
 	}
     }
 
@@ -979,7 +979,7 @@ int read_ads1282_coefs_from_eeprom(void *par)
 
 
 /**
- *  Возвращает номер прибора
+ *  Р’РѕР·РІСЂР°С‰Р°РµС‚ РЅРѕРјРµСЂ РїСЂРёР±РѕСЂР°
  */
 #pragma section("FLASH_code")
 u16 read_mod_id_from_eeprom(void)
@@ -996,7 +996,7 @@ u16 read_mod_id_from_eeprom(void)
 
 
 /**
- * Время работы в режиме сбора данных
+ * Р’СЂРµРјСЏ СЂР°Р±РѕС‚С‹ РІ СЂРµР¶РёРјРµ СЃР±РѕСЂР° РґР°РЅРЅС‹С…
  */
 #pragma section("FLASH_code")
 u32 read_time_work_from_eeprom(void)
@@ -1006,7 +1006,7 @@ u32 read_time_work_from_eeprom(void)
 
 
 /**
- *  Возвращает время работы в командном режиме
+ *  Р’РѕР·РІСЂР°С‰Р°РµС‚ РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ РІ РєРѕРјР°РЅРґРЅРѕРј СЂРµР¶РёРјРµ
  */
 #pragma section("FLASH_code")
 u32 read_time_cmd_from_eeprom(void)
@@ -1016,7 +1016,7 @@ u32 read_time_cmd_from_eeprom(void)
 
 
 /**
- *  Возвращает время работы модема
+ *  Р’РѕР·РІСЂР°С‰Р°РµС‚ РІСЂРµРјСЏ СЂР°Р±РѕС‚С‹ РјРѕРґРµРјР°
  */
 #pragma section("FLASH_code")
 u32 read_time_modem_from_eeprom(void)
@@ -1027,7 +1027,7 @@ u32 read_time_modem_from_eeprom(void)
 
 
 /**
- * получить rsvd0
+ * РїРѕР»СѓС‡РёС‚СЊ rsvd0
 */
 #pragma section("FLASH_code")
 u32 read_rsvd0_from_eeprom(void)
@@ -1037,7 +1037,7 @@ u32 read_rsvd0_from_eeprom(void)
 
 
 /**
- * получить rsvd1
+ * РїРѕР»СѓС‡РёС‚СЊ rsvd1
 */
 #pragma section("FLASH_code")
 u32 read_rsvd1_from_eeprom(void)
@@ -1047,7 +1047,7 @@ u32 read_rsvd1_from_eeprom(void)
 
 
 /**
- * получить rsvd2
+ * РїРѕР»СѓС‡РёС‚СЊ rsvd2
 */
 #pragma section("FLASH_code")
 u32 read_rsvd2_from_eeprom(void)
@@ -1057,14 +1057,14 @@ u32 read_rsvd2_from_eeprom(void)
 
 
 /** 
- *  Прочитать с eeprom данные. Разбираемся с ошибками выше
+ *  РџСЂРѕС‡РёС‚Р°С‚СЊ СЃ eeprom РґР°РЅРЅС‹Рµ. Р Р°Р·Р±РёСЂР°РµРјСЃСЏ СЃ РѕС€РёР±РєР°РјРё РІС‹С€Рµ
  */
 #pragma section("FLASH_code")
 u32 read_all_data_from_eeprom(void)
 {
     u32 res = 0;
 
-    // За одно ставим и адрес платы     
+    // Р—Р° РѕРґРЅРѕ СЃС‚Р°РІРёРј Рё Р°РґСЂРµСЃ РїР»Р°С‚С‹     
     if (eeprom_read(&eeprom_data.mod_id))
 	res |= 1 << EEPROM_MOD_ID;
 
@@ -1117,7 +1117,7 @@ u32 read_all_data_from_eeprom(void)
 
 
 /** 
- *  Записать данные по умолчанию на eeprom.
+ *  Р—Р°РїРёСЃР°С‚СЊ РґР°РЅРЅС‹Рµ РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ РЅР° eeprom.
  */
 #pragma section("FLASH_code")
 void write_default_data_to_eeprom(void *par)
@@ -1126,9 +1126,9 @@ void write_default_data_to_eeprom(void *par)
     DEV_STATUS_STRUCT *status;
     int i;
 
-    LED_on(LED_RED);
+    LED_on(LED_YELLOW);
 
-    // сбрасываем eeprom
+    // СЃР±СЂР°СЃС‹РІР°РµРј eeprom
     if (par != NULL) {
 	status = (DEV_STATUS_STRUCT *) par;
 	status->st_test0 |= 0x10;
@@ -1157,5 +1157,5 @@ void write_default_data_to_eeprom(void *par)
 	status->eeprom = 0;
 	status->st_test1 &= ~0x08;
     }
-    LED_off(LED_RED);
+    LED_off(LED_YELLOW);
 }
