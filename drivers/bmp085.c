@@ -8,7 +8,7 @@
 #define 	BMP085_TWI_DIV_LO       17
 #define 	BMP085_NUM_MOD		0
 
-/* Íàñòğîéêè èíòåğôåéñà TWI */
+/* ĞĞ°ÑÑ‚Ñ€Ğ¾Ğ¹ĞºĞ¸ Ğ¸Ğ½Ñ‚ĞµÑ€Ñ„ĞµĞ¹ÑĞ° TWI */
 section("FLASH_data")
 static const twi_clock_div bmp085_val = {
     .lo_div_clk = BMP085_TWI_DIV_LO,
@@ -17,7 +17,7 @@ static const twi_clock_div bmp085_val = {
 };
 
 
-/* Çàïèñàíî â eeprom äàò÷èêà - ìîæíî çàáèòü âî FLASH */
+/* Ğ—Ğ°Ğ¿Ğ¸ÑĞ°Ğ½Ğ¾ Ğ² eeprom Ğ´Ğ°Ñ‚Ñ‡Ğ¸ĞºĞ° - Ğ¼Ğ¾Ğ¶Ğ½Ğ¾ Ğ·Ğ°Ğ±Ğ¸Ñ‚ÑŒ Ğ²Ğ¾ FLASH */
 static struct bmp085_calibr_pars {
     s16 ac1;
     s16 ac2;
@@ -37,7 +37,7 @@ static struct bmp085_calibr_pars {
 
 
 /**
- * Èíèöèàëèçàöèÿ, ïîòîì çàìåíèòü íà ÷òåíèå ñğàçó âñåé ïà÷êè
+ * Ğ˜Ğ½Ğ¸Ñ†Ğ¸Ğ°Ğ»Ğ¸Ğ·Ğ°Ñ†Ğ¸Ñ, Ğ¿Ğ¾Ñ‚Ğ¾Ğ¼ Ğ·Ğ°Ğ¼ĞµĞ½Ğ¸Ñ‚ÑŒ Ğ½Ğ° Ñ‡Ñ‚ĞµĞ½Ğ¸Ğµ ÑÑ€Ğ°Ğ·Ñƒ Ğ²ÑĞµĞ¹ Ğ¿Ğ°Ñ‡ĞºĞ¸
  */
 #pragma section("FLASH_code")
 bool bmp085_init(void)
@@ -45,11 +45,11 @@ bool bmp085_init(void)
     bool res;
 
     do {
-	// Âíóòğè pars âñå ïîñòàâëåíî â 0
+	// Ğ’Ğ½ÑƒÑ‚Ñ€Ğ¸ pars Ğ²ÑĞµ Ğ¿Ğ¾ÑÑ‚Ğ°Ğ²Ğ»ĞµĞ½Ğ¾ Ğ² 0
 	memset(&pars, 0, sizeof(struct bmp085_calibr_pars));
 	pars.init = false;
 
-	/* ×èòàåì ñíà÷àëà êàëèáğîâî÷íûå êîıôôèöèåíòû */
+	/* Ğ§Ğ¸Ñ‚Ğ°ĞµĞ¼ ÑĞ½Ğ°Ñ‡Ğ°Ğ»Ğ° ĞºĞ°Ğ»Ğ¸Ğ±Ñ€Ğ¾Ğ²Ğ¾Ñ‡Ğ½Ñ‹Ğµ ĞºĞ¾ÑÑ„Ñ„Ğ¸Ñ†Ğ¸ĞµĞ½Ñ‚Ñ‹ */
 	res = TWI_read_pack(BMP085_ADDR, 0xaa, (u8 *) & pars.ac1, 2, &bmp085_val);
 	pars.ac1 = byteswap2(pars.ac1);
 	if (pars.ac1 == 0 || pars.ac1 == 0xffff || res == false)
@@ -113,7 +113,7 @@ bool bmp085_init(void)
 }
 
 
-/* Ïîëó÷èòü äàííûå */
+/* ĞŸĞ¾Ğ»ÑƒÑ‡Ğ¸Ñ‚ÑŒ Ğ´Ğ°Ğ½Ğ½Ñ‹Ğµ */
 #pragma section("FLASH_code")
 bool bmp085_data_get(int *temp, int *press)
 {
@@ -127,21 +127,21 @@ bool bmp085_data_get(int *temp, int *press)
 
 
     do {
-	// íå çàïóùåí!
+	// Ğ½Ğµ Ğ·Ğ°Ğ¿ÑƒÑ‰ĞµĞ½!
 	if (!pars.init)
 	    break;
 
-	/* Ïîëó÷èì òåìïåğàòóğó - 2 áàéòà */
+	/* ĞŸĞ¾Ğ»ÑƒÑ‡Ğ¸Ğ¼ Ñ‚ĞµĞ¼Ğ¿ĞµÑ€Ğ°Ñ‚ÑƒÑ€Ñƒ - 2 Ğ±Ğ°Ğ¹Ñ‚Ğ° */
 	data = 0x2e;
 	TWI_write_pack(BMP085_ADDR, 0xf4, &data, 1, &bmp085_val);
-	delay_ms(5);		// æäåì 5 ìñ è ÷èòàåì èç F6 è F7
+	delay_ms(5);		// Ğ¶Ğ´ĞµĞ¼ 5 Ğ¼Ñ Ğ¸ Ñ‡Ğ¸Ñ‚Ğ°ĞµĞ¼ Ğ¸Ğ· F6 Ğ¸ F7
 	res = TWI_read_pack(BMP085_ADDR, 0xf6, (u8 *) & ut, 2, &bmp085_val);
 	if (res == false)
 	    break;
 
 	ut = byteswap2(ut);
 
-	/* Ïîëó÷èì äàâëåíèå - 2 áàéòà */
+	/* ĞŸĞ¾Ğ»ÑƒÑ‡Ğ¸Ğ¼ Ğ´Ğ°Ğ²Ğ»ĞµĞ½Ğ¸Ğµ - 2 Ğ±Ğ°Ğ¹Ñ‚Ğ° */
 	data = 0x34;
 	TWI_write_pack(BMP085_ADDR, 0xf4, &data, 1, &bmp085_val);
 	delay_ms(5);
@@ -155,7 +155,7 @@ bool bmp085_data_get(int *temp, int *press)
 	    break;
 	}
 
-	/* ğàñ÷åò òåìïåğàòóğû */
+	/* Ñ€Ğ°ÑÑ‡ĞµÑ‚ Ñ‚ĞµĞ¼Ğ¿ĞµÑ€Ğ°Ñ‚ÑƒÑ€Ñ‹ */
 	x1 = (ut - pars.ac6) * pars.ac5 >> 15;
 	x2 = (pars.mc << 11) / (x1 + pars.md);
 	b5 = (x1 + x2);
@@ -164,7 +164,7 @@ bool bmp085_data_get(int *temp, int *press)
 	if (temp != NULL)
 	    *temp = (b5 + 8) >> 4;
 
-	/* ğàñ÷åò äàâëåíèÿ */
+	/* Ñ€Ğ°ÑÑ‡ĞµÑ‚ Ğ´Ğ°Ğ²Ğ»ĞµĞ½Ğ¸Ñ */
 	b6 = b5 - 4000;
 	x1 = (pars.b2 * (b6 * b6 >> 12)) >> 11;
 	x2 = pars.ac2 * b6 >> 11;
