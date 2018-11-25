@@ -12,73 +12,73 @@
 
 
 /**
- * Инициализация портов на БФ + sport0 и SPI1
- * По-умолчанию все порты на входе в Z - состоянии (page 9 - 3)
- * Просто отключим все их функции
+ * РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РїРѕСЂС‚РѕРІ РЅР° Р‘Р¤ + sport0 Рё SPI1
+ * РџРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ РІСЃРµ РїРѕСЂС‚С‹ РЅР° РІС…РѕРґРµ РІ Z - СЃРѕСЃС‚РѕСЏРЅРёРё (page 9 - 3)
+ * РџСЂРѕСЃС‚Рѕ РѕС‚РєР»СЋС‡РёРј РІСЃРµ РёС… С„СѓРЅРєС†РёРё
  * 
  */
 #pragma section("FLASH_code")
 void init_bf_ports(void)
 {
-    /* Порты F: отключаем функции и все на вход */
+    /* РџРѕСЂС‚С‹ F: РѕС‚РєР»СЋС‡Р°РµРј С„СѓРЅРєС†РёРё Рё РІСЃРµ РЅР° РІС…РѕРґ */
     *pPORTF_FER = 0;
     *pPORTFIO_DIR = 0;
 
-    /* От всех портов отключаем функции */
+    /* РћС‚ РІСЃРµС… РїРѕСЂС‚РѕРІ РѕС‚РєР»СЋС‡Р°РµРј С„СѓРЅРєС†РёРё */
     *pPORTG_FER &= ~(PG0 | PG1 | PG2 | PG3 | PG4 | PG5 | PG6 | PG7 | PG8 | PG9 | PG10 | PG11 /* | PG12 | PG13 */  | PG14 | PG15);
-    *pPORTGIO_CLEAR = (PG3 | PG4 | PG11);	/* ставим в ноль */
-    *pPORTGIO_DIR = (PG3 | PG4 | PG11);	/* На выход, все остальные на вход  */
+    *pPORTGIO_CLEAR = (PG3 | PG4 | PG11);	/* СЃС‚Р°РІРёРј РІ РЅРѕР»СЊ */
+    *pPORTGIO_DIR = (PG3 | PG4 | PG11);	/* РќР° РІС‹С…РѕРґ, РІСЃРµ РѕСЃС‚Р°Р»СЊРЅС‹Рµ РЅР° РІС…РѕРґ  */
 #if 0
-    *pPORTH_FER &= ~(PH0 | PH1 | PH2);	/* Порты H: PH1 на вход-остальные на выход и в ноль */
-    *pPORTHIO_CLEAR = (PH0 | PH2);	/* ставим в ноль */
+    *pPORTH_FER &= ~(PH0 | PH1 | PH2);	/* РџРѕСЂС‚С‹ H: PH1 РЅР° РІС…РѕРґ-РѕСЃС‚Р°Р»СЊРЅС‹Рµ РЅР° РІС‹С…РѕРґ Рё РІ РЅРѕР»СЊ */
+    *pPORTHIO_CLEAR = (PH0 | PH2);	/* СЃС‚Р°РІРёРј РІ РЅРѕР»СЊ */
     *pPORTHIO_DIR = (PH0 | PH2);
 #else
-    *pPORTH_FER &= ~(PH1 | PH2);	/* Порты H: PH1 на вход-остальные на выход и в ноль */
-    *pPORTHIO_CLEAR = PH2;	/* ставим в ноль */
+    *pPORTH_FER &= ~(PH1 | PH2);	/* РџРѕСЂС‚С‹ H: PH1 РЅР° РІС…РѕРґ-РѕСЃС‚Р°Р»СЊРЅС‹Рµ РЅР° РІС‹С…РѕРґ Рё РІ РЅРѕР»СЊ */
+    *pPORTHIO_CLEAR = PH2;	/* СЃС‚Р°РІРёРј РІ РЅРѕР»СЊ */
     *pPORTHIO_DIR = PH2;
 #endif
-    TIMER2_init();		/* Запускаем вспомогательный таймер - самый первый! В этой функции!!! */
-    SPI1_init();		/* Подключенные по SPI1 устройства */
-    SPORT0_config();		/* СПОРТ0  */
+    TIMER2_init();		/* Р—Р°РїСѓСЃРєР°РµРј РІСЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Р№ С‚Р°Р№РјРµСЂ - СЃР°РјС‹Р№ РїРµСЂРІС‹Р№! Р’ СЌС‚РѕР№ С„СѓРЅРєС†РёРё!!! */
+    SPI1_init();		/* РџРѕРґРєР»СЋС‡РµРЅРЅС‹Рµ РїРѕ SPI1 СѓСЃС‚СЂРѕР№СЃС‚РІР° */
+    SPORT0_config();		/* РЎРџРћР Рў0  */
 }
 
 /**
- * Инициализация портов на атмеге
- * По-умолчанию все порты на входе в Z - состоянии (page 9 - 3)
+ * РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РїРѕСЂС‚РѕРІ РЅР° Р°С‚РјРµРіРµ
+ * РџРѕ-СѓРјРѕР»С‡Р°РЅРёСЋ РІСЃРµ РїРѕСЂС‚С‹ РЅР° РІС…РѕРґРµ РІ Z - СЃРѕСЃС‚РѕСЏРЅРёРё (page 9 - 3)
  */
 #pragma section("FLASH_code")
 void init_atmega_ports(void)
 {
 #if 0
-    /* Сбросим и уберем reset с экспандера PH0 */
-    *pPORTH_FER &= ~PH0;	/* Отключаем функции */
-    *pPORTHIO_CLEAR = PH0;	/* Делаем 0 на выход */
-    *pPORTHIO_DIR |= PH0;	/* Делаем их на выход */
+    /* РЎР±СЂРѕСЃРёРј Рё СѓР±РµСЂРµРј reset СЃ СЌРєСЃРїР°РЅРґРµСЂР° PH0 */
+    *pPORTH_FER &= ~PH0;	/* РћС‚РєР»СЋС‡Р°РµРј С„СѓРЅРєС†РёРё */
+    *pPORTHIO_CLEAR = PH0;	/* Р”РµР»Р°РµРј 0 РЅР° РІС‹С…РѕРґ */
+    *pPORTHIO_DIR |= PH0;	/* Р”РµР»Р°РµРј РёС… РЅР° РІС‹С…РѕРґ */
     ssync();
-    *pPORTHIO_SET = PH0;	/* Делаем 1 на выход */
+    *pPORTHIO_SET = PH0;	/* Р”РµР»Р°РµРј 1 РЅР° РІС‹С…РѕРґ */
     ssync();
 #endif
 
-    delay_ms(WAIT_START_ATMEGA);	/* Задержка, т.к. Наш DSP очень быстрый - не успевают инициализироваца Atmega регистры!!! */
+    delay_ms(WAIT_START_ATMEGA);	/* Р—Р°РґРµСЂР¶РєР°, С‚.Рє. РќР°С€ DSP РѕС‡РµРЅСЊ Р±С‹СЃС‚СЂС‹Р№ - РЅРµ СѓСЃРїРµРІР°СЋС‚ РёРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°С†Р° Atmega СЂРµРіРёСЃС‚СЂС‹!!! */
 
 
-    pin_clr(WUSB_EN_PORT, WUSB_EN_PIN);	/* направления порта B - только WUSB_EN_PIN и MISO для обмена, остальные в Z */
-    pin_clr(USBEXT33_EN_PORT, USBEXT33_EN_PIN);	/* направления порта - все Z кроме выход USBEXT33 */
-    pin_clr(GATEBURN_PORT, GATEBURN_PIN);	/* направления порта A - все в Z - кроме GATEBURN (на нем 0) закрыть реде пережига */
-    pin_set(USB_EN_PORT, USB_EN_PIN);	/* Порты D в Z состояние, кроме USB_EN_PIN  и GPS_EN_PIN */
-    pin_set(UART_SELA_PORT, UART_SELA_PIN);	/* Установить порты E в z состояние кроме следующих, на модем */
-    pin_clr(APWR_EN_PORT, APWR_EN_PIN);	/* Установим порты  - чтобы не сбросить!!! */
+    pin_clr(WUSB_EN_PORT, WUSB_EN_PIN);	/* РЅР°РїСЂР°РІР»РµРЅРёСЏ РїРѕСЂС‚Р° B - С‚РѕР»СЊРєРѕ WUSB_EN_PIN Рё MISO РґР»СЏ РѕР±РјРµРЅР°, РѕСЃС‚Р°Р»СЊРЅС‹Рµ РІ Z */
+    pin_clr(USBEXT33_EN_PORT, USBEXT33_EN_PIN);	/* РЅР°РїСЂР°РІР»РµРЅРёСЏ РїРѕСЂС‚Р° - РІСЃРµ Z РєСЂРѕРјРµ РІС‹С…РѕРґ USBEXT33 */
+    pin_clr(GATEBURN_PORT, GATEBURN_PIN);	/* РЅР°РїСЂР°РІР»РµРЅРёСЏ РїРѕСЂС‚Р° A - РІСЃРµ РІ Z - РєСЂРѕРјРµ GATEBURN (РЅР° РЅРµРј 0) Р·Р°РєСЂС‹С‚СЊ СЂРµРґРµ РїРµСЂРµР¶РёРіР° */
+    pin_set(USB_EN_PORT, USB_EN_PIN);	/* РџРѕСЂС‚С‹ D РІ Z СЃРѕСЃС‚РѕСЏРЅРёРµ, РєСЂРѕРјРµ USB_EN_PIN  Рё GPS_EN_PIN */
+    pin_set(UART_SELA_PORT, UART_SELA_PIN);	/* РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РїРѕСЂС‚С‹ E РІ z СЃРѕСЃС‚РѕСЏРЅРёРµ РєСЂРѕРјРµ СЃР»РµРґСѓСЋС‰РёС…, РЅР° РјРѕРґРµРј */
+    pin_clr(APWR_EN_PORT, APWR_EN_PIN);	/* РЈСЃС‚Р°РЅРѕРІРёРј РїРѕСЂС‚С‹  - С‡С‚РѕР±С‹ РЅРµ СЃР±СЂРѕСЃРёС‚СЊ!!! */
 
     pin_clr(EXP_MISO_PORT, EXP_MISO_PIN);
     pin_clr(GPS_EN_PORT, GPS_EN_PIN);
     pin_set(SD_SRCSEL_PORT, SD_SRCSEL_PIN);
-    pin_set(FT232_RST_PORT, FT232_RST_PIN);	/* 1 на FT232 */
-    pin_set(MES_MUX_SELA_PORT, MES_MUX_SELA_PIN);	/* На выход */
-    pin_set(MES_MUX_SELB_PORT, MES_MUX_SELB_PIN);	/* На выход */
+    pin_set(FT232_RST_PORT, FT232_RST_PIN);	/* 1 РЅР° FT232 */
+    pin_set(MES_MUX_SELA_PORT, MES_MUX_SELA_PIN);	/* РќР° РІС‹С…РѕРґ */
+    pin_set(MES_MUX_SELB_PORT, MES_MUX_SELB_PIN);	/* РќР° РІС‹С…РѕРґ */
 
-    /* Общяя чясть. Obscaja castj */
-    LED_init();			/* Огоньки, внутри запускается експандер и SPI */
-    RELE_init();		/* Иниц. всех реле */
+    /* РћР±С‰СЏСЏ С‡СЏСЃС‚СЊ. Obscaja castj */
+    LED_init();			/* РћРіРѕРЅСЊРєРё, РІРЅСѓС‚СЂРё Р·Р°РїСѓСЃРєР°РµС‚СЃСЏ РµРєСЃРїР°РЅРґРµСЂ Рё SPI */
+    RELE_init();		/* РРЅРёС†. РІСЃРµС… СЂРµР»Рµ */
 }
 
 
@@ -104,7 +104,7 @@ static void clr_status_bit(u8 bit)
 
 
 /**
- * Переключить на сильвану портом PD0 експандера
+ * РџРµСЂРµРєР»СЋС‡РёС‚СЊ РЅР° СЃРёР»СЊРІР°РЅСѓ РїРѕСЂС‚РѕРј PD0 РµРєСЃРїР°РЅРґРµСЂР°
  */
 #pragma section("FLASH_code")
 void select_gps_module(void)
@@ -114,7 +114,7 @@ void select_gps_module(void)
 }
 
 /**
- * Выключить сильвану
+ * Р’С‹РєР»СЋС‡РёС‚СЊ СЃРёР»СЊРІР°РЅСѓ
  */
 #pragma section("FLASH_code")
 void unselect_gps_module(void)
@@ -125,7 +125,7 @@ void unselect_gps_module(void)
 
 
 /**
- * Включить реле модема
+ * Р’РєР»СЋС‡РёС‚СЊ СЂРµР»Рµ РјРѕРґРµРјР°
  */
 #pragma section("FLASH_code")
 void modem_on(void)
@@ -136,7 +136,7 @@ void modem_on(void)
 
 
 /**
- * Выключить модем
+ * Р’С‹РєР»СЋС‡РёС‚СЊ РјРѕРґРµРј
  */
 #pragma section("FLASH_code")
 void modem_off(void)
@@ -147,7 +147,7 @@ void modem_off(void)
 
 
 /**
- * Включить пережиг
+ * Р’РєР»СЋС‡РёС‚СЊ РїРµСЂРµР¶РёРі
  */
 #pragma section("FLASH_code")
 void burn_wire_on(void)
@@ -157,7 +157,7 @@ void burn_wire_on(void)
 }
 
 /**
- * Выключить пережиг
+ * Р’С‹РєР»СЋС‡РёС‚СЊ РїРµСЂРµР¶РёРі
  */
 #pragma section("FLASH_code")
 void burn_wire_off(void)
@@ -168,7 +168,7 @@ void burn_wire_off(void)
 
 
 /**
- * Включить аналоговую часть
+ * Р’РєР»СЋС‡РёС‚СЊ Р°РЅР°Р»РѕРіРѕРІСѓСЋ С‡Р°СЃС‚СЊ
  */
 #pragma section("FLASH_code")
 void select_analog_power(void)
@@ -181,7 +181,7 @@ void select_analog_power(void)
 }
 
 /**
- * Выключить аналоговую часть
+ * Р’С‹РєР»СЋС‡РёС‚СЊ Р°РЅР°Р»РѕРіРѕРІСѓСЋ С‡Р°СЃС‚СЊ
  */
 #pragma section("FLASH_code")
 void unselect_analog_power(void)
@@ -193,7 +193,7 @@ void unselect_analog_power(void)
 
 
 /**
- * Переключить на UART - 0 для UART
+ * РџРµСЂРµРєР»СЋС‡РёС‚СЊ РЅР° UART - 0 РґР»СЏ UART
  */
 #pragma section("FLASH_code")
 void select_debug_module(void)
@@ -205,7 +205,7 @@ void select_debug_module(void)
 
 
 /**
- * Переключить на аналоговый модем
+ * РџРµСЂРµРєР»СЋС‡РёС‚СЊ РЅР° Р°РЅР°Р»РѕРіРѕРІС‹Р№ РјРѕРґРµРј
  */
 #pragma section("FLASH_code")
 void select_modem_module(void)
@@ -216,13 +216,13 @@ void select_modem_module(void)
 }
 
 /**
- * Отключить UART
+ * РћС‚РєР»СЋС‡РёС‚СЊ UART
  */
 #pragma section("FLASH_code")
 void unselect_debug_uart(void)
 {
-    pin_hiz(USB_EN_PORT, USB_EN_PIN);	/* Включаем направление */
-    pin_clr(FT232_RST_PORT, FT232_RST_PIN);	/* Выключаем ft232  */
+    pin_hiz(USB_EN_PORT, USB_EN_PIN);	/* Р’РєР»СЋС‡Р°РµРј РЅР°РїСЂР°РІР»РµРЅРёРµ */
+    pin_clr(FT232_RST_PORT, FT232_RST_PIN);	/* Р’С‹РєР»СЋС‡Р°РµРј ft232  */
     clr_status_bit(RELE_MODEM_MODULE_BIT);
     clr_status_bit(RELE_DEBUG_MODULE_BIT);
 }
@@ -231,8 +231,8 @@ void unselect_debug_uart(void)
 
 
 /**
- * Подключить беспроводной USB, возвращает успех или нет
- * Успех - есть WUSB, 0 - подключено через проводок
+ * РџРѕРґРєР»СЋС‡РёС‚СЊ Р±РµСЃРїСЂРѕРІРѕРґРЅРѕР№ USB, РІРѕР·РІСЂР°С‰Р°РµС‚ СѓСЃРїРµС… РёР»Рё РЅРµС‚
+ * РЈСЃРїРµС… - РµСЃС‚СЊ WUSB, 0 - РїРѕРґРєР»СЋС‡РµРЅРѕ С‡РµСЂРµР· РїСЂРѕРІРѕРґРѕРє
  */
 #pragma section("FLASH_code")
 bool wusb_on(void)
@@ -242,66 +242,66 @@ bool wusb_on(void)
 
 
     pin_clr(USBEXT33_EN_PORT, USBEXT33_EN_PIN);
-    pin_clr(USB_EN_PORT, USB_EN_PIN);	/* Включение питания USB */
+    pin_clr(USB_EN_PORT, USB_EN_PIN);	/* Р’РєР»СЋС‡РµРЅРёРµ РїРёС‚Р°РЅРёСЏ USB */
 
 
-    pin_clr(HUB_RST_PORT, HUB_RST_PIN);	/* Сброс Хаба  */
-    delay_ms(5);			/* Задержка */
+    pin_clr(HUB_RST_PORT, HUB_RST_PIN);	/* РЎР±СЂРѕСЃ РҐР°Р±Р°  */
+    delay_ms(5);			/* Р—Р°РґРµСЂР¶РєР° */
 
-    pin_set(HUB_RST_PORT, HUB_RST_PIN);	/* Сброс Хаба  */
-    delay_ms(250);			/* Задержка */
-    /* Определим, есть ли внешнее питание с USB(если 0), если есть 1 - WUSB */
+    pin_set(HUB_RST_PORT, HUB_RST_PIN);	/* РЎР±СЂРѕСЃ РҐР°Р±Р°  */
+    delay_ms(250);			/* Р—Р°РґРµСЂР¶РєР° */
+    /* РћРїСЂРµРґРµР»РёРј, РµСЃС‚СЊ Р»Рё РІРЅРµС€РЅРµРµ РїРёС‚Р°РЅРёРµ СЃ USB(РµСЃР»Рё 0), РµСЃР»Рё РµСЃС‚СЊ 1 - WUSB */
     pin = pin_get(USB_VBUSDET_BUF_INPUT_PORT);
     ret = ((pin & (1 << USB_VBUSDET_BUF_PIN)) ? true : false);
 
 
-    // всегда включаем
+    // РІСЃРµРіРґР° РІРєР»СЋС‡Р°РµРј
     if ((pin & (1 << USB_VBUSDET_BUF_PIN)) == 0) {
-	pin_clr(WUSB_EN_PORT, WUSB_EN_PIN);	/* Убираем питание с Alereon - нет WUSB */
+	pin_clr(WUSB_EN_PORT, WUSB_EN_PIN);	/* РЈР±РёСЂР°РµРј РїРёС‚Р°РЅРёРµ СЃ Alereon - РЅРµС‚ WUSB */
         set_status_bit(RELE_USB_BIT);
         clr_status_bit(RELE_WUSB_BIT);
     } else {
-	pin_set(WUSB_EN_PORT, WUSB_EN_PIN);	/* Подаем питание на Alereon - есть WUSB */
+	pin_set(WUSB_EN_PORT, WUSB_EN_PIN);	/* РџРѕРґР°РµРј РїРёС‚Р°РЅРёРµ РЅР° Alereon - РµСЃС‚СЊ WUSB */
 	clr_status_bit(RELE_USB_BIT);
         set_status_bit(RELE_WUSB_BIT);
     }
 
     pin_clr(FT232_RST_PORT, FT232_RST_PIN);	/* Reset  */
     delay_ms(250);
-    pin_set(FT232_RST_PORT, FT232_RST_PIN);	/* Убираем reset  */
+    pin_set(FT232_RST_PORT, FT232_RST_PIN);	/* РЈР±РёСЂР°РµРј reset  */
     delay_ms(125);
 
     return ret;
 }
 
 /**
- * Выключить беспроводной USB, и все остальные USB
+ * Р’С‹РєР»СЋС‡РёС‚СЊ Р±РµСЃРїСЂРѕРІРѕРґРЅРѕР№ USB, Рё РІСЃРµ РѕСЃС‚Р°Р»СЊРЅС‹Рµ USB
  */
 #pragma section("FLASH_code")
 void wusb_off(void)
 {
-    pin_clr(WUSB_EN_PORT, WUSB_EN_PIN);	/* Выключаем WUSB_EN_PIN в "0" */
-    pin_set(USB_EN_PORT, USB_EN_PIN);	/* Выключаем USB */
-    pin_clr(FT232_RST_PORT, FT232_RST_PIN);	/* Выключаем ft232  */
-    pin_set(UART_SELA_PORT, UART_SELA_PIN);	/* Отключить UART. Отключить все выводы */
+    pin_clr(WUSB_EN_PORT, WUSB_EN_PIN);	/* Р’С‹РєР»СЋС‡Р°РµРј WUSB_EN_PIN РІ "0" */
+    pin_set(USB_EN_PORT, USB_EN_PIN);	/* Р’С‹РєР»СЋС‡Р°РµРј USB */
+    pin_clr(FT232_RST_PORT, FT232_RST_PIN);	/* Р’С‹РєР»СЋС‡Р°РµРј ft232  */
+    pin_set(UART_SELA_PORT, UART_SELA_PIN);	/* РћС‚РєР»СЋС‡РёС‚СЊ UART. РћС‚РєР»СЋС‡РёС‚СЊ РІСЃРµ РІС‹РІРѕРґС‹ */
 
-    pin_clr(AT_SD_CD_PORT, AT_SD_CD_PIN);	/* Вешаем в Z */
-    pin_clr(AT_SD_WP_PORT, AT_SD_WP_PIN);	/* Вешаем в Z */
-    pin_clr(HUB_RST_PORT, HUB_RST_PIN);	/* Вешаем в 0 */
+    pin_clr(AT_SD_CD_PORT, AT_SD_CD_PIN);	/* Р’РµС€Р°РµРј РІ Z */
+    pin_clr(AT_SD_WP_PORT, AT_SD_WP_PIN);	/* Р’РµС€Р°РµРј РІ Z */
+    pin_clr(HUB_RST_PORT, HUB_RST_PIN);	/* Р’РµС€Р°РµРј РІ 0 */
     clr_status_bit(RELE_USB_BIT);
     clr_status_bit(RELE_WUSB_BIT);
 }
 
 
 /**
- * SD карта вставлена в слот?
+ * SD РєР°СЂС‚Р° РІСЃС‚Р°РІР»РµРЅР° РІ СЃР»РѕС‚?
  */
 #pragma section("FLASH_code")
 bool check_sd_card(void)
 {
     u8 res;
 
-    /* кард детект */
+    /* РєР°СЂРґ РґРµС‚РµРєС‚ */
     res = (*pPORTGIO & PG1);
 
     if (res)
@@ -313,8 +313,8 @@ bool check_sd_card(void)
 }
 
 /**
- * Включить SD карту 
- * SD карта подключена к BF
+ * Р’РєР»СЋС‡РёС‚СЊ SD РєР°СЂС‚Сѓ 
+ * SD РєР°СЂС‚Р° РїРѕРґРєР»СЋС‡РµРЅР° Рє BF
  */
 #pragma section("FLASH_code")
 void select_sdcard_to_bf(void)
@@ -333,13 +333,13 @@ void select_sdcard_to_bf(void)
 
 
 /**
- * Включить SD карту к кардридеру. SD карта подключена к кардридеру
+ * Р’РєР»СЋС‡РёС‚СЊ SD РєР°СЂС‚Сѓ Рє РєР°СЂРґСЂРёРґРµСЂСѓ. SD РєР°СЂС‚Р° РїРѕРґРєР»СЋС‡РµРЅР° Рє РєР°СЂРґСЂРёРґРµСЂСѓ
  */
 #pragma section("FLASH_code")
 void select_sdcard_to_cr(void)
 {
-    pin_clr(USB_EN_PORT, USB_EN_PIN);	/* 0 - включено */
-    pin_set(HUB_RST_PORT, HUB_RST_PIN);	/* Убираем reset с HUB */
+    pin_clr(USB_EN_PORT, USB_EN_PIN);	/* 0 - РІРєР»СЋС‡РµРЅРѕ */
+    pin_set(HUB_RST_PORT, HUB_RST_PIN);	/* РЈР±РёСЂР°РµРј reset СЃ HUB */
     delay_ms(5);
     pin_set(SD_SRCSEL_PORT, SD_SRCSEL_PIN);
     pin_clr(SD_EN_PORT, SD_EN_PIN);
@@ -351,7 +351,7 @@ void select_sdcard_to_cr(void)
 
 
 /**
- * Ресет старого модема
+ * Р РµСЃРµС‚ СЃС‚Р°СЂРѕРіРѕ РјРѕРґРµРјР°
  */
 #pragma section("FLASH_code")
 void old_modem_reset(void)
