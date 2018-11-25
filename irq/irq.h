@@ -3,7 +3,7 @@
 
 #include "globdefs.h"
 
-/* Номера векторов */
+/* РќРѕРјРµСЂР° РІРµРєС‚РѕСЂРѕРІ */
 #define		TIM1_TIM3_VECTOR_NUM			(7)
 #define		ADS1282_VECTOR_NUM		(8)
 #define		NMEA_VECTOR_NUM			(9)
