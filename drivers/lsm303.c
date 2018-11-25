@@ -1,8 +1,8 @@
 /*******************************************************************************************************************
- * Компас и акселерометр подключены на длинном куске провода, 
- * поэтому работаем с ним ТОЛЬКО на стандартной скорости 100 кГц
- * SCL clock low time - 4.7 мкс минимум
- * SCL clock hi  time - 4.0 мкс минимум
+ * РљРѕРјРїР°СЃ Рё Р°РєСЃРµР»РµСЂРѕРјРµС‚СЂ РїРѕРґРєР»СЋС‡РµРЅС‹ РЅР° РґР»РёРЅРЅРѕРј РєСѓСЃРєРµ РїСЂРѕРІРѕРґР°, 
+ * РїРѕСЌС‚РѕРјСѓ СЂР°Р±РѕС‚Р°РµРј СЃ РЅРёРј РўРћР›Р¬РљРћ РЅР° СЃС‚Р°РЅРґР°СЂС‚РЅРѕР№ СЃРєРѕСЂРѕСЃС‚Рё 100 РєР“С†
+ * SCL clock low time - 4.7 РјРєСЃ РјРёРЅРёРјСѓРј
+ * SCL clock hi  time - 4.0 РјРєСЃ РјРёРЅРёРјСѓРј
  *******************************************************************************************************************/
 #include <string.h>
 #include "utils.h"
@@ -11,8 +11,8 @@
 #include "log.h"
 
 
-/* Регистры акселерометра  */
-#define 	LSM303_ACC_ADDR		0x19	/* -- в примере неправильный адрес. этот правильный */
+/* Р РµРіРёСЃС‚СЂС‹ Р°РєСЃРµР»РµСЂРѕРјРµС‚СЂР°  */
+#define 	LSM303_ACC_ADDR		0x19	/* -- РІ РїСЂРёРјРµСЂРµ РЅРµРїСЂР°РІРёР»СЊРЅС‹Р№ Р°РґСЂРµСЃ. СЌС‚РѕС‚ РїСЂР°РІРёР»СЊРЅС‹Р№ */
 #define 	CTRL_REG1_A		0x20
 #define 	CTRL_REG4_A		0x23
 #define         STATUS_REG_A            0x27	/* Status register acceleration */
@@ -24,11 +24,11 @@
 #define 	OUT_Z_H_A		0x2d
 
 
-/* Регистры компаса */
+/* Р РµРіРёСЃС‚СЂС‹ РєРѕРјРїР°СЃР° */
 #define 	LSM303_COMP_ADDR	0x1E
 #define 	CRA_REG_M		0x00	/* data rate reg */
-#define 	CRB_REG_M		0x01	/* GAIN reg - усиление */
-#define		MR_REG_M		0x02	/* Mode sel reg - выбор режима */
+#define 	CRB_REG_M		0x01	/* GAIN reg - СѓСЃРёР»РµРЅРёРµ */
+#define		MR_REG_M		0x02	/* Mode sel reg - РІС‹Р±РѕСЂ СЂРµР¶РёРјР° */
 
 #define		OUT_X_H_M		0x03
 #define		OUT_X_L_M		0x04
@@ -38,19 +38,19 @@
 #define		OUT_Y_L_M		0x08
 #define         SR_REG_M                0x09	/* Status Register magnetic field */
 
-/* Регистры термометра */
+/* Р РµРіРёСЃС‚СЂС‹ С‚РµСЂРјРѕРјРµС‚СЂР° */
 #define 	TEMP_OUT_H_M 		0x31
 #define 	TEMP_OUT_L_M 		0x32
 
 
-/* Для компаса */
+/* Р”Р»СЏ РєРѕРјРїР°СЃР° */
 #define 	LSM303_TWI_COMP_HI	36
 #define 	LSM303_TWI_COMP_LO      37
 
 
 
 
-/* Для акселерометра */
+/* Р”Р»СЏ Р°РєСЃРµР»РµСЂРѕРјРµС‚СЂР° */
 #define 	LSM303_TWI_ACC_HI	36
 #define 	LSM303_TWI_ACC_LO       37
 
@@ -62,7 +62,7 @@
 #define         RES_DATA_LOCK		0x1FFF
 
 
-/* Настройки интерфейса TWI - акселерометр */
+/* РќР°СЃС‚СЂРѕР№РєРё РёРЅС‚РµСЂС„РµР№СЃР° TWI - Р°РєСЃРµР»РµСЂРѕРјРµС‚СЂ */
 section("FLASH_data")
 static const twi_clock_div lsm303_acc_val = {
     .lo_div_clk = LSM303_TWI_ACC_LO,
@@ -89,7 +89,7 @@ static struct {
 
 
 
-/* Запустить акселерометр  */
+/* Р—Р°РїСѓСЃС‚РёС‚СЊ Р°РєСЃРµР»РµСЂРѕРјРµС‚СЂ  */
 #pragma section("FLASH_code")
 bool lsm303_init_acc(void)
 {
@@ -112,14 +112,14 @@ bool lsm303_init_acc(void)
 }
 
 
-/* Запустить компас */
+/* Р—Р°РїСѓСЃС‚РёС‚СЊ РєРѕРјРїР°СЃ */
 #pragma section("FLASH_code")
 bool lsm303_init_comp(void)
 {
     u8 b;
-    u8 rate = 0x0C | 0x80;	/* Частота 7.5 Гц, + температурный датчик ON */
+    u8 rate = 0x0C | 0x80;	/* Р§Р°СЃС‚РѕС‚Р° 7.5 Р“С†, + С‚РµРјРїРµСЂР°С‚СѓСЂРЅС‹Р№ РґР°С‚С‡РёРє ON */
     u8 gain = 0x20;		/* gn2=0 gn1=0 gn0=1 */
-    u8 mode = 0x00;		/* Continiuos mode - проверить, что это правильный режим */
+    u8 mode = 0x00;		/* Continiuos mode - РїСЂРѕРІРµСЂРёС‚СЊ, С‡С‚Рѕ СЌС‚Рѕ РїСЂР°РІРёР»СЊРЅС‹Р№ СЂРµР¶РёРј */
     bool res = false;
 
     do {
@@ -147,7 +147,7 @@ bool lsm303_init_comp(void)
 }
 
 
-/* Получить данные акселерометра */
+/* РџРѕР»СѓС‡РёС‚СЊ РґР°РЅРЅС‹Рµ Р°РєСЃРµР»РµСЂРѕРјРµС‚СЂР° */
 #pragma section("FLASH_code")
 bool lsm303_get_acc_data(lsm303_data * acc)
 {
@@ -156,7 +156,7 @@ bool lsm303_get_acc_data(lsm303_data * acc)
     bool res = false;
     int t0;
 
-    /* Запускаем акселерометр */
+    /* Р—Р°РїСѓСЃРєР°РµРј Р°РєСЃРµР»РµСЂРѕРјРµС‚СЂ */
     if (!(result_struct.acc_data_res)) {
 	res = lsm303_init_acc();
 
@@ -169,7 +169,7 @@ bool lsm303_get_acc_data(lsm303_data * acc)
      t0 = get_msec_ticks();
 
 
-    /* Ждем статуса с данными 100 мс - на нашей частоте. потом можно уменьшить задержку */
+    /* Р–РґРµРј СЃС‚Р°С‚СѓСЃР° СЃ РґР°РЅРЅС‹РјРё 100 РјСЃ - РЅР° РЅР°С€РµР№ С‡Р°СЃС‚РѕС‚Рµ. РїРѕС‚РѕРј РјРѕР¶РЅРѕ СѓРјРµРЅСЊС€РёС‚СЊ Р·Р°РґРµСЂР¶РєСѓ */
     do {
 	status = TWI_read_byte(LSM303_ACC_ADDR, STATUS_REG_A, &lsm303_acc_val);
 	if (get_msec_ticks() - t0 < 100) {
@@ -179,23 +179,23 @@ bool lsm303_get_acc_data(lsm303_data * acc)
     } while (!(status & 8));
 
 
-    /* Читаем регистры  */
-    lo = TWI_read_byte(LSM303_ACC_ADDR, OUT_X_L_A, &lsm303_acc_val);	/* Младший  */
-    hi = TWI_read_byte(LSM303_ACC_ADDR, OUT_X_H_A, &lsm303_acc_val);	/* Старший  */
-    x = ((u16) hi << 8) + lo;	/* Проверить endian */
+    /* Р§РёС‚Р°РµРј СЂРµРіРёСЃС‚СЂС‹  */
+    lo = TWI_read_byte(LSM303_ACC_ADDR, OUT_X_L_A, &lsm303_acc_val);	/* РњР»Р°РґС€РёР№  */
+    hi = TWI_read_byte(LSM303_ACC_ADDR, OUT_X_H_A, &lsm303_acc_val);	/* РЎС‚Р°СЂС€РёР№  */
+    x = ((u16) hi << 8) + lo;	/* РџСЂРѕРІРµСЂРёС‚СЊ endian */
     x /= 16;
 
-    lo = TWI_read_byte(LSM303_ACC_ADDR, OUT_Y_L_A, &lsm303_acc_val);	/* Младший  */
-    hi = TWI_read_byte(LSM303_ACC_ADDR, OUT_Y_H_A, &lsm303_acc_val);	/* Старший  */
-    y = ((u16) hi << 8) + lo;	/* Проверить endian */
+    lo = TWI_read_byte(LSM303_ACC_ADDR, OUT_Y_L_A, &lsm303_acc_val);	/* РњР»Р°РґС€РёР№  */
+    hi = TWI_read_byte(LSM303_ACC_ADDR, OUT_Y_H_A, &lsm303_acc_val);	/* РЎС‚Р°СЂС€РёР№  */
+    y = ((u16) hi << 8) + lo;	/* РџСЂРѕРІРµСЂРёС‚СЊ endian */
     y /= 16;
 
-    lo = TWI_read_byte(LSM303_ACC_ADDR, OUT_Z_L_A, &lsm303_acc_val);	/* Младший  */
-    hi = TWI_read_byte(LSM303_ACC_ADDR, OUT_Z_H_A, &lsm303_acc_val);	/* Старший  */
-    z = ((u16) hi << 8) + lo;	/* Проверить endian */
+    lo = TWI_read_byte(LSM303_ACC_ADDR, OUT_Z_L_A, &lsm303_acc_val);	/* РњР»Р°РґС€РёР№  */
+    hi = TWI_read_byte(LSM303_ACC_ADDR, OUT_Z_H_A, &lsm303_acc_val);	/* РЎС‚Р°СЂС€РёР№  */
+    z = ((u16) hi << 8) + lo;	/* РџСЂРѕРІРµСЂРёС‚СЊ endian */
     z /= 16;
 
-    /* Датчики читаются? */
+    /* Р”Р°С‚С‡РёРєРё С‡РёС‚Р°СЋС‚СЃСЏ? */
     if (!(x == 0 && y == 0 && z == 0)) {
 	acc->x = x;
 	acc->y = y;
@@ -211,7 +211,7 @@ bool lsm303_get_acc_data(lsm303_data * acc)
     return res;
 }
 
-/* Получить данные компаса */
+/* РџРѕР»СѓС‡РёС‚СЊ РґР°РЅРЅС‹Рµ РєРѕРјРїР°СЃР° */
 #pragma section("FLASH_code")
 bool lsm303_get_comp_data(lsm303_data * comp)
 {
@@ -220,7 +220,7 @@ bool lsm303_get_comp_data(lsm303_data * comp)
     s16 x, y, z, t;
     int temp, t0;
 
-    /* Запускаем компас */
+    /* Р—Р°РїСѓСЃРєР°РµРј РєРѕРјРїР°СЃ */
     if (!(result_struct.comp_data_res)) {
 	res = lsm303_init_comp();
 
@@ -230,7 +230,7 @@ bool lsm303_get_comp_data(lsm303_data * comp)
 	    return res;
     }
 
-    /* Ждем статуса с данными 100 мс - на нашей частоте. потом можно уменьшить задержку */
+    /* Р–РґРµРј СЃС‚Р°С‚СѓСЃР° СЃ РґР°РЅРЅС‹РјРё 100 РјСЃ - РЅР° РЅР°С€РµР№ С‡Р°СЃС‚РѕС‚Рµ. РїРѕС‚РѕРј РјРѕР¶РЅРѕ СѓРјРµРЅСЊС€РёС‚СЊ Р·Р°РґРµСЂР¶РєСѓ */
    t0 = get_msec_ticks();
     do {
 	status = TWI_read_byte(LSM303_COMP_ADDR, SR_REG_M, &lsm303_acc_val);
@@ -241,31 +241,31 @@ bool lsm303_get_comp_data(lsm303_data * comp)
     } while (!(status & 1));
 
 
-    hi = TWI_read_byte(LSM303_COMP_ADDR, OUT_X_H_M, &lsm303_comp_val);	/* Старший  */
-    lo = TWI_read_byte(LSM303_COMP_ADDR, OUT_X_L_M, &lsm303_comp_val);	/* Младший  */
-    x = ((u16) hi << 8) + lo;	/* Проверить endian */
+    hi = TWI_read_byte(LSM303_COMP_ADDR, OUT_X_H_M, &lsm303_comp_val);	/* РЎС‚Р°СЂС€РёР№  */
+    lo = TWI_read_byte(LSM303_COMP_ADDR, OUT_X_L_M, &lsm303_comp_val);	/* РњР»Р°РґС€РёР№  */
+    x = ((u16) hi << 8) + lo;	/* РџСЂРѕРІРµСЂРёС‚СЊ endian */
     x /= 16;
 
-    hi = TWI_read_byte(LSM303_COMP_ADDR, OUT_Z_H_M, &lsm303_comp_val);	/* Старший  */
-    lo = TWI_read_byte(LSM303_COMP_ADDR, OUT_Z_L_M, &lsm303_comp_val);	/* Младший  */
-    z = ((u16) hi << 8) + lo;	/* Проверить endian */
+    hi = TWI_read_byte(LSM303_COMP_ADDR, OUT_Z_H_M, &lsm303_comp_val);	/* РЎС‚Р°СЂС€РёР№  */
+    lo = TWI_read_byte(LSM303_COMP_ADDR, OUT_Z_L_M, &lsm303_comp_val);	/* РњР»Р°РґС€РёР№  */
+    z = ((u16) hi << 8) + lo;	/* РџСЂРѕРІРµСЂРёС‚СЊ endian */
     z /= 16;
 
-    hi = TWI_read_byte(LSM303_COMP_ADDR, OUT_Y_H_M, &lsm303_comp_val);	/* Старший  */
-    lo = TWI_read_byte(LSM303_COMP_ADDR, OUT_Y_L_M, &lsm303_comp_val);	/* Младший  */
-    y = ((u16) hi << 8) + lo;	/* Проверить endian */
+    hi = TWI_read_byte(LSM303_COMP_ADDR, OUT_Y_H_M, &lsm303_comp_val);	/* РЎС‚Р°СЂС€РёР№  */
+    lo = TWI_read_byte(LSM303_COMP_ADDR, OUT_Y_L_M, &lsm303_comp_val);	/* РњР»Р°РґС€РёР№  */
+    y = ((u16) hi << 8) + lo;	/* РџСЂРѕРІРµСЂРёС‚СЊ endian */
     y /= 16;
 
-    /* Получить температуру - она находится в компасе  */
-    hi = TWI_read_byte(LSM303_COMP_ADDR, TEMP_OUT_H_M, &lsm303_comp_val);	/* Старшой  */
+    /* РџРѕР»СѓС‡РёС‚СЊ С‚РµРјРїРµСЂР°С‚СѓСЂСѓ - РѕРЅР° РЅР°С…РѕРґРёС‚СЃСЏ РІ РєРѕРјРїР°СЃРµ  */
+    hi = TWI_read_byte(LSM303_COMP_ADDR, TEMP_OUT_H_M, &lsm303_comp_val);	/* РЎС‚Р°СЂС€РѕР№  */
     lo = TWI_read_byte(LSM303_COMP_ADDR, TEMP_OUT_L_M, &lsm303_comp_val);
 
-    temp = (s16) (((u16) hi << 8) | lo);	/* Проверить endian */
+    temp = (s16) (((u16) hi << 8) | lo);	/* РџСЂРѕРІРµСЂРёС‚СЊ endian */
     temp *= 10;
     temp >>= 7;
     t = temp + 220;
 
-    /* Датчики читаются? */
+    /* Р”Р°С‚С‡РёРєРё С‡РёС‚Р°СЋС‚СЃСЏ? */
     if (!(x == 0 && y == 0 && z == 0 && t == 220)) {
 	comp->x = x;
 	comp->y = y;
