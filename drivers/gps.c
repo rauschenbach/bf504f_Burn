@@ -1,6 +1,6 @@
 /*******************************************************************
- * GPS прием строки NMEA
- * Реагируем только на строку $GPRMC!!!
+ * GPS РїСЂРёРµРј СЃС‚СЂРѕРєРё NMEA
+ * Р РµР°РіРёСЂСѓРµРј С‚РѕР»СЊРєРѕ РЅР° СЃС‚СЂРѕРєСѓ $GPRMC!!!
 *******************************************************************/
 #include <string.h>
 #include <stdio.h>
@@ -16,39 +16,40 @@
 #include "led.h"
 #include "pll.h"
 
-#define 	GPS_NMEA_OLD_SPEED  		UART_SPEED_115200	/* Скорости подберем */
-#define 	GPS_NMEA_NEW_SPEED  		UART_SPEED_9600	/* Скорости подберем */
+#define 	GPS_NMEA_OLD_SPEED  		UART_SPEED_115200	/* РЎРєРѕСЂРѕСЃС‚Рё РїРѕРґР±РµСЂРµРј */
+#define 	GPS_NMEA_NEW_SPEED  		UART_SPEED_9600	/* РЎРєРѕСЂРѕСЃС‚Рё РїРѕРґР±РµСЂРµРј */
 #define 	RX_FIN_SIGN 			0x5A
+#define		UTC_OFFSET			18  		/* РњРµРЅСЏРµС‚СЃСЏ СЂР°Р· РІ 2-3 РіРѕРґР° */
 
-/* Прием по UART0 - выделяем память на указатель на нашу структуру */
+/* РџСЂРёРµРј РїРѕ UART0 - РІС‹РґРµР»СЏРµРј РїР°РјСЏС‚СЊ РЅР° СѓРєР°Р·Р°С‚РµР»СЊ РЅР° РЅР°С€Сѓ СЃС‚СЂСѓРєС‚СѓСЂСѓ */
 static struct NMEA_DATA_STRUCT {
-    u32 rx_nmea_time;		/* Время из строки - сохраняется для таймера 4 */
+    u32 rx_nmea_time;		/* Р’СЂРµРјСЏ РёР· СЃС‚СЂРѕРєРё - СЃРѕС…СЂР°РЅСЏРµС‚СЃСЏ РґР»СЏ С‚Р°Р№РјРµСЂР° 4 */
     s64 dif_time;
 
-    s32 lat;			/* Широта */
-    s32 lon;			/* Долгота  */
+    s32 lat;			/* РЁРёСЂРѕС‚Р° */
+    s32 lon;			/* Р”РѕР»РіРѕС‚Р°  */
 
-    c8 rx_pmtk_buf[NMEA_PMTK_STRING_SIZE];	/* Суда сливаем для разбора PMTK, в случае чего - залезет на rx_buf_out */
-    c8 rx_buf_in[NMEA_GPRMC_STRING_SIZE];	/* Суда сливаем принятое */
-    c8 rx_buf_out[NMEA_GPRMC_STRING_SIZE];	/* Суда сливаем для разбора */
+    c8 rx_pmtk_buf[NMEA_PMTK_STRING_SIZE];	/* РЎСѓРґР° СЃР»РёРІР°РµРј РґР»СЏ СЂР°Р·Р±РѕСЂР° PMTK, РІ СЃР»СѓС‡Р°Рµ С‡РµРіРѕ - Р·Р°Р»РµР·РµС‚ РЅР° rx_buf_out */
+    c8 rx_buf_in[NMEA_GPRMC_STRING_SIZE];	/* РЎСѓРґР° СЃР»РёРІР°РµРј РїСЂРёРЅСЏС‚РѕРµ */
+    c8 rx_buf_out[NMEA_GPRMC_STRING_SIZE];	/* РЎСѓРґР° СЃР»РёРІР°РµРј РґР»СЏ СЂР°Р·Р±РѕСЂР° */
 
     u8 rx_beg;
     u8 rx_num;
     u8 rx_cnt;
-    bool rx_check;		/* Достоверность  */
+    bool rx_check;		/* Р”РѕСЃС‚РѕРІРµСЂРЅРѕСЃС‚СЊ  */
 
     u8 rx_pmtk_len;
-    u8 rx_exist;		/* NMEA есть прием */
+    u8 rx_exist;		/* NMEA РµСЃС‚СЊ РїСЂРёРµРј */
     u8 rx_fin;
 } *gps_data_ptr;
 
 
 static long gps_parse_nmea_string(void);
-static void gps_nmea_read_ISR(u8);	/* Чтение из UART0 */
+static void gps_nmea_read_ISR(u8);	/* Р§С‚РµРЅРёРµ РёР· UART0 */
 
 /**
- * Function:    gps_init - запускается сразу же 
- * Убрал делитель EDBO
+ * Function:    gps_init - Р·Р°РїСѓСЃРєР°РµС‚СЃСЏ СЃСЂР°Р·Сѓ Р¶Рµ 
+ * РЈР±СЂР°Р» РґРµР»РёС‚РµР»СЊ EDBO
  */
 #pragma section("FLASH_code")
 int gps_init(void)
@@ -57,9 +58,9 @@ int gps_init(void)
     int res = -1;
     int t0, t1;
 
-    select_gps_module();	/* Для GPS  - запустить UART0 */
+    select_gps_module();	/* Р”Р»СЏ GPS  - Р·Р°РїСѓСЃС‚РёС‚СЊ UART0 */
 
-    /* Сначала создаем буфер на прием */
+    /* РЎРЅР°С‡Р°Р»Р° СЃРѕР·РґР°РµРј Р±СѓС„РµСЂ РЅР° РїСЂРёРµРј */
     if (gps_data_ptr == NULL) {
 	gps_data_ptr = calloc(sizeof(struct NMEA_DATA_STRUCT), 1);
 	if (gps_data_ptr == NULL) {
@@ -72,16 +73,16 @@ int gps_init(void)
     }
 
 
-    /* Вызываем UART0 init на 115200 */
+    /* Р’С‹Р·С‹РІР°РµРј UART0 init РЅР° 115200 */
     gps_par.baud = GPS_NMEA_OLD_SPEED;
     gps_par.rx_call_back_func = gps_nmea_read_ISR;
-    gps_par.tx_call_back_func = NULL;	/* Нет  */
+    gps_par.tx_call_back_func = NULL;	/* РќРµС‚  */
 
     if (UART0_init(&gps_par) == true) {
 
 
 #if 1
-	/* Послать "пробуждение"  */
+	/* РџРѕСЃР»Р°С‚СЊ "РїСЂРѕР±СѓР¶РґРµРЅРёРµ"  */
 	t0 = get_msec_ticks();
 	t1 = t0;
 	while (t1 - t0 < 250) {
@@ -92,7 +93,7 @@ int gps_init(void)
 #endif
 
 
-	/* Поменять скорость порта */
+	/* РџРѕРјРµРЅСЏС‚СЊ СЃРєРѕСЂРѕСЃС‚СЊ РїРѕСЂС‚Р° */
 	t0 = get_msec_ticks();
 	t1 = t0;
 	while (t1 - t0 < 250) {
@@ -102,7 +103,7 @@ int gps_init(void)
 	res = gps_change_baud();
 
 #if 0
-	/* Послать еще команду */
+	/* РџРѕСЃР»Р°С‚СЊ РµС‰Рµ РєРѕРјР°РЅРґСѓ */
 	t0 = get_msec_ticks();
 	t1 = t0;
 	while (t1 - t0 < 250) {
@@ -118,7 +119,7 @@ int gps_init(void)
 
 
 /**
- * Выключаем UART0, освободим буферы 
+ * Р’С‹РєР»СЋС‡Р°РµРј UART0, РѕСЃРІРѕР±РѕРґРёРј Р±СѓС„РµСЂС‹ 
  */
 #pragma section("FLASH_code")
 void gps_close(void)
@@ -136,37 +137,37 @@ void gps_close(void)
 
 
 /**
- * Причина прерывания - приемный буфер готов - реагируем только на $GPRMC!
+ * РџСЂРёС‡РёРЅР° РїСЂРµСЂС‹РІР°РЅРёСЏ - РїСЂРёРµРјРЅС‹Р№ Р±СѓС„РµСЂ РіРѕС‚РѕРІ - СЂРµР°РіРёСЂСѓРµРј С‚РѕР»СЊРєРѕ РЅР° $GPRMC!
  */
 #pragma section("FLASH_code")
 static void gps_nmea_read_ISR(u8 rx_byte)
-{				/* Чтение из UART0 */
+{				/* Р§С‚РµРЅРёРµ РёР· UART0 */
     char buf[32];
 
-    /*  Первый байт */
-    if (rx_byte == '$') {	/* Начинается всегда с $ */
+    /*  РџРµСЂРІС‹Р№ Р±Р°Р№С‚ */
+    if (rx_byte == '$') {	/* РќР°С‡РёРЅР°РµС‚СЃСЏ РІСЃРµРіРґР° СЃ $ */
 	gps_data_ptr->rx_beg = 1;
 	gps_data_ptr->rx_cnt = 1;
 	gps_data_ptr->rx_buf_in[0] = '$';
 
-	//   gps_data_ptr->rx_nmea_time = 0;      // попробуем сбросить время
-	gps_data_ptr->rx_fin = 0;	/* Флаг окончания приема строки  при приеме GPRMS!!!! */
+	//   gps_data_ptr->rx_nmea_time = 0;      // РїРѕРїСЂРѕР±СѓРµРј СЃР±СЂРѕСЃРёС‚СЊ РІСЂРµРјСЏ
+	gps_data_ptr->rx_fin = 0;	/* Р¤Р»Р°Рі РѕРєРѕРЅС‡Р°РЅРёСЏ РїСЂРёРµРјР° СЃС‚СЂРѕРєРё  РїСЂРё РїСЂРёРµРјРµ GPRMS!!!! */
 	gps_data_ptr->rx_exist = 0;
-    } else if (gps_data_ptr->rx_beg == 1) {	// Прием уже начался
+    } else if (gps_data_ptr->rx_beg == 1) {	// РџСЂРёРµРј СѓР¶Рµ РЅР°С‡Р°Р»СЃСЏ
 	gps_data_ptr->rx_buf_in[gps_data_ptr->rx_cnt] = rx_byte;
 
-	/*  Проверка, перевод строки/ Собираем пакеты RMC и GSA и PMTK */
+	/*  РџСЂРѕРІРµСЂРєР°, РїРµСЂРµРІРѕРґ СЃС‚СЂРѕРєРё/ РЎРѕР±РёСЂР°РµРј РїР°РєРµС‚С‹ RMC Рё GSA Рё PMTK */
 	if (rx_byte == '\x0A') {
 
-	    // Ответ на команду PMTK
+	    // РћС‚РІРµС‚ РЅР° РєРѕРјР°РЅРґСѓ PMTK
 	    if (gps_data_ptr->rx_buf_in[1] == 'P' && gps_data_ptr->rx_buf_in[2] == 'M' && gps_data_ptr->rx_buf_in[3] == 'T'
 		&& gps_data_ptr->rx_buf_in[4] == 'K') {
-		memcpy(gps_data_ptr->rx_pmtk_buf, gps_data_ptr->rx_buf_in, gps_data_ptr->rx_cnt % (NMEA_PMTK_STRING_SIZE - 1));	// скопировали в буфер
+		memcpy(gps_data_ptr->rx_pmtk_buf, gps_data_ptr->rx_buf_in, gps_data_ptr->rx_cnt % (NMEA_PMTK_STRING_SIZE - 1));	// СЃРєРѕРїРёСЂРѕРІР°Р»Рё РІ Р±СѓС„РµСЂ
 		gps_data_ptr->rx_pmtk_buf[gps_data_ptr->rx_cnt - 1] = 0;
 		gps_data_ptr->rx_pmtk_len = gps_data_ptr->rx_cnt;
 		return;
 	    }
-	    // GPRMC - если прием через PC!
+	    // GPRMC - РµСЃР»Рё РїСЂРёРµРј С‡РµСЂРµР· PC!
 	    // $GPRMC,085827.649,A,5541.7900,N,03721.3821,E,0.06,0.00,181113,10.0,E,A*36
 	    if (gps_data_ptr->rx_buf_in[1] == 'G' && gps_data_ptr->rx_buf_in[3] == 'R' && gps_data_ptr->rx_buf_in[4] == 'M'
 		&& gps_data_ptr->rx_buf_in[5] == 'C') {
@@ -175,14 +176,14 @@ static void gps_nmea_read_ISR(u8 rx_byte)
 		gps_data_ptr->rx_beg = 0;
 		gps_data_ptr->rx_cnt = 0;
 		gps_data_ptr->rx_nmea_time = gps_parse_nmea_string();
-		gps_data_ptr->rx_fin = RX_FIN_SIGN;	/* Флаг окончания приема строки  при приеме GPRMC!!!! */
+		gps_data_ptr->rx_fin = RX_FIN_SIGN;	/* Р¤Р»Р°Рі РѕРєРѕРЅС‡Р°РЅРёСЏ РїСЂРёРµРјР° СЃС‚СЂРѕРєРё  РїСЂРё РїСЂРёРµРјРµ GPRMC!!!! */
 		return;
 	    }
-	    // Пакет  $GPGSA,A,3,17,28,11,04,,,,,,,,,3.20,3.09,1.51*04
+	    // РџР°РєРµС‚  $GPGSA,A,3,17,28,11,04,,,,,,,,,3.20,3.09,1.51*04
 	    if (gps_data_ptr->rx_buf_in[1] == 'G' && gps_data_ptr->rx_buf_in[3] == 'G' && gps_data_ptr->rx_buf_in[4] == 'S'
 		&& gps_data_ptr->rx_buf_in[5] == 'A') {
-		gps_data_ptr->rx_check = ((gps_data_ptr->rx_buf_in[9] == '3') ? true : false);	/* Есть 3dFix? */
-		gps_data_ptr->rx_buf_in[1] = 0;	// вместо memset
+		gps_data_ptr->rx_check = ((gps_data_ptr->rx_buf_in[9] == '3') ? true : false);	/* Р•СЃС‚СЊ 3dFix? */
+		gps_data_ptr->rx_buf_in[1] = 0;	// РІРјРµСЃС‚Рѕ memset
 		gps_data_ptr->rx_beg = 0;
 		gps_data_ptr->rx_cnt = 0;
 		gps_data_ptr->rx_exist = 1;
@@ -200,7 +201,7 @@ static void gps_nmea_read_ISR(u8 rx_byte)
 
 
 /**
- * Получить строку от NMEA
+ * РџРѕР»СѓС‡РёС‚СЊ СЃС‚СЂРѕРєСѓ РѕС‚ NMEA
  */
 #pragma section("FLASH_code")
 int gps_get_nmea_string(char *str, int len)
@@ -217,17 +218,17 @@ int gps_get_nmea_string(char *str, int len)
 
 
 /**
- * Получить строку от NMEA
+ * РџРѕР»СѓС‡РёС‚СЊ СЃС‚СЂРѕРєСѓ РѕС‚ NMEA
  */
 #pragma section("FLASH_code")
 int gps_get_pmtk_string(char *str, int n)
 {
     int res = 0;
 
-    /* Если есть PMTK - выводим только ее */
+    /* Р•СЃР»Рё РµСЃС‚СЊ PMTK - РІС‹РІРѕРґРёРј С‚РѕР»СЊРєРѕ РµРµ */
     if (gps_data_ptr->rx_pmtk_len) {
 	int len = gps_data_ptr->rx_pmtk_len < n ? gps_data_ptr->rx_pmtk_len : n;
-	memcpy(str, gps_data_ptr->rx_pmtk_buf, len);	//  Ответ на команду PMTK 
+	memcpy(str, gps_data_ptr->rx_pmtk_buf, len);	//  РћС‚РІРµС‚ РЅР° РєРѕРјР°РЅРґСѓ PMTK 
 	gps_data_ptr->rx_pmtk_len = 0;
 	res = len;
     }
@@ -236,7 +237,7 @@ int gps_get_pmtk_string(char *str, int n)
 
 
 /**
- * NMEA есть прием?
+ * NMEA РµСЃС‚СЊ РїСЂРёРµРј?
  */
 #pragma section("FLASH_code")
 u8 gps_nmea_exist(void)
@@ -245,7 +246,7 @@ u8 gps_nmea_exist(void)
 }
 
 /**
- * Отслеживать достоверность данных при приеме
+ * РћС‚СЃР»РµР¶РёРІР°С‚СЊ РґРѕСЃС‚РѕРІРµСЂРЅРѕСЃС‚СЊ РґР°РЅРЅС‹С… РїСЂРё РїСЂРёРµРјРµ
  */
 #pragma section("FLASH_code")
 bool gps_check_for_reliability(void)
@@ -255,7 +256,7 @@ bool gps_check_for_reliability(void)
 
 
 /**
- * Получить время от NMEA
+ * РџРѕР»СѓС‡РёС‚СЊ РІСЂРµРјСЏ РѕС‚ NMEA
  */
 section("L1_code")
 int gps_get_nmea_time(void)
@@ -277,9 +278,9 @@ s64 gps_get_dif_time(void)
 
 
 /**
- * Разобрать строку от NMEA, чтобы не делать это в ISR
+ * Р Р°Р·РѕР±СЂР°С‚СЊ СЃС‚СЂРѕРєСѓ РѕС‚ NMEA, С‡С‚РѕР±С‹ РЅРµ РґРµР»Р°С‚СЊ СЌС‚Рѕ РІ ISR
  * $GPRMC,105105.000,A,5541.7967,N,03721.3407,E,0.39,0.00,261212,10.0,E,A*37
- * Пройти в цыкле по буферу и определить позиции времени и координат
+ * РџСЂРѕР№С‚Рё РІ С†С‹РєР»Рµ РїРѕ Р±СѓС„РµСЂСѓ Рё РѕРїСЂРµРґРµР»РёС‚СЊ РїРѕР·РёС†РёРё РІСЂРµРјРµРЅРё Рё РєРѕРѕСЂРґРёРЅР°С‚
  */
 #pragma section("FLASH_code")
 static long gps_parse_nmea_string(void)
@@ -298,38 +299,38 @@ static long gps_parse_nmea_string(void)
 	u8 lat_wid, lon_wid;
 
 
-	// пройдем по строке
+	// РїСЂРѕР№РґРµРј РїРѕ СЃС‚СЂРѕРєРµ
 	// $GPRMC,115406.000,A,5541.7843,N,03721.3629,E,0.02,0.00,031213,10.0,E,A*37
 	for (i = 0; i < NMEA_GPRMC_STRING_SIZE; i++) {
 
 	    if (gps_data_ptr->rx_buf_out[i] == 0x2c)
 		count++;
 
-	    // найдем позицию time
+	    // РЅР°Р№РґРµРј РїРѕР·РёС†РёСЋ time
 	    if (!tim_pos && count == 1) {
 		tim_pos = i + 1;
 	    } else if (!ver_pos && count == 2) {
-		ver_pos = i + 1;	// найдем позицыю достоверности 'A'
+		ver_pos = i + 1;	// РЅР°Р№РґРµРј РїРѕР·РёС†С‹СЋ РґРѕСЃС‚РѕРІРµСЂРЅРѕСЃС‚Рё 'A'
 	    } else if (!lat_pos && count == 3) {
-		lat_pos = i + 1;	// найдем позицыю широты
+		lat_pos = i + 1;	// РЅР°Р№РґРµРј РїРѕР·РёС†С‹СЋ С€РёСЂРѕС‚С‹
 	    } else if (!ns_pos && count == 4) {
-		ns_pos = i + 1;	// Позиция полушара N или S
+		ns_pos = i + 1;	// РџРѕР·РёС†РёСЏ РїРѕР»СѓС€Р°СЂР° N РёР»Рё S
 		lat_wid = ns_pos - lat_pos - 1;
 	    } else if (!lon_pos && count == 5) {
-		lon_pos = i + 1;	// найдем позицыю долготы
+		lon_pos = i + 1;	// РЅР°Р№РґРµРј РїРѕР·РёС†С‹СЋ РґРѕР»РіРѕС‚С‹
 	    } else if (!we_pos && count == 6) {
-		we_pos = i + 1;	// Позиция полушара W или E
+		we_pos = i + 1;	// РџРѕР·РёС†РёСЏ РїРѕР»СѓС€Р°СЂР° W РёР»Рё E
 		lon_wid = we_pos - lon_pos - 1;
 	    } else if (!dat_pos && count == 9) {
-		dat_pos = i + 1;	// Позиция даты
+		dat_pos = i + 1;	// РџРѕР·РёС†РёСЏ РґР°С‚С‹
 		break;
 	    }
 	}
 	if (count != 9 || gps_data_ptr->rx_buf_out[ver_pos] != 'A') {
 	    gps_data_ptr->rx_check = false;
-	    break;		// нет достоверности
+	    break;		// РЅРµС‚ РґРѕСЃС‚РѕРІРµСЂРЅРѕСЃС‚Рё
 	}
-	// Время
+	// Р’СЂРµРјСЏ
 	memcpy(buf, gps_data_ptr->rx_buf_out + tim_pos, 2);
 	buf[2] = 0;
 	td.hour = atoi(buf);
@@ -359,12 +360,12 @@ static long gps_parse_nmea_string(void)
 	    gps_data_ptr->rx_check = true;
 	    res = count;
 	}
-	// Широта и долгота занимает. раз в 4 секунды 
+	// РЁРёСЂРѕС‚Р° Рё РґРѕР»РіРѕС‚Р° Р·Р°РЅРёРјР°РµС‚. СЂР°Р· РІ 4 СЃРµРєСѓРЅРґС‹ 
 	if (lat_wid < 2 || lat_wid > 12 || lon_wid < 2 || lon_wid > 12 || count % 4 != 0)
 	    break;
 
 	// $GPRMC,115406.000,A,5541.7840,N,03721.3629,E,0.02,0.00,031213,10.0,E,A*37
-	// Сохраняем целое
+	// РЎРѕС…СЂР°РЅСЏРµРј С†РµР»РѕРµ
 	memcpy(buf, gps_data_ptr->rx_buf_out + lat_pos, lat_wid);
 	buf[lat_wid] = 0;
 	if (gps_data_ptr->rx_buf_out[ns_pos] == 'N') {
@@ -386,14 +387,14 @@ static long gps_parse_nmea_string(void)
     } while (0);
 
     t1 = get_long_time();
-    gps_data_ptr->dif_time = t1 - t0;	// в наносекундах
+    gps_data_ptr->dif_time = t1 - t0;	// РІ РЅР°РЅРѕСЃРµРєСѓРЅРґР°С…
 
     return res;
 }
 
 
 /**
- * Получить широту и долготу
+ * РџРѕР»СѓС‡РёС‚СЊ С€РёСЂРѕС‚Сѓ Рё РґРѕР»РіРѕС‚Сѓ
  */
 #pragma section("FLASH_code")
 void gps_get_coordinates(s32 * lat, s32 * lon)
@@ -409,15 +410,15 @@ void gps_get_coordinates(s32 * lat, s32 * lon)
 		break;
 	    }
 	    LED_blink();
-	} while (get_sec_ticks() - t0 < TIM4_BUF_SIZE / 4);	/* Ждем 4 секунды */
+	} while (get_sec_ticks() - t0 < TIM4_BUF_SIZE / 4);	/* Р–РґРµРј 4 СЃРµРєСѓРЅРґС‹ */
     }
 }
 
-/* выдается: GPRMC  ONLY! */
+/* РІС‹РґР°РµС‚СЃСЏ: GPRMC  ONLY! */
 #pragma section("FLASH_code")
 void gps_set_grmc(void)
 {
-    char str[NMEA_PMTK_STRING_SIZE * 2];	/* Эта строка в 2 раза больше! */
+    char str[NMEA_PMTK_STRING_SIZE * 2];	/* Р­С‚Р° СЃС‚СЂРѕРєР° РІ 2 СЂР°Р·Р° Р±РѕР»СЊС€Рµ! */
     int res;
     int t0 = get_sec_ticks();
 
@@ -433,7 +434,7 @@ void gps_set_grmc(void)
 	res = -1;
 	memset(str, 0, sizeof(str));
 	do {
-	    if (gps_get_pmtk_string(str, NMEA_PMTK_STRING_SIZE) > 0) {	// Выведем PMTK строку если она есть
+	    if (gps_get_pmtk_string(str, NMEA_PMTK_STRING_SIZE) > 0) {	// Р’С‹РІРµРґРµРј PMTK СЃС‚СЂРѕРєСѓ РµСЃР»Рё РѕРЅР° РµСЃС‚СЊ
 		log_write_log_file("INFO: %s\n", str);
 		res = 0;
 		break;
@@ -450,7 +451,7 @@ void gps_set_grmc(void)
 
 
 /**
- * Проснуться 
+ * РџСЂРѕСЃРЅСѓС‚СЊСЃСЏ 
  */
 #pragma section("FLASH_code")
 void gps_wake_up(void)
@@ -469,13 +470,13 @@ void gps_wake_up(void)
 	    break;
 	}
 
-	/* Ждем 4 секунды: $PMTK000 */
+	/* Р–РґРµРј 4 СЃРµРєСѓРЅРґС‹: $PMTK000 */
 	res = -1;
 	memset(str, 0, sizeof(str));
 	do {
-	    if (gps_get_pmtk_string(str, NMEA_PMTK_STRING_SIZE) > 0) {	// Выведем PMTK строку если она есть
+	    if (gps_get_pmtk_string(str, NMEA_PMTK_STRING_SIZE) > 0) {	// Р’С‹РІРµРґРµРј PMTK СЃС‚СЂРѕРєСѓ РµСЃР»Рё РѕРЅР° РµСЃС‚СЊ
 		log_write_log_file("INFO: %s\n", str);
-		p = strstr(str, "$PMTK");	// нашли строку
+		p = strstr(str, "$PMTK");	// РЅР°С€Р»Рё СЃС‚СЂРѕРєСѓ
 		if (p != NULL) {
 		    res = 0;
 		    break;
@@ -492,7 +493,7 @@ void gps_wake_up(void)
 
 
 /**
- * Заснуть
+ * Р—Р°СЃРЅСѓС‚СЊ
  */
 #pragma section("FLASH_code")
 void gps_standby(void)
@@ -511,13 +512,13 @@ void gps_standby(void)
 	    break;
 	}
 
-	/* Ждем 4 секунды: $PMTK*** */
+	/* Р–РґРµРј 4 СЃРµРєСѓРЅРґС‹: $PMTK*** */
 	res = -1;
 	memset(str, 0, sizeof(str));
 	do {
-	    if (gps_get_pmtk_string(str, NMEA_PMTK_STRING_SIZE) > 0) {	// Выведем PMTK строку если она есть
+	    if (gps_get_pmtk_string(str, NMEA_PMTK_STRING_SIZE) > 0) {	// Р’С‹РІРµРґРµРј PMTK СЃС‚СЂРѕРєСѓ РµСЃР»Рё РѕРЅР° РµСЃС‚СЊ
 		log_write_log_file("INFO: %s\n", str);
-		p = strstr(str, "$PMTK");	// нашли строку
+		p = strstr(str, "$PMTK");	// РЅР°С€Р»Рё СЃС‚СЂРѕРєСѓ
 		if (p != NULL) {
 		    res = 0;
 		    break;
@@ -534,7 +535,7 @@ void gps_standby(void)
 
 
 
-/* Определить смещение времени UTC */
+/* РћРїСЂРµРґРµР»РёС‚СЊ СЃРјРµС‰РµРЅРёРµ РІСЂРµРјРµРЅРё UTC */
 #pragma section("FLASH_code")
 int gps_get_utc_offset(void)
 {
@@ -552,15 +553,15 @@ int gps_get_utc_offset(void)
 	    break;
 	}
 
-	/* Ждем 4 секунды: $PMTK001,457,1*34 или $PMTK557,15.0*03 */
+	/* Р–РґРµРј 4 СЃРµРєСѓРЅРґС‹: $PMTK001,457,1*34 РёР»Рё $PMTK557,15.0*03 */
 	res = -1;
 	memset(str, 0, sizeof(str));
 	do {
-	    if (gps_get_pmtk_string(str, NMEA_PMTK_STRING_SIZE) > 0) {	// Выведем PMTK строку если она есть
+	    if (gps_get_pmtk_string(str, NMEA_PMTK_STRING_SIZE) > 0) {	// Р’С‹РІРµРґРµРј PMTK СЃС‚СЂРѕРєСѓ РµСЃР»Рё РѕРЅР° РµСЃС‚СЊ
 		log_write_log_file("INFO: %s\n", str);
 
-		/* Старый модуль Sylvana */
-		p = strstr(str, "$PMTK557,");	/* нашли строку */
+		/* РЎС‚Р°СЂС‹Р№ РјРѕРґСѓР»СЊ Sylvana */
+		p = strstr(str, "$PMTK557,");	/* РЅР°С€Р»Рё СЃС‚СЂРѕРєСѓ */
 		if (p != NULL) {
 		    memcpy(str, p + 9, 2);
 		    str[2] = 0;
@@ -569,11 +570,11 @@ int gps_get_utc_offset(void)
 		    break;
 		}
 
- 		/* Новый модуль FastRax */
+ 		/* РќРѕРІС‹Р№ РјРѕРґСѓР»СЊ FastRax */
 		p1 = strstr(str, "$PMTK001,457");
 		if (p1 != NULL) {
 /*		    log_write_log_file("INFO: UTC Offset: assume 16 sec\n"); */
-		    res = 16;
+		    res = UTC_OFFSET;
 		    break;
 		}
 	    }
@@ -598,7 +599,7 @@ void gps_set_zda(void)
 
 
     do {
-	/* выдается: GPRMC, -, GPGGA, GPGSA, GPGSV, + GPZDA */
+	/* РІС‹РґР°РµС‚СЃСЏ: GPRMC, -, GPGGA, GPGSA, GPGSV, + GPZDA */
 	strcpy(str, "$PMTK314,0,1,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,0*29\r\n");
 	log_write_log_file("INFO: Reprogram UART0 to receive $GPZDA string: %s\n", str);
 
@@ -610,14 +611,14 @@ void gps_set_zda(void)
 
 
 #if 1
-	/* Ждем 2 секунды: $PMTK */
+	/* Р–РґРµРј 2 СЃРµРєСѓРЅРґС‹: $PMTK */
 	res = -1;
 	t0 = get_sec_ticks();
 	memset(str, 0, sizeof(str));
 	do {
-	    if (gps_get_pmtk_string(str, NMEA_PMTK_STRING_SIZE) > 0) {	// Выведем PMTK строку если она есть
+	    if (gps_get_pmtk_string(str, NMEA_PMTK_STRING_SIZE) > 0) {	// Р’С‹РІРµРґРµРј PMTK СЃС‚СЂРѕРєСѓ РµСЃР»Рё РѕРЅР° РµСЃС‚СЊ
 		log_write_log_file("INFO: %s\n", str);
-		p = strstr(str, "$PMTK");	// нашли строку
+		p = strstr(str, "$PMTK");	// РЅР°С€Р»Рё СЃС‚СЂРѕРєСѓ
 		if (p != NULL) {
 		    res = 0;
 		    break;
@@ -635,7 +636,7 @@ void gps_set_zda(void)
 
 
 
-/* Поменять скорость */
+/* РџРѕРјРµРЅСЏС‚СЊ СЃРєРѕСЂРѕСЃС‚СЊ */
 #pragma section("FLASH_code")
 int gps_change_baud(void)
 {
@@ -654,13 +655,13 @@ int gps_change_baud(void)
 	    break;
 	}
 
-	/* Ждем 2 секунды: $PMTK */
+	/* Р–РґРµРј 2 СЃРµРєСѓРЅРґС‹: $PMTK */
 	res = -1;
 	memset(str, 0, sizeof(str));
 	do {
-	    if (gps_get_pmtk_string(str, NMEA_PMTK_STRING_SIZE) > 0) {	// Выведем PMTK строку если она есть
+	    if (gps_get_pmtk_string(str, NMEA_PMTK_STRING_SIZE) > 0) {	// Р’С‹РІРµРґРµРј PMTK СЃС‚СЂРѕРєСѓ РµСЃР»Рё РѕРЅР° РµСЃС‚СЊ
 		log_write_log_file("INFO: %s\n", str);
-		p = strstr(str, "$PMTK");	// нашли строку
+		p = strstr(str, "$PMTK");	// РЅР°С€Р»Рё СЃС‚СЂРѕРєСѓ
 		if (p != NULL) {
 		    res = 0;
 		    break;
@@ -675,10 +676,10 @@ int gps_change_baud(void)
 	log_write_log_file("INFO: Can't get reply or command not supported\n");
     }
 
-    /* Перепрограммируем UART0 */
+    /* РџРµСЂРµРїСЂРѕРіСЂР°РјРјРёСЂСѓРµРј UART0 */
     gps_par.baud = GPS_NMEA_NEW_SPEED;
     gps_par.rx_call_back_func = gps_nmea_read_ISR;
-    gps_par.tx_call_back_func = NULL;	/* Нет  */
+    gps_par.tx_call_back_func = NULL;	/* РќРµС‚  */
     if (UART0_init(&gps_par) == true)
 	res = 0;
 
