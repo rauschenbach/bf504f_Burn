@@ -4,23 +4,17 @@
  ***********************************************************************************************************/
 #include <stdlib.h>
 #include <string.h>
-#include "ports.h"
+#include "timer0.h"
 #include "rsi.h"
-#include "utils.h"
 #include "led.h"
 
 
-#define RSI_CMD_TIMER_TIMEOUT	12000000	/* Таймаут на команды = 0.5 секунды */
-#define RSI_READ_TIMER_TIMEOUT	12000000	/* Таймаут на чтение = 0.5 секунды  */
-#define RSI_WRITE_TIMER_TIMEOUT	12000000	/* Таймаут на запись одного блока - 0.5 секунды */
-
+#define CARD_TIMER_TIMEOUT	12000000
 
 /* local function declarations */
-static uint32_t card_address(uint32_t);
 static void SDBlockRead(void *, uint32_t);
 static void SDBlockWrite(void *, uint32_t);
-static void rsi_start_dma_transfer(void *, uint32_t, bool);
-static void rsi_stop_dma_transfer(u32);
+static int rsi_wait_for_card(void);
 static void rsi_set_optimum_identification_speed(void);
 static void rsi_get_pll_clocks(void);
 static void rsi_set_optimum_sd_speed(void);
@@ -42,32 +36,39 @@ static uint32_t rsi_read_multi_blocks_dma(uint32_t, void *, uint32_t);
 static uint32_t rsi_read_single_block_dma(uint32_t, void *);
 
 
-/* Структура держит параметры SD карты   */
+
+
+/* РЎС‚СЂСѓРєС‚СѓСЂР° РґРµСЂР¶РёС‚ РїР°СЂР°РјРµС‚СЂС‹ SD РєР°СЂС‚С‹   */
 static ADI_RSI_CARD_REGISTERS adi_rsi_card_registers;
 static uint8_t dma_buffer[64];
 
+
 static SD_CARD_ERROR_STRUCT sd_card_error;
 
-#pragma section("FLASH_code")
-void rsi_get_card_timeout(SD_CARD_ERROR_STRUCT * ts)
-{
-    memcpy(ts, &sd_card_error, sizeof(SD_CARD_ERROR_STRUCT));
-}
 
-/* Выдать параметры SD карты */
-#pragma section("FLASH_code")
+
+/* Р’С‹РґР°С‚СЊ РїР°СЂР°РјРµС‚СЂС‹ SD РєР°СЂС‚С‹ */
+section("L1_code")
 int rsi_get_sd_cart_type_and_speed_grade(void *par)
 {
-    /* Скопируем параметры  */
+    /* РЎРєРѕРїРёСЂСѓРµРј РїР°СЂР°РјРµС‚СЂС‹  */
     memcpy(par, &adi_rsi_card_registers, sizeof(ADI_RSI_CARD_REGISTERS));
     return sizeof(ADI_RSI_CARD_REGISTERS);
 }
 
+/**
+ * РџРµСЂРµС‰РёС‚Р°С‚СЊ Р°РґСЂРµСЃ РєР°СЂС‚С‹, РµСЃР»Рё РѕРЅР° РЅРµРІС‹СЃРѕРєРѕР№ РїР»РѕС‚РЅРѕСЃС‚Рё
+ */
+section("L1_code")
+static uint32_t card_address(uint32_t block_num)
+{
+    return (adi_rsi_card_registers.type == SD_MMC_CARD_TYPE_SD_V2X_HIGH_CAPACITY) ? block_num : block_num * 512;
+}
 
 /**
- * Найти оптимальный CLK карты 
+ * РќР°Р№С‚Рё РѕРїС‚РёРјР°Р»СЊРЅС‹Р№ CLK РєР°СЂС‚С‹ 
  */
-#pragma section("FLASH_code")
+section("L1_code")
 static void rsi_set_optimum_sd_speed(void)
 {
     uint32_t clkdiv = 0;
@@ -90,8 +91,10 @@ static void rsi_set_optimum_sd_speed(void)
     }
 }
 
+
+
 /**
- * Определить, какая карта у нас вставлена. От определения зависит способ работы с ней.
+ * РћРїСЂРµРґРµР»РёС‚СЊ, РєР°РєР°СЏ РєР°СЂС‚Р° Сѓ РЅР°СЃ РІСЃС‚Р°РІР»РµРЅР°. РћС‚ РѕРїСЂРµРґРµР»РµРЅРёСЏ Р·Р°РІРёСЃРёС‚ СЃРїРѕСЃРѕР± СЂР°Р±РѕС‚С‹ СЃ РЅРµР№.
  */
 section("L1_code")
 static SD_MMC_CARD_TYPE rsi_identification(void)
@@ -99,89 +102,147 @@ static SD_MMC_CARD_TYPE rsi_identification(void)
     uint32_t error;
     uint32_t response;
 
+    /* Sending GO_IDLE_STATE command before performing card identification */
+    error = rsi_send_command(SD_MMC_CMD_GO_IDLE_STATE, 0);
 
-    do {
-	/* Sending GO_IDLE_STATE command before performing card identification */
-	error = rsi_send_command(SD_MMC_CMD_GO_IDLE_STATE, 0);
+    /* Sending SEND_IF_COND command for 2.7V to 3.6V compatibility. Starting SD Version 2.0 identification. */
+    /* SD_MMC_CMD8 | R7_RESPONSE  */
+    error = rsi_send_command(SD_CMD_SEND_IF_COND, 0x000001AA);
 
-	/* Sending SEND_IF_COND command for 2.7V to 3.6V compatibility. Starting SD Version 2.0 identification. */
-	error = rsi_send_command(SD_CMD_SEND_IF_COND, 0x000001AA);
+    if (!error) {
+	/* Card is compatible, likely an SD Version 2.0 compliant card. It's a version 2.0 or later SD memory card */
+	response = *pRSI_RESPONSE0;	/* get the response to send to the identification routine */
+	adi_rsi_card_registers.type = rsi_identification_sdv2(response);
+    } else {
+	/* Card is not compatible or did not respond. Starting SD Version 1.x identification */
+	adi_rsi_card_registers.type = rsi_identification_sdv1();	/* check if it's a version 1.X SD memory card */
+    }
 
+    /* Р”Р»СЏ РІСЃРµС… РєР°СЂС‚ РІСЃРµС… РІРµСЂСЃРёР№  */
+    if (adi_rsi_card_registers.type == SD_MMC_CARD_TYPE_SD_V1X || adi_rsi_card_registers.type == SD_MMC_CARD_TYPE_SD_V2X ||
+	adi_rsi_card_registers.type == SD_MMC_CARD_TYPE_SD_V2X_HIGH_CAPACITY) {
+
+	error = rsi_get_sd_cid();	/* Requesting CID register */
+	error = rsi_send_command(SD_CMD_SEND_RELATIVE_ADDR, 0);	/* Requesting RCA */
 	if (!error) {
-	    /* Card is compatible, likely an SD Version 2.0 compliant card. It's a version 2.0 or later SD memory card */
-	    response = *pRSI_RESPONSE0;	/* get the response to send to the identification routine */
-	    adi_rsi_card_registers.type = rsi_identification_sdv2(response);
-	} else {
-	    /* Card is not compatible or did not respond. Starting SD Version 1.x identification */
-	    adi_rsi_card_registers.type = rsi_identification_sdv1();	/* check if it's a version 1.X SD memory card */
-	}
+	    *pRSI_PWR_CONTROL &= 0x3;
+	    adi_rsi_card_registers.sd.rca = (*pRSI_RESPONSE0 & 0xFFFF0000) >> 16;
 
-	/* Для всех карт всех версий  */
-	if (adi_rsi_card_registers.type == SD_MMC_CARD_TYPE_SD_V1X || adi_rsi_card_registers.type == SD_MMC_CARD_TYPE_SD_V2X ||
-	    adi_rsi_card_registers.type == SD_MMC_CARD_TYPE_SD_V2X_HIGH_CAPACITY) {
+	    /* Requesting Card Status register */
+	    error = rsi_send_command(SD_MMC_CMD_SEND_STATUS, (adi_rsi_card_registers.sd.rca << 16));
+	    adi_rsi_card_registers.sd.csr = *pRSI_RESPONSE0;
 
-	    error = rsi_get_sd_cid();	/* Requesting CID register */
-	    error = rsi_send_command(SD_CMD_SEND_RELATIVE_ADDR, 0);	/* Requesting RCA */
-	    if (!error) {
-		*pRSI_PWR_CONTROL &= 0x3;
-		adi_rsi_card_registers.sd.rca = (*pRSI_RESPONSE0 & 0xFFFF0000) >> 16;
+	    error = rsi_send_csd();	/* Requesting CSD register */
+	    if (error) {
+		adi_rsi_card_registers.type = CARD_SLOT_NOT_INITIALIZED;
+		goto met;
+	    }
+	    // Р·РґРµСЃСЊ РѕС‰РёР±РєР° РЅР° РѕРґРЅРѕР№ РёР· РєР°СЂС‚!!!
+	    error = rsi_get_sd_scr_register();	/* Requesting SCR register */
+	    if (error) {
+		adi_rsi_card_registers.type = CARD_SLOT_NOT_INITIALIZED;
+		goto met;
+	    }
 
-		/* Requesting Card Status register */
-		error = rsi_send_command(SD_MMC_CMD_SEND_STATUS, (adi_rsi_card_registers.sd.rca << 16));
-		adi_rsi_card_registers.sd.csr = *pRSI_RESPONSE0;
+	    rsi_set_optimum_sd_speed();	/* Optimizing RSI interface speed */
 
-		error = rsi_send_csd();	/* Requesting CSD register */
-		if (error) {
-		    adi_rsi_card_registers.type = CARD_SLOT_NOT_INITIALIZED;
-		    break;
-		}
-		// здесь ощибка на одной из карт!!!
-		error = rsi_get_sd_scr_register();	/* Requesting SCR register */
-		if (error) {
-		    adi_rsi_card_registers.type = CARD_SLOT_NOT_INITIALIZED;
-		    break;
-		}
+	    adi_rsi_card_registers.bus_width = RSI_DATA_BUS_WIDTH_4;
+	    error = rsi_set_bus_width_4_bits();	/* Setting RSI bus width to 4-bit */
+	    if (error) {
+		adi_rsi_card_registers.type = CARD_SLOT_NOT_INITIALIZED;
+		goto met;
+	    }
 
-		rsi_set_optimum_sd_speed();	/* Optimizing RSI interface speed */
-
-		adi_rsi_card_registers.bus_width = RSI_DATA_BUS_WIDTH_4;
-		error = rsi_set_bus_width_4_bits();	/* Setting RSI bus width to 4-bit */
-		if (error) {
-		    adi_rsi_card_registers.type = CARD_SLOT_NOT_INITIALIZED;
-		    break;
-		}
-
-		error = rsi_get_sd_ssr_register();	/* Requesting SSR register */
-		if (error) {
-		    adi_rsi_card_registers.type = CARD_SLOT_NOT_INITIALIZED;
-		    break;
-		}
+	    error = rsi_get_sd_ssr_register();	/* Requesting SSR register */
+	    if (error) {
+		adi_rsi_card_registers.type = CARD_SLOT_NOT_INITIALIZED;
+		goto met;
 	    }
 	}
-    } while (0);
+    }
+  met:
     return adi_rsi_card_registers.type;
 }
 
+/* РџСЂРѕРІРµСЂРёС‚СЊ СЌС‚Сѓ С„СѓРЅРєС†РёСЋ!!! РќР° РѕРґРЅРѕР№ С‡РµСЂРЅРѕР№ РєР°СЂС‚Рµ РЅРµ СЂР°Р±РѕС‚Р°РµС‚!!!   */
+section("L1_code")
+static uint32_t rsi_get_sd_scr_register(void)
+{
+    uint32_t error = 0;
+    int t0;
+
+    *pRSI_DATA_LGTH = 8;
+    *pRSI_DATA_TIMER = CARD_TIMER_TIMEOUT;	/* С‚Р°Р№РјР°СѓС‚ РІ С‚РёРєР°С… С‚Р°РєС‚РѕРІРѕР№ С‡Р°СЃС‚РѕС‚С‹ = РїРѕР»СЃРµРєСѓРЅРґС‹ */
+
+    /* SD_MMC_CMD13 | R1_RESPONSE - read addressed card's Status register  */
+    error = rsi_send_command(SD_MMC_CMD_SEND_STATUS, adi_rsi_card_registers.sd.rca << 16);
+
+    if ((*pRSI_RESPONSE0 & SD_CSR_CURRENT_STATE) == SD_CSR_CURRENT_STATE_STANDBY) {
+	error = rsi_send_command(SD_MMC_CMD_SELECT_DESELECT_CARD, adi_rsi_card_registers.sd.rca << 16);
+    }
+
+    SDBlockRead((void *) &dma_buffer[0], 8);
+
+    /* SD_MMC_CMD55 | R1_RESPONSE - Set SD card for application specific command */
+    error = rsi_send_command(SD_MMC_CMD_APP_CMD, adi_rsi_card_registers.sd.rca << 16);
+
+    /* SD_ACMD51 | R1_RESPONSE */
+    error = rsi_send_command(SD_CMD_GET_CONFIG_REG, 0);
+
+    if (!error) {
+	int t0 = 50;
+	*pRSI_DATA_CONTROL = 0x3B;
+
+/* РЈР±СЂР°Р» СЌС‚Сѓ РїСЂРѕРІРµСЂРєСѓ */
+	while (!(*pRSI_STATUS & DAT_BLK_END) && t0--) {
+		delay_ms(25);
+	}
+#if 0	
+	if (t0 <= 0) {
+	   return CMD_TIMEOUT;
+	}
+#endif
+	
+	*pRSI_STATUSCL = DAT_BLK_END_STAT | DAT_END_STAT;
+
+	/* clear the DMA Done IRQ */
+	*pDMA1_IRQ_STATUS = *pDMA1_IRQ_STATUS & DMA_DONE;
+
+	adi_rsi_card_registers.sd.scr.scr_structure = (SD_SCR_STRUCTURE) ((dma_buffer[0] & 0xF0) >> 4);
+	adi_rsi_card_registers.sd.scr.sd_spec = (SD_SCR_SD_SPEC) (dma_buffer[0] & 0x0F);
+	adi_rsi_card_registers.sd.scr.data_stat_after_erase = (dma_buffer[1] & 0x80) >> 7;
+	adi_rsi_card_registers.sd.scr.sd_security = (SD_SCR_SD_SECURITY) ((dma_buffer[1] & 0x70) >> 4);
+	adi_rsi_card_registers.sd.scr.sd_bus_widths = (SD_SCR_SD_BUS_WIDTHS) (dma_buffer[1] & 0x0F);
+    }
+
+    return error;
+}
+
+
 /**
- * Проверить что наша карта SD Version 2.0
+ * РџСЂРѕРІРµСЂРёС‚СЊ С‡С‚Рѕ РЅР°С€Р° РєР°СЂС‚Р° SD Version 2.0
  */
-#pragma section("FLASH_code")
+section("L1_code")
 static SD_MMC_CARD_TYPE rsi_identification_sdv2(uint32_t response)
 {
     uint32_t error;
     SD_MMC_CARD_TYPE type = UNUSABLE_CARD;
 
-    *pRSI_DATA_TIMER = RSI_CMD_TIMER_TIMEOUT * 2;	/* таймаут в тиках тактовой частоты секунда */
+    *pRSI_DATA_TIMER = CARD_TIMER_TIMEOUT * 2;	/* С‚Р°Р№РјР°СѓС‚ РІ С‚РёРєР°С… С‚Р°РєС‚РѕРІРѕР№ С‡Р°СЃС‚РѕС‚С‹ СЃРµРєСѓРЅРґР° */
     ssync();
 
 
     if (response & 0x00000100) {
 
 	if ((response & 0x000000FF) == 0xAA) {
+
 	    /* Echo back patter correct */
 	    type = SD_MMC_CARD_TYPE_SD_V2X;
 	    do {
+	         /* SD_MMC_CMD55 | R1_RESPONSE  */
 		error = rsi_send_command(SD_MMC_CMD_APP_CMD, 0);	/* card with compatible voltage range */
+
+		/* SD_ACMD41 | R3_RESPONSE */
 		error = rsi_send_command(SD_CMD_GET_OCR_VALUE, 0x40FF8000);	/* Requesting OCR register */
 
 		if (((error & CMD_TIMEOUT) == CMD_TIMEOUT) || (!(*pRSI_RESPONSE0 & 0x00FF8000))) {
@@ -192,7 +253,7 @@ static SD_MMC_CARD_TYPE rsi_identification_sdv2(uint32_t response)
 		}
 	    } while (!(adi_rsi_card_registers.sd.ocr & (unsigned int) SD_OCR_CARD_POWER_UP_STATUS));
 
-	    /* SD Version 2.0 or later Standard Capacity или Высокой плотности? */
+	    /* SD Version 2.0 or later Standard Capacity РёР»Рё Р’С‹СЃРѕРєРѕР№ РїР»РѕС‚РЅРѕСЃС‚Рё? */
 	    if (type == SD_MMC_CARD_TYPE_SD_V2X) {
 		if (adi_rsi_card_registers.sd.ocr & SD_OCR_CARD_CAPACITY_STATUS) {
 		    type = SD_MMC_CARD_TYPE_SD_V2X_HIGH_CAPACITY;	/* SD Version 2.0 or later High Capacity card detected successfully! */
@@ -204,15 +265,15 @@ static SD_MMC_CARD_TYPE rsi_identification_sdv2(uint32_t response)
 }
 
 /**
- * Проверить, что карта или SD ver 1.x или вообще непонятно какая карта
- * В этом месте виснет!!!
+ * РџСЂРѕРІРµСЂРёС‚СЊ, С‡С‚Рѕ РєР°СЂС‚Р° РёР»Рё SD ver 1.x РёР»Рё РІРѕРѕР±С‰Рµ РЅРµРїРѕРЅСЏС‚РЅРѕ РєР°РєР°СЏ РєР°СЂС‚Р°
+ * Р’ СЌС‚РѕРј РјРµСЃС‚Рµ РІРёСЃРЅРµС‚!!!
  */
-#pragma section("FLASH_code")
+section("L1_code")
 static SD_MMC_CARD_TYPE rsi_identification_sdv1(void)
 {
     uint32_t error;
 
-    *pRSI_DATA_TIMER = RSI_CMD_TIMER_TIMEOUT * 2;	/* таймаут в тиках тактовой частоты секунда */
+    *pRSI_DATA_TIMER = CARD_TIMER_TIMEOUT * 2;	/* С‚Р°Р№РјР°СѓС‚ РІ С‚РёРєР°С… С‚Р°РєС‚РѕРІРѕР№ С‡Р°СЃС‚РѕС‚С‹ СЃРµРєСѓРЅРґР° */
     ssync();
 
     SD_MMC_CARD_TYPE type = SD_MMC_CARD_TYPE_SD_V1X;
@@ -225,7 +286,7 @@ static SD_MMC_CARD_TYPE rsi_identification_sdv1(void)
 	error = rsi_send_command(SD_MMC_CMD_APP_CMD, 0);
 	error = rsi_send_command(SD_CMD_GET_OCR_VALUE, 0x00FF8000);	/* Requesting OCR register */
 
-	/* Не sd карта а х.з.ч. Если случился таймаут */
+	/* РќРµ sd РєР°СЂС‚Р° Р° С….Р·.С‡. Р•СЃР»Рё СЃР»СѓС‡РёР»СЃСЏ С‚Р°Р№РјР°СѓС‚ */
 	if ((error & CMD_TIMEOUT) == CMD_TIMEOUT) {
 	    type = UNUSABLE_CARD;
 	    break;
@@ -237,7 +298,7 @@ static SD_MMC_CARD_TYPE rsi_identification_sdv1(void)
     return type;		/* SD Version 1.x card detected successfully or not an SD card  */
 }
 
-#pragma section("FLASH_code")
+section("L1_code")
 static uint32_t rsi_get_sd_cid(void)
 {
     uint32_t error;
@@ -259,7 +320,7 @@ static uint32_t rsi_get_sd_cid(void)
     return error;
 }
 
-#pragma section("FLASH_code")
+section("L1_code")
 static uint32_t rsi_send_csd(void)
 {
     uint32_t error;
@@ -301,7 +362,7 @@ static uint32_t rsi_send_csd(void)
 		adi_rsi_card_registers.sd.csd.c_size_mult = 0;
 		adi_rsi_card_registers.sd.csd.c_size = ((*pRSI_RESPONSE1 & 0x0000003F) << 16) | ((*pRSI_RESPONSE2 & 0xFFFF0000) >> 16);
 	    } else {
-		/* error. Непонятная версия карты */
+		/* error. РќРµРїРѕРЅСЏС‚РЅР°СЏ РІРµСЂСЃРёСЏ РєР°СЂС‚С‹ */
 		return (u32) - 1;
 	    }
 	    adi_rsi_card_registers.sd.csd.erase_blk_en = (*pRSI_RESPONSE2 & 0x00004000) >> 14;
@@ -324,9 +385,9 @@ static uint32_t rsi_send_csd(void)
 
 
 /**
- * Установить 4-битную шину
- */
-#pragma section("FLASH_code")
+ * РЈСЃС‚Р°РЅРѕРІРёС‚СЊ 4-Р±РёС‚РЅСѓСЋ С€РёРЅСѓ
+*/
+section("L1_code")
 static uint32_t rsi_set_bus_width_4_bits(void)
 {
     uint32_t error = CARD_SLOT_NOT_INITIALIZED;
@@ -347,62 +408,85 @@ static uint32_t rsi_set_bus_width_4_bits(void)
     return error;
 }
 
-
-/* Проверить эту функцию!!! На одной черной карте не работает!!!   */
-#pragma section("FLASH_code")
-static uint32_t rsi_get_sd_scr_register(void)
+section("L1_code")
+static uint32_t rsi_get_wait_until_ready(void)
 {
     uint32_t error = 0;
+    uint32_t rca = 0;
+    uint32_t status = 0;
 
-    *pRSI_DATA_LGTH = 8;
-    *pRSI_DATA_TIMER = RSI_CMD_TIMER_TIMEOUT;	/* таймаут в тиках тактовой частоты = полсекунды */
-
-    error = rsi_send_command(SD_MMC_CMD_SEND_STATUS, adi_rsi_card_registers.sd.rca << 16);
-
-    if ((*pRSI_RESPONSE0 & SD_CSR_CURRENT_STATE) == SD_CSR_CURRENT_STATE_STANDBY) {
-	error = rsi_send_command(SD_MMC_CMD_SELECT_DESELECT_CARD, adi_rsi_card_registers.sd.rca << 16);
+    switch (adi_rsi_card_registers.type) {
+    case SD_MMC_CARD_TYPE_SD_V1X:
+    case SD_MMC_CARD_TYPE_SD_V2X:
+    case SD_MMC_CARD_TYPE_SD_V2X_HIGH_CAPACITY:
+	rca = adi_rsi_card_registers.sd.rca << 16;
+	break;
+    case UNUSABLE_CARD:
+    case CARD_SLOT_NOT_INITIALIZED:
+	error = 1;
+	break;
+    default:
+	error = 1;
     }
 
-    rsi_start_dma_transfer((void *) &dma_buffer[0], 8, true);
-
-
-    error = rsi_send_command(SD_MMC_CMD_APP_CMD, adi_rsi_card_registers.sd.rca << 16);
-    error = rsi_send_command(SD_CMD_GET_CONFIG_REG, 0);
-
     if (!error) {
-	int t0 = 0x1000;
-	*pRSI_DATA_CONTROL = 0x3B;
-
-/* Убрал проверку, узнать для чего она! */
-#if 0
-	while (!(*pRSI_STATUS & DAT_BLK_END) && t0--);
-	if (t0 <= 0)
-	    return CMD_TIMEOUT;
-#endif
-	*pRSI_STATUSCL = DAT_BLK_END_STAT | DAT_END_STAT;
-
-	/* clear the DMA Done IRQ */
-	*pDMA1_IRQ_STATUS = *pDMA1_IRQ_STATUS & DMA_DONE;
-
-	adi_rsi_card_registers.sd.scr.scr_structure = (SD_SCR_STRUCTURE) ((dma_buffer[0] & 0xF0) >> 4);
-	adi_rsi_card_registers.sd.scr.sd_spec = (SD_SCR_SD_SPEC) (dma_buffer[0] & 0x0F);
-	adi_rsi_card_registers.sd.scr.data_stat_after_erase = (dma_buffer[1] & 0x80) >> 7;
-	adi_rsi_card_registers.sd.scr.sd_security = (SD_SCR_SD_SECURITY) ((dma_buffer[1] & 0x70) >> 4);
-	adi_rsi_card_registers.sd.scr.sd_bus_widths = (SD_SCR_SD_BUS_WIDTHS) (dma_buffer[1] & 0x0F);
+	while ((status & 0x00000100) != 0x00000100) {
+	    error = rsi_send_command(SD_MMC_CMD_SEND_STATUS, rca);
+	    status = *pRSI_RESPONSE0;
+	}
     }
 
     return error;
 }
 
-#pragma section("FLASH_code")
+
+/* performs a 256 byte DMA read operation from the NAND flash */
+section("L1_code")
+static void SDBlockRead(void *pDestination, uint32_t size)
+{
+    /* initialize the DMA registers */
+    *pDMA1_CONFIG = 0x0000;
+    *pDMA1_START_ADDR = pDestination;
+    *pDMA1_X_COUNT = (size / 4);	/* 512 byte transfers */
+    *pDMA1_X_MODIFY = 4;	/* 4 byte modifier */
+
+    /* clear the DMA Done IRQ */
+    *pDMA1_IRQ_STATUS = *pDMA1_IRQ_STATUS & DMA_DONE;
+
+    /* enable the DMA channel, this does not cause the transfer to start */
+    /* the transfer actually starts when we write to the page program bit in NFC_PGCTL */
+    *pDMA1_CONFIG = DMAEN | WNR | WDSIZE_32 | DI_EN | SYNC;
+    ssync();
+}
+
+/* performs a 256 byte DMA write operation to the NAND flash */
+section("L1_code")
+static void SDBlockWrite(void *pSource, uint32_t size)
+{
+    /* initialize the DMA registers */
+    *pDMA1_CONFIG = 0x0000;
+    *pDMA1_START_ADDR = pSource;
+    *pDMA1_X_COUNT = size / 4;	/* 512 byte transfers */
+    *pDMA1_X_MODIFY = 4;	/* 4 byte modifier */
+
+    /* clear the DMA Done IRQ */
+    *pDMA1_IRQ_STATUS = *pDMA1_IRQ_STATUS & DMA_DONE;
+
+    /* enable the DMA channel, this does not cause the transfer to start */
+    /* the transfer actually starts when we write to the page program bit in NFC_PGCTL */
+    *pDMA1_CONFIG = DMAEN | WDSIZE_32 | DI_EN | SYNC;
+    ssync();
+}
+
+section("L1_code")
 static uint32_t rsi_get_sd_ssr_register(void)
 {
     uint32_t error = 0;
 
     *pRSI_DATA_LGTH = 64;
-    *pRSI_DATA_TIMER = RSI_CMD_TIMER_TIMEOUT;	/* таймаут в тиках тактовой частоты = полсекунды */
+    *pRSI_DATA_TIMER = CARD_TIMER_TIMEOUT;	/* С‚Р°Р№РјР°СѓС‚ РІ С‚РёРєР°С… С‚Р°РєС‚РѕРІРѕР№ С‡Р°СЃС‚РѕС‚С‹ = РїРѕР»СЃРµРєСѓРЅРґС‹ */
 
-    rsi_start_dma_transfer((void *) &dma_buffer[0], 64, true);	/* Чтение */
+    SDBlockRead((void *) &dma_buffer[0], 64);
 
     error = rsi_send_command(SD_MMC_CMD_SEND_STATUS, adi_rsi_card_registers.sd.rca << 16);
 
@@ -441,59 +525,63 @@ static uint32_t rsi_get_sd_ssr_register(void)
 }
 
 /**
- * Инициализация интерфейса SD карты. Порты, прерывания, DMA и проч.
- * Защиту от записи и наличие карты смотрим НЕ по 3-му пину!
+ * РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ РёРЅС‚РµСЂС„РµР№СЃР° SD РєР°СЂС‚С‹. РџРѕСЂС‚С‹, РїСЂРµСЂС‹РІР°РЅРёСЏ, DMA Рё РїСЂРѕС‡.
+ * Р—Р°С‰РёС‚Сѓ РѕС‚ Р·Р°РїРёСЃРё Рё РЅР°Р»РёС‡РёРµ РєР°СЂС‚С‹ СЃРјРѕС‚СЂРёРј РќР• РїРѕ 3-РјСѓ РїРёРЅСѓ!
  */
-#pragma section("FLASH_code")
+section("L1_code")
 int rsi_setup(void)
 {
     int t0, t1;
     SD_MMC_CARD_TYPE type = UNUSABLE_CARD;
 
-    t0 = get_msec_ticks();	/* Получим время здесь! */
-
-    /* Конфигурить порты для RSI: Разрешаем функцию на PG6...PG9 - DATA[3:0], PG10 - RSI_CMD и PG11 - RSI_CLK */
+    /* РљРѕРЅС„РёРіСѓСЂРёС‚СЊ РїРѕСЂС‚С‹ РґР»СЏ RSI: Р Р°Р·СЂРµС€Р°РµРј С„СѓРЅРєС†РёСЋ РЅР° PG6...PG9 - DATA[3:0], PG10 - RSI_CMD Рё PG11 - RSI_CLK */
     *pPORTG_FER |= (PG6 | PG7 | PG8 | PG9 | PG10 | PG11);
-    *pPORTG_MUX |= (1 << 8) | (1 << 10);	/* MUX на 2-й функции-биты [9:8] - 01, [11:10] - 01   */
-    *pPORTG_FER &= ~(PG0 | PG1);	/* CD и WP - отключаем функции */
+    *pPORTG_MUX |= (1 << 8) | (1 << 10);	/* MUX РЅР° 2-Р№ С„СѓРЅРєС†РёРё-Р±РёС‚С‹ [9:8] - 01, [11:10] - 01   */
+    *pPORTG_FER &= ~(PG0 | PG1);	/* CD Рё WP - РѕС‚РєР»СЋС‡Р°РµРј С„СѓРЅРєС†РёРё */
     ssync();
 
 
-    *pPORTGIO_DIR &= ~(PG0 | PG1);	/* Делаем их на вход  */
+    *pPORTGIO_DIR &= ~(PG0 | PG1);	/* Р”РµР»Р°РµРј РёС… РЅР° РІС…РѕРґ  */
     *pPORTGIO_INEN |= (PG0 | PG1);
-    *pPORTGIO_POLAR |= (PG0 | PG1);	/* пин будет читаться как 1 при перепаде в 0 */
+    *pPORTGIO_POLAR |= (PG0 | PG1);	/* РїРёРЅ Р±СѓРґРµС‚ С‡РёС‚Р°С‚СЊСЃСЏ РєР°Рє 1 РїСЂРё РїРµСЂРµРїР°РґРµ РІ 0 */
     *pPORTGIO_EDGE &= ~(PG0 | PG1);
     ssync();
 
-    /* Получить клоки из  настроек PLL */
+    /* РџРѕР»СѓС‡РёС‚СЊ РєР»РѕРєРё РёР·  РЅР°СЃС‚СЂРѕРµРє PLL */
     rsi_get_pll_clocks();
 
-    /* Если карты WP или карты нету. Ждем ~1 секунду */
-    while (!check_sd_card()) {
-	t1 = get_msec_ticks();
-	if ((t1 - t0) > 1000) {
-	    return type;	/* Таймаут - 1 секунда */
-	}
-	LED_blink();		/* Моргаем */
+    /* Р•СЃР»Рё РєР°СЂС‚С‹ WP РёР»Рё РєР°СЂС‚С‹ РЅРµС‚Сѓ. Р–РґРµРј ~1 СЃРµРєСѓРЅРґСѓ */
+    for(t0 = 0; t0 < 100; t0++) {
+    
+    	if(*pPORTGIO & PG1)
+	   break;    	
+	delay_ms(5);
     }
+   
+    if(t0 > 9)
+       return type;	/* РўР°Р№РјР°СѓС‚ - 1 СЃРµРєСѓРЅРґР° */
 
-    /*Если карта отпределилась */
-    *pRSI_CONFIG = RSI_CLK_EN | PU_DAT | PU_DAT3;	/* Разрешим клок и подтянем ноги */
+    /*Р•СЃР»Рё РєР°СЂС‚Р° РѕС‚РїСЂРµРґРµР»РёР»Р°СЃСЊ */
+    *pRSI_CONFIG = RSI_CLK_EN | PU_DAT | PU_DAT3;	/* Р Р°Р·СЂРµС€РёРј РєР»РѕРє Рё РїРѕРґС‚СЏРЅРµРј РЅРѕРіРё */
     *pRSI_PWR_CONTROL = PWR_ON;
     ssync();
 
     *pRSI_CLK_CONTROL = (CLK_EN | PWR_SV_EN);	/* enable the RSI clocks + power save */
-    rsi_set_optimum_identification_speed();	/* На время инициализации частота д.б. < 400 кГц   */
+    rsi_set_optimum_identification_speed();	/* РќР° РІСЂРµРјСЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё С‡Р°СЃС‚РѕС‚Р° Рґ.Р±. < 400 РєР“С†   */
     ssync();
 
-    delay_ms(50);		/* Поставил задержку и sync(), иногда! бывает ошибка стартового бита! */
+    delay_ms(50);		/* РџРѕСЃС‚Р°РІРёР» Р·Р°РґРµСЂР¶РєСѓ Рё sync(), РёРЅРѕРіРґР°! Р±С‹РІР°РµС‚ РѕС€РёР±РєР° СЃС‚Р°СЂС‚РѕРІРѕРіРѕ Р±РёС‚Р°! */
 
-    /* Определить тип карты */
+
+    /* РћРїСЂРµРґРµР»РёС‚СЊ С‚РёРї РєР°СЂС‚С‹ */
     t0 = 0;
     do {
 	type = rsi_identification();
-	LED_blink();
-    } while ((type == UNUSABLE_CARD|| type == CARD_SLOT_NOT_INITIALIZED) && t0++ < 100);
+	delay_ms(10);
+	LED_toggle(LED_YELLOW);
+    } while ((type == UNUSABLE_CARD || type == CARD_SLOT_NOT_INITIALIZED) && t0++ < 100);
+
+    LED_off(LED_YELLOW);
 
     if (type == UNUSABLE_CARD || type == CARD_SLOT_NOT_INITIALIZED)
 	return -1;
@@ -502,23 +590,22 @@ int rsi_setup(void)
 }
 
 /**
- * Выключить питание с RSI
+ * Р’С‹РєР»СЋС‡РёС‚СЊ РїРёС‚Р°РЅРёРµ СЃ RSI
  */
-#pragma section("FLASH_code")
+section("L1_code")
 void rsi_power_off(void)
 {
-    *pRSI_CLK_CONTROL = 0;
-    *pRSI_CONFIG = 0;		/* Разрешим клок и подтянем ноги */
-    *pRSI_STATUSCL = 0x07ff;
-    *pRSI_PWR_CONTROL = 0;	/* Выключим питание */
-    ssync();
+    *pRSI_CONFIG = 0;	/* Р Р°Р·СЂРµС€РёРј РєР»РѕРє Рё РїРѕРґС‚СЏРЅРµРј РЅРѕРіРё */
+    *pRSI_DATA_CONTROL = 0;	/* Р Р°Р·СЂРµС€РёРј РєР»РѕРє Рё РїРѕРґС‚СЏРЅРµРј РЅРѕРіРё */
+    *pRSI_PWR_CONTROL = 0;	/* Р’С‹РєР»СЋС‡РёРј РїРёС‚Р°РЅРёРµ */
+     ssync();
 }
 
 /**
- * Какая частота стоит в PLL?
- * VCO не должно превышать 300 МГц для нашего CPU (д.б. даже меньше!!!)
+ * РљР°РєР°СЏ С‡Р°СЃС‚РѕС‚Р° СЃС‚РѕРёС‚ РІ PLL?
+ * VCO РЅРµ РґРѕР»Р¶РЅРѕ РїСЂРµРІС‹С€Р°С‚СЊ 300 РњР“С† РґР»СЏ РЅР°С€РµРіРѕ CPU (Рґ.Р±. РґР°Р¶Рµ РјРµРЅСЊС€Рµ!!!)
  */
-#pragma section("FLASH_code")
+section("L1_code")
 static void rsi_get_pll_clocks(void)
 {
     /* VCO = QUARTZ_CLK_FREQ * MSEL */
@@ -537,21 +624,21 @@ static void rsi_get_pll_clocks(void)
 	    vco = QUARTZ_CLK_FREQ * ((pll_ctl & 0x7E00) >> 9);
 	}
 
-	/* B PLL стоит делитель?  */
+	/* B PLL СЃС‚РѕРёС‚ РґРµР»РёС‚РµР»СЊ?  */
 	if (pll_ctl & 0x0001) {
 	    vco >>= 1;
 	}
 
-	/* Получили клоки */
+	/* РџРѕР»СѓС‡РёР»Рё РєР»РѕРєРё */
 	adi_rsi_card_registers.cclk = vco >> cclk_div;
 	adi_rsi_card_registers.sclk = vco / sclk_div;
     }
 }
 
 /**
- * Установка частоты RSI на время инициализации 
+ * РЈСЃС‚Р°РЅРѕРІРєР° С‡Р°СЃС‚РѕС‚С‹ RSI РЅР° РІСЂРµРјСЏ РёРЅРёС†РёР°Р»РёР·Р°С†РёРё 
  */
-#pragma section("FLASH_code")
+section("L1_code")
 static void rsi_set_optimum_identification_speed(void)
 {
     uint32_t clkdiv = 0;
@@ -564,7 +651,7 @@ static void rsi_set_optimum_identification_speed(void)
 	*pRSI_CLK_CONTROL |= CLKDIV_BYPASS;
     } else {
 	do {
-	    rsi_freq = (sclk / (2 * (clkdiv + 1)));	/* Подбираем частоту, чтобы она была ниже 400 кГц  */
+	    rsi_freq = (sclk / (2 * (clkdiv + 1)));	/* РџРѕРґР±РёСЂР°РµРј С‡Р°СЃС‚РѕС‚Сѓ, С‡С‚РѕР±С‹ РѕРЅР° Р±С‹Р»Р° РЅРёР¶Рµ 400 РєР“С†  */
 	    clkdiv++;
 	} while (rsi_freq > card_speed);
 
@@ -575,51 +662,47 @@ static void rsi_set_optimum_identification_speed(void)
 }
 
 /**
- *  Число секторов на sd карте 
+ *  Р§РёСЃР»Рѕ СЃРµРєС‚РѕСЂРѕРІ РЅР° sd РєР°СЂС‚Рµ 
  */
-#pragma section("FLASH_code")
+section("L1_code")
 uint32_t rsi_get_sec_count(void)
 {
     return adi_rsi_card_registers.sd.csd.c_size;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-//              Внутри L1
+//              Р’РЅСѓС‚СЂРё L1
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-/**
- * Перещитать адрес карты, если она невысокой плотности
- */
+
+/* Р§РёС‚Р°РµС‚ 1 РёР»Рё РЅРµСЃРєРѕР»СЊРєРѕ Р±Р»РѕРєРѕРІ РёР· SD РїРѕ DMA  */
 section("L1_code")
-static uint32_t card_address(uint32_t block_num)
+uint32_t rsi_read_blocks_from_sd_card(uint32_t block_num, void *pReadBuffer, uint32_t num_blocks)
 {
-    return (adi_rsi_card_registers.type == SD_MMC_CARD_TYPE_SD_V2X_HIGH_CAPACITY) ? block_num : block_num * 512;
-}
-
-
-/* performs a 256 byte DMA write/read operation to the NAND flash */
-section("L1_code")
-static void rsi_start_dma_transfer(void *buf, uint32_t size, bool read)
-{
-    /* initialize the DMA registers */
-    *pDMA1_CONFIG = 0x0000;
-    *pDMA1_START_ADDR = buf;
-    *pDMA1_X_COUNT = size / 4;	/* 512 byte transfers */
-    *pDMA1_X_MODIFY = 4;	/* 4 byte modifier */
-    *pDMA1_IRQ_STATUS = *pDMA1_IRQ_STATUS & DMA_DONE;	/* clear the DMA Done IRQ */
-    ssync();
-
-    /* Отличаются только направлением WNR */
-    if (read)
-	*pDMA1_CONFIG = DMAEN | WNR | WDSIZE_32 | DI_EN | SYNC;
+    uint32_t error = 0;
+    if (num_blocks == 1)
+	error = rsi_read_single_block_dma(card_address(block_num), pReadBuffer);
     else
-	*pDMA1_CONFIG = DMAEN | WDSIZE_32 | DI_EN | SYNC;
-    ssync();
+	error = rsi_read_multi_blocks_dma(card_address(block_num), pReadBuffer, num_blocks);
+    return error;
+}
+
+/* РџРёС€РµС‚ 1 РёР»Рё РјРЅРѕРіРѕ Р±Р»РѕРєРѕРІ РЅР° SD РєР°СЂС‚Сѓ */
+section("L1_code")
+uint32_t rsi_write_blocks_to_sd_card(uint32_t block_num, void *pWriteBuffer, uint32_t num_blocks)
+{
+    uint32_t error = 0;
+    if (num_blocks == 1)
+	error = rsi_write_single_block_dma(card_address(block_num), pWriteBuffer);
+    else
+	error = rsi_write_multi_blocks_dma(card_address(block_num), pWriteBuffer, num_blocks);
+    return error;
 }
 
 
+
 /**
- *  Послать команду контролеру внутри SD карты
- *  Ошибки, кот. можем получить: таймаут + CRC err + startbit err
+ *  РџРѕСЃР»Р°С‚СЊ РєРѕРјР°РЅРґСѓ РєРѕРЅС‚СЂРѕР»РµСЂСѓ РІРЅСѓС‚СЂРё SD РєР°СЂС‚С‹
+ *  РћС€РёР±РєРё, РєРѕС‚. РјРѕР¶РµРј РїРѕР»СѓС‡РёС‚СЊ: С‚Р°Р№РјР°СѓС‚ + CRC err + startbit err
  */
 section("L1_code")
 static uint32_t rsi_send_command(uint16_t command, uint32_t argument)
@@ -641,142 +724,142 @@ static uint32_t rsi_send_command(uint16_t command, uint32_t argument)
 	ssync();
     }
 
-    /* Если есть ошибка-возвращаем ее, если нет то 0 */
+    /* Р•СЃР»Рё РµСЃС‚СЊ РѕС€РёР±РєР°-РІРѕР·РІСЂР°С‰Р°РµРј РµРµ, РµСЃР»Рё РЅРµС‚ С‚Рѕ 0 */
     if (*pRSI_STATUS & error) {
-	sd_card_error.cmd_error++;	/* Ошибка в команде */
 	result = *pRSI_STATUS;
     }
-    *pRSI_STATUSCL = error | success;	/* Очищаем статус  */
+    *pRSI_STATUSCL = error | success;	/* РћС‡РёС‰Р°РµРј СЃС‚Р°С‚СѓСЃ  */
     ssync();
 
-    return (result);		/* Если ошибки нет - возвращаем 0 (OK) */
+    return (result);		/* Р•СЃР»Рё РѕС€РёР±РєРё РЅРµС‚ - РІРѕР·РІСЂР°С‰Р°РµРј 0 (OK) */
 }
 
 
 
 /**
- *  Чтение нескольких блоков. Отличается командой от чтения одного блока.
+ *  Р§С‚РµРЅРёРµ С‚РѕР»СЊРєРѕ РѕРґРЅРѕРіРѕ Р±Р»РѕРєР°
  */
 section("L1_code")
-uint32_t rsi_read_blocks_from_sd_card(uint32_t block_num, void *buf, uint32_t count)
+static uint32_t rsi_read_single_block_dma(uint32_t card_address, void *pDestination)
 {
-    u32 error = 0;
-    u32 status;
-    u16 cmd = count == 1 ? SD_MMC_CMD_READ_SINGLE_BLOCK : SD_MMC_CMD_READ_MULTIPLE_BLOCK;
+    uint32_t error = 0;		/* assume no error */
+    uint32_t status = 0;
 
-    do {
-	rsi_start_dma_transfer(buf, count * 512, true);
+    *pRSI_DATA_LGTH = 512;	/* length of data transfer */
+    *pRSI_DATA_TIMER = CARD_TIMER_TIMEOUT;	/* С‚Р°Р№РјР°СѓС‚ РІ С‚РёРєР°С… С‚Р°РєС‚РѕРІРѕР№ С‡Р°СЃС‚РѕС‚С‹ = РїРѕР»СЃРµРєСѓРЅРґС‹ */
 
-	*pRSI_DATA_LGTH = count * 512;
-	*pRSI_DATA_TIMER = RSI_READ_TIMER_TIMEOUT /* * count */ ;	/* таймаут в тиках тактовой частоты = полсекунды */
-	*pRSI_DATA_CONTROL = 0x9B;
-	ssync();
+    SDBlockRead(pDestination, 512);	/* configures the DMA for a 512 byte read */
+    *pRSI_DATA_CONTROL = 0x9B;	/* start the data path state machine so it's ready to accept data */
+    error = rsi_send_command(SD_MMC_CMD_READ_SINGLE_BLOCK, card_address);	/* issue the block read command */
 
-	error = rsi_send_command(cmd, card_address(block_num));
-	if (error) {
-	    break;		// Должны выключить DMA
-	}
 
+    /* РћР¶РёРґР°РµРј РїРµСЂРµРґР°С‡Рё Р±Р»РѕРєР° СЃ РІС‹РІРѕРґРѕРј РѕС€РёР±РєРё РёР»Рё С‚Р°Р№РјР°СѓС‚Р° */
+    if (!error) {
 	do {
-	    status = *pRSI_STATUS;	// Если статус  = 0x214 - виснет!
-	} while (!(status & (DAT_TIMEOUT | DAT_END | RX_OVERRUN)));	/* На полсекунды */
-	*pRSI_STATUSCL = DAT_END_STAT | DAT_BLK_END_STAT | DAT_TIMEOUT_STAT | RX_OVERRUN_STAT;
+	    status = *pRSI_STATUS;
+	} while ((status & (DAT_BLK_END | DAT_END | DAT_CRC_FAIL | DAT_TIMEOUT)) == 0);
 
-	/* Если много блоков  */
-	if (count > 1) {
-	    error = rsi_send_command(SD_MMC_CMD_STOP_TRANSMISSION, 0);
-	    if (error)
-		break;		/* Должны выключить DMA */
-	}
-
-	/* Смотрим ошибки приема */
-	if (status & (DAT_TIMEOUT_STAT | RX_OVERRUN_STAT)) {
-	    if (status & DAT_TIMEOUT_STAT) {
-		sd_card_error.read_timeout++;
-	    }
+	if (status & DAT_END) {
+	    *pRSI_STATUSCL = DAT_BLK_END_STAT | DAT_END_STAT;
+	    error = 0;
+	} else {
 	    error = status;
-	    break;
+	    *pRSI_STATUSCL = DAT_CRC_FAIL | DAT_TIMEOUT;
 	}
-    } while (0);
+    }
 
-    rsi_stop_dma_transfer(error);	/* ensure the dma has completed */
+    while ((*pDMA1_IRQ_STATUS & DMA_DONE) != DMA_DONE);	/* РџРµСЂРµРґР°С‡Р° Р·Р°РІРµСЂС€РёР»Р°СЃСЊ? */
+    *pDMA1_IRQ_STATUS = *pDMA1_IRQ_STATUS & DMA_DONE;	/* РћС‡РёСЃС‚РёРј СЂРµРіРёСЃС‚СЂ DMA IRQ */
     return error;
 }
 
 /**
- *  Запись нескольких блоков. Отличается командой от записи одного блока.
+ *  Р§С‚РµРЅРёРµ РЅРµСЃРєРѕР»СЊРєРёС… Р±Р»РѕРєРѕРІ. РћС‚Р»РёС‡Р°РµС‚СЃСЏ РєРѕРјР°РЅРґРѕР№ РѕС‚ С‡С‚РµРЅРёСЏ РѕРґРЅРѕРіРѕ Р±Р»РѕРєР°.
  */
 section("L1_code")
-uint32_t rsi_write_blocks_to_sd_card(uint32_t block_num, void *buf, uint32_t count)
+static uint32_t rsi_read_multi_blocks_dma(uint32_t card_address, void *pDestination, uint32_t num_blocks)
 {
-    u32 error = 0;
-    u32 status;
-    u16 cmd = (count == 1) ? SD_MMC_CMD_WRITE_SINGLE_BLOCK : SD_MMC_CMD_WRITE_MULTIPLE_BLOCK;
+    uint32_t error = 0;
 
+    *pRSI_DATA_LGTH = num_blocks * 512;
+    *pRSI_DATA_TIMER = CARD_TIMER_TIMEOUT;	/* С‚Р°Р№РјР°СѓС‚ РІ С‚РёРєР°С… С‚Р°РєС‚РѕРІРѕР№ С‡Р°СЃС‚РѕС‚С‹ = РїРѕР»СЃРµРєСѓРЅРґС‹ */
+
+    SDBlockRead(pDestination, num_blocks * 512);
+    *pRSI_DATA_CONTROL = 0x9B;
+
+    error = rsi_send_command(SD_MMC_CMD_READ_MULTIPLE_BLOCK, card_address);
     do {
-	rsi_start_dma_transfer(buf, count * 512, false);	/* п.5 Конфигурируем DMA на запись */
-	*pRSI_DATA_LGTH = count * 512;	/* п.6 Число байт для передачи */
-	*pRSI_DATA_TIMER = RSI_WRITE_TIMER_TIMEOUT /* * count */ ;	/* п.7 Таймаут в тиках тактовой частоты */
+	while (!(*pRSI_STATUS & DAT_BLK_END));
+    } while (!(*pRSI_STATUS & DAT_END));
 
-	error = rsi_send_command(cmd, card_address(block_num));	/* 8, 9, 10 */
-	if (error) {
-	    sd_card_error.cmd_error++;
-	    break;
-	}
+    *pRSI_STATUSCL = DAT_BLK_END_STAT | DAT_END_STAT;
+    error = rsi_send_command(SD_MMC_CMD_STOP_TRANSMISSION, 0);
 
-	*pRSI_DATA_CONTROL = 0x90 | DATA_EN | DATA_DMA_EN;	/* п.11 0x90 - длина блока, степень двойки */
+    /* ensure the dma has completed */
+    while ((*pDMA1_IRQ_STATUS & DMA_DONE) != DMA_DONE);
+    *pDMA1_IRQ_STATUS = *pDMA1_IRQ_STATUS & DMA_DONE;
+    return error;
+}
 
-	/* Ожидаем передачи блока с выводом ошибки или таймаута */
-	do {
-	    status = *pRSI_STATUS;
-	} while (!(status & (DAT_TIMEOUT | DAT_END | TX_UNDERRUN | DAT_CRC_FAIL)));	/* На полсекунды */
-	*pRSI_STATUSCL = DAT_END_STAT | DAT_BLK_END_STAT | DAT_TIMEOUT_STAT | TX_UNDERRUN_STAT | DAT_CRC_FAIL_STAT;
+/**
+ *  Р—Р°РїРёСЃСЊ С‚РѕР»СЊРєРѕ РѕРґРЅРѕРіРѕ Р±Р»РѕРєР°
+ */
+section("L1_code")
+static uint32_t rsi_write_single_block_dma(uint32_t card_address, void *pSource)
+{
+    uint32_t error = 0;
 
+    *pRSI_DATA_LGTH = 512;
+    *pRSI_DATA_TIMER = CARD_TIMER_TIMEOUT;	/* С‚Р°Р№РјР°СѓС‚ РІ С‚РёРєР°С… С‚Р°РєС‚РѕРІРѕР№ С‡Р°СЃС‚РѕС‚С‹ = РїРѕР»СЃРµРєСѓРЅРґС‹ */
 
-	/* Если много блоков  */
-	if (count > 1) {
-	    error = rsi_send_command(SD_MMC_CMD_STOP_TRANSMISSION, 0);
-	    if (error)
-		break;		// Должны выключить DMA
-	}
-	// Смотрим ошибки передачи
-	if (status & (DAT_TIMEOUT_STAT | TX_UNDERRUN_STAT)) {
-	    if (status & DAT_TIMEOUT_STAT) {
-		sd_card_error.write_timeout++;
-	    }
-	    error = status;
-	    break;
-	}
-    } while (0);
-    rsi_stop_dma_transfer(error);	/* Если таймаут - наверное вЫключить DMA */
+    SDBlockWrite(pSource, 512);
+    error = rsi_send_command(SD_MMC_CMD_WRITE_SINGLE_BLOCK, card_address);
+    *pRSI_DATA_CONTROL = 0x99;
+
+    while (!(*pRSI_STATUS & DAT_BLK_END));
+    *pRSI_STATUSCL = DAT_BLK_END_STAT | DAT_END_STAT;
+
+    /* ensure DMA has completed */
+    while ((*pDMA1_IRQ_STATUS & DMA_DONE) != DMA_DONE);
+    *pDMA1_IRQ_STATUS = *pDMA1_IRQ_STATUS & DMA_DONE;
+
+    /* wait until the device becomes ready */
+    rsi_get_wait_until_ready();
+    return error;
+}
+
+/**
+ *  Р—Р°РїРёСЃСЊ РЅРµСЃРєРѕР»СЊРєРёС… Р±Р»РѕРєРѕРІ. РћС‚Р»РёС‡Р°РµС‚СЃСЏ РєРѕРјР°РЅРґРѕР№ РѕС‚ Р·Р°РїРёСЃРё РѕРґРЅРѕРіРѕ Р±Р»РѕРєР°.
+ */
+section("L1_code")
+static uint32_t rsi_write_multi_blocks_dma(uint32_t card_address, void *pSource, uint32_t num_blocks)
+{
+    u32 error;
+    u32 status;
+
+    *pRSI_DATA_LGTH = num_blocks * 512;
+    *pRSI_DATA_TIMER = CARD_TIMER_TIMEOUT * 2;	/* С‚Р°Р№РјР°СѓС‚ РІ С‚РёРєР°С… С‚Р°РєС‚РѕРІРѕР№ С‡Р°СЃС‚РѕС‚С‹ = РїРѕР»СЃРµРєСѓРЅРґС‹ */
+
+    SDBlockWrite(pSource, num_blocks * 512);
+    error = rsi_send_command(SD_MMC_CMD_WRITE_MULTIPLE_BLOCK, card_address);
+    *pRSI_DATA_CONTROL = 0x99;
+
+    /* РћР¶РёРґР°РµРј РїРµСЂРµРґР°С‡Рё Р±Р»РѕРєР° СЃ РІС‹РІРѕРґРѕРј РѕС€РёР±РєРё РёР»Рё С‚Р°Р№РјР°СѓС‚Р° */
+    while (!((status = *pRSI_STATUS) & (DAT_END | DAT_TIMEOUT)));
+    *pRSI_STATUSCL = DAT_END_STAT | DAT_BLK_END_STAT | DAT_TIMEOUT_STAT;
+
+    error = rsi_send_command(SD_MMC_CMD_STOP_TRANSMISSION, 0);
+
+    while ((*pDMA1_IRQ_STATUS & DMA_DONE) != DMA_DONE);	/* ensure DMA has completed */
+    *pDMA1_IRQ_STATUS = *pDMA1_IRQ_STATUS & DMA_DONE;
+
     rsi_get_wait_until_ready();	/* wait for the device to become ready */
     return error;
 }
 
 
-/* При любой ошибке - наверное вЫключить DMA */
-section("L1_code")
-static void rsi_stop_dma_transfer(u32 stat)
+#pragma section("FLASH_code")
+void rsi_get_card_timeout(SD_CARD_ERROR_STRUCT * ts)
 {
-    if (stat) {
-	sd_card_error.any_error++;
-	*pDMA1_CONFIG = 0x0000;
-    } else {
-	while ((*pDMA1_IRQ_STATUS & DMA_DONE) != DMA_DONE);	/* ensure DMA has completed */
-    }
-    *pDMA1_IRQ_STATUS = *pDMA1_IRQ_STATUS & DMA_DONE;
-}
-
-
-section("L1_code")
-static uint32_t rsi_get_wait_until_ready(void)
-{
-    uint32_t status = 0;
-    uint32_t error = 0;
-
-    while ((status & 0x00000100) != 0x00000100) {
-	error = rsi_send_command(SD_MMC_CMD_SEND_STATUS, adi_rsi_card_registers.sd.rca << 16);
-	status = *pRSI_RESPONSE0;
-    }
-    return error;
+    memcpy(ts, &sd_card_error, sizeof(SD_CARD_ERROR_STRUCT));
 }
