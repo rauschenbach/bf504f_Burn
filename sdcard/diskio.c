@@ -20,20 +20,20 @@ DWORD get_fattime (void)
   TIME_DATE t;	
   long sec;
 
-  /*  Смотрим время  */
+  /*  РЎРјРѕС‚СЂРёРј РІСЂРµРјСЏ  */
   sec = get_sec_ticks();
   sec_to_td(sec, &t);
 
-  return	  ((DWORD)(t.year - 1980) << 25)		/* Год  */
-			| ((DWORD)t.mon << 21)			/* Месяц:   	1...12  */
-			| ((DWORD)t.day << 16)                  /* день:    	1...30  */
-			| ((DWORD)t.hour << 11)   		/* часы:    	0...23  */
-			| ((DWORD)t.min << 5)		        /* минуты:  	0...59  */
-			| ((DWORD)(t.sec / 2) >> 1);		/* секунды * 2:	0...29  */
+  return	  ((DWORD)(t.year - 1980) << 25)		/* Р“РѕРґ  */
+			| ((DWORD)t.mon << 21)			/* РњРµСЃСЏС†:   	1...12  */
+			| ((DWORD)t.day << 16)                  /* РґРµРЅСЊ:    	1...30  */
+			| ((DWORD)t.hour << 11)   		/* С‡Р°СЃС‹:    	0...23  */
+			| ((DWORD)t.min << 5)		        /* РјРёРЅСѓС‚С‹:  	0...59  */
+			| ((DWORD)(t.sec / 2) >> 1);		/* СЃРµРєСѓРЅРґС‹ * 2:	0...29  */
 }
 
 /**
- * Опрашивать состояние диска, и если ее вынули-показать неготовность
+ * РћРїСЂР°С€РёРІР°С‚СЊ СЃРѕСЃС‚РѕСЏРЅРёРµ РґРёСЃРєР°, Рё РµСЃР»Рё РµРµ РІС‹РЅСѓР»Рё-РїРѕРєР°Р·Р°С‚СЊ РЅРµРіРѕС‚РѕРІРЅРѕСЃС‚СЊ
  */
 section("L1_code")
 DSTATUS disk_status (BYTE drv)
@@ -49,11 +49,11 @@ DSTATUS disk_status (BYTE drv)
 
 
 /**
- * Инициализировать SD интерфейс-вызов функции перенес из других файлов ff.c
- * Не вставлена карта или какие-то проблемы?
+ * РРЅРёС†РёР°Р»РёР·РёСЂРѕРІР°С‚СЊ SD РёРЅС‚РµСЂС„РµР№СЃ-РІС‹Р·РѕРІ С„СѓРЅРєС†РёРё РїРµСЂРµРЅРµСЃ РёР· РґСЂСѓРіРёС… С„Р°Р№Р»РѕРІ ff.c
+ * РќРµ РІСЃС‚Р°РІР»РµРЅР° РєР°СЂС‚Р° РёР»Рё РєР°РєРёРµ-С‚Рѕ РїСЂРѕР±Р»РµРјС‹?
  */
 section("L1_code")
-DSTATUS disk_initialize (BYTE drv)
+DSTATUS disk_init (BYTE drv)
 {
 	if(rsi_setup())
            return STA_NOINIT;
@@ -79,7 +79,7 @@ DRESULT disk_read (
 	if (s & STA_NOINIT) return RES_NOTRDY;
 	if (!count) return RES_PARERR;
 	
-	/* Прочитать блок / блоки  */	
+	/* РџСЂРѕС‡РёС‚Р°С‚СЊ Р±Р»РѕРє / Р±Р»РѕРєРё  */	
 	rsi_read_blocks_from_sd_card(sector, buff, count);
 	return RES_OK;
 }
@@ -103,10 +103,10 @@ DRESULT disk_write (
 
 	s = disk_status(drv);
 	if (s & STA_NOINIT) return RES_NOTRDY;
-	if (s & STA_PROTECT) return RES_WRPRT;  /* пока не проверяем это */ 
+	if (s & STA_PROTECT) return RES_WRPRT;  /* РїРѕРєР° РЅРµ РїСЂРѕРІРµСЂСЏРµРј СЌС‚Рѕ */ 
 	if (!count) return RES_PARERR;
 
-	/* Записать блок / блоки  */	
+	/* Р—Р°РїРёСЃР°С‚СЊ Р±Р»РѕРє / Р±Р»РѕРєРё  */	
 	rsi_write_blocks_to_sd_card(sector, (void*)buff, count);
 	return RES_OK;
 }
