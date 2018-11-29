@@ -1,9 +1,9 @@
-/* На TWI (I2C) работают:
+/* РќР° TWI (I2C) СЂР°Р±РѕС‚Р°СЋС‚:
  * 1) RTC
- * 2) датчик температуры и давления
- * 3) акселерометр и компас
- * + могут появиться другие устройства!
- * NB - в функции записи пакета неправильно стояли делители частоты! TWI работал "на пределе!"
+ * 2) РґР°С‚С‡РёРє С‚РµРјРїРµСЂР°С‚СѓСЂС‹ Рё РґР°РІР»РµРЅРёСЏ
+ * 3) Р°РєСЃРµР»РµСЂРѕРјРµС‚СЂ Рё РєРѕРјРїР°СЃ
+ * + РјРѕРіСѓС‚ РїРѕСЏРІРёС‚СЊСЃСЏ РґСЂСѓРіРёРµ СѓСЃС‚СЂРѕР№СЃС‚РІР°!
+ * NB - РІ С„СѓРЅРєС†РёРё Р·Р°РїРёСЃРё РїР°РєРµС‚Р° РЅРµРїСЂР°РІРёР»СЊРЅРѕ СЃС‚РѕСЏР»Рё РґРµР»РёС‚РµР»Рё С‡Р°СЃС‚РѕС‚С‹! TWI СЂР°Р±РѕС‚Р°Р» "РЅР° РїСЂРµРґРµР»Рµ!"
  */
 
 #include "utils.h"
@@ -19,9 +19,9 @@
 #define CLKDIV_LO 		17	/* SCL low period */
 
 /** 
- * Инициализация TWI, он не подключен к GPIO :( - просто делаем сброс.
- * изменение регистра контроля делаем в чтении и записи-для разных микросхем
- * там будут стоят разные биты 
+ * РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ TWI, РѕРЅ РЅРµ РїРѕРґРєР»СЋС‡РµРЅ Рє GPIO :( - РїСЂРѕСЃС‚Рѕ РґРµР»Р°РµРј СЃР±СЂРѕСЃ.
+ * РёР·РјРµРЅРµРЅРёРµ СЂРµРіРёСЃС‚СЂР° РєРѕРЅС‚СЂРѕР»СЏ РґРµР»Р°РµРј РІ С‡С‚РµРЅРёРё Рё Р·Р°РїРёСЃРё-РґР»СЏ СЂР°Р·РЅС‹С… РјРёРєСЂРѕСЃС…РµРј
+ * С‚Р°Рј Р±СѓРґСѓС‚ СЃС‚РѕСЏС‚ СЂР°Р·РЅС‹Рµ Р±РёС‚С‹ 
  */
 #pragma section("FLASH_code")
 static void _twi_reset(void)
@@ -34,7 +34,7 @@ static void _twi_reset(void)
 }
 
 /**
- * Стоп TWI - опрашиваем раз в секунду, все остальное время должен быть выключен
+ * РЎС‚РѕРї TWI - РѕРїСЂР°С€РёРІР°РµРј СЂР°Р· РІ СЃРµРєСѓРЅРґСѓ, РІСЃРµ РѕСЃС‚Р°Р»СЊРЅРѕРµ РІСЂРµРјСЏ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РІС‹РєР»СЋС‡РµРЅ
  */
 #pragma section("FLASH_code")
 void TWI_stop(void)
@@ -44,8 +44,8 @@ void TWI_stop(void)
 }
 
 /** 
- * Запись в регистр по TWI в режыме мастера 
- * Возвращает успех или нет
+ * Р—Р°РїРёСЃСЊ РІ СЂРµРіРёСЃС‚СЂ РїРѕ TWI РІ СЂРµР¶С‹РјРµ РјР°СЃС‚РµСЂР° 
+ * Р’РѕР·РІСЂР°С‰Р°РµС‚ СѓСЃРїРµС… РёР»Рё РЅРµС‚
  */
 #pragma section("FLASH_code")
 bool TWI_write_pack(u16 addr, u8 reg, u8 * pointer, u16 count, const void* par)
@@ -62,14 +62,14 @@ bool TWI_write_pack(u16 addr, u8 reg, u8 * pointer, u16 count, const void* par)
        hi = div->hi_div_clk;
     }
 
-    _twi_reset();			/* Сбрасываем интерфейс TWI */
+    _twi_reset();			/* РЎР±СЂР°СЃС‹РІР°РµРј РёРЅС‚РµСЂС„РµР№СЃ TWI */
 
     *pTWI_FIFO_CTL = 0;		/* clear the bit manually */
-    *pTWI_CONTROL = TWI_ENA | PRESCALER_VALUE;	/* Регистр TWI_CONTROL, прескалер = 48 MHz / 10 MHz + разрешить TWI */
+    *pTWI_CONTROL = TWI_ENA | PRESCALER_VALUE;	/* Р РµРіРёСЃС‚СЂ TWI_CONTROL, РїСЂРµСЃРєР°Р»РµСЂ = 48 MHz / 10 MHz + СЂР°Р·СЂРµС€РёС‚СЊ TWI */
 
-    *pTWI_CLKDIV = (hi << 8) | lo;	/* Делитель для CLK = 100 кГц ~ 100 */
-    *pTWI_MASTER_ADDR = addr;	/* Передаем команду, что мы хотим записать регистр reg */
-    *pTWI_MASTER_CTL = (count + 1 << 6) | MEN;	/* Старт передачи малой скорости, 1 байт регистр + count передаем */
+    *pTWI_CLKDIV = (hi << 8) | lo;	/* Р”РµР»РёС‚РµР»СЊ РґР»СЏ CLK = 100 РєР“С† ~ 100 */
+    *pTWI_MASTER_ADDR = addr;	/* РџРµСЂРµРґР°РµРј РєРѕРјР°РЅРґСѓ, С‡С‚Рѕ РјС‹ С…РѕС‚РёРј Р·Р°РїРёСЃР°С‚СЊ СЂРµРіРёСЃС‚СЂ reg */
+    *pTWI_MASTER_CTL = (count + 1 << 6) | MEN;	/* РЎС‚Р°СЂС‚ РїРµСЂРµРґР°С‡Рё РјР°Р»РѕР№ СЃРєРѕСЂРѕСЃС‚Рё, 1 Р±Р°Р№С‚ СЂРµРіРёСЃС‚СЂ + count РїРµСЂРµРґР°РµРј */
     ssync();
 
 
@@ -83,7 +83,7 @@ bool TWI_write_pack(u16 addr, u8 reg, u8 * pointer, u16 count, const void* par)
 	}
     }
 
-    *pTWI_XMT_DATA8 = reg;	/* номер регистра */
+    *pTWI_XMT_DATA8 = reg;	/* РЅРѕРјРµСЂ СЂРµРіРёСЃС‚СЂР° */
     ssync();
 
 
@@ -116,7 +116,7 @@ bool TWI_write_pack(u16 addr, u8 reg, u8 * pointer, u16 count, const void* par)
 }
 
 
-/* Чтение по TWI в реж. мастера */
+/* Р§С‚РµРЅРёРµ РїРѕ TWI РІ СЂРµР¶. РјР°СЃС‚РµСЂР° */
 #pragma section("FLASH_code")
 bool TWI_read_pack(u16 addr, u8 reg, u8 * pointer, u16 count, const void* par)
 {
@@ -135,12 +135,12 @@ bool TWI_read_pack(u16 addr, u8 reg, u8 * pointer, u16 count, const void* par)
 
     _twi_reset();
     *pTWI_FIFO_CTL = 0;
-    *pTWI_CONTROL = TWI_ENA | PRESCALER_VALUE;	/* Регистр TWI_CONTROL, прескалер = 48 MHz / 10 MHz + разрешить TWI */
+    *pTWI_CONTROL = TWI_ENA | PRESCALER_VALUE;	/* Р РµРіРёСЃС‚СЂ TWI_CONTROL, РїСЂРµСЃРєР°Р»РµСЂ = 48 MHz / 10 MHz + СЂР°Р·СЂРµС€РёС‚СЊ TWI */
 
-    *pTWI_CLKDIV = (hi << 8) | lo;	/* Делитель для CLK = 100 кГц ~ 100 */
-    *pTWI_MASTER_ADDR = addr;	/* адрес (7-бит + бит чтение/запись) */
-    *pTWI_XMT_DATA8 = reg;	/* Начальный адрес регистра  */
-    *pTWI_MASTER_CTL = (1 << 6) | MEN;	/* Старт передачи */
+    *pTWI_CLKDIV = (hi << 8) | lo;	/* Р”РµР»РёС‚РµР»СЊ РґР»СЏ CLK = 100 РєР“С† ~ 100 */
+    *pTWI_MASTER_ADDR = addr;	/* Р°РґСЂРµСЃ (7-Р±РёС‚ + Р±РёС‚ С‡С‚РµРЅРёРµ/Р·Р°РїРёСЃСЊ) */
+    *pTWI_XMT_DATA8 = reg;	/* РќР°С‡Р°Р»СЊРЅС‹Р№ Р°РґСЂРµСЃ СЂРµРіРёСЃС‚СЂР°  */
+    *pTWI_MASTER_CTL = (1 << 6) | MEN;	/* РЎС‚Р°СЂС‚ РїРµСЂРµРґР°С‡Рё */
     ssync();
 
     /* wait to load the next sample into the TX FIFO */
@@ -148,7 +148,7 @@ bool TWI_read_pack(u16 addr, u8 reg, u8 * pointer, u16 count, const void* par)
     while (*pTWI_MASTER_STAT & MPROG) {
 	ssync();
 
-	/* Адрес не подтвержден - нет устройтства */
+	/* РђРґСЂРµСЃ РЅРµ РїРѕРґС‚РІРµСЂР¶РґРµРЅ - РЅРµС‚ СѓСЃС‚СЂРѕР№С‚СЃС‚РІР° */
 	if (get_msec_ticks() - t0 > 10 || *pTWI_MASTER_STAT & ANAK) {
 	    goto met;
 	}
@@ -156,15 +156,15 @@ bool TWI_read_pack(u16 addr, u8 reg, u8 * pointer, u16 count, const void* par)
 
 /*     _twi_reset();  */
     *pTWI_FIFO_CTL = 0;
-    *pTWI_CONTROL = TWI_ENA | PRESCALER_VALUE;	/* Регистр TWI_CONTROL, прескалер = 48 MHz / 10 MHz + разрешить TWI */
+    *pTWI_CONTROL = TWI_ENA | PRESCALER_VALUE;	/* Р РµРіРёСЃС‚СЂ TWI_CONTROL, РїСЂРµСЃРєР°Р»РµСЂ = 48 MHz / 10 MHz + СЂР°Р·СЂРµС€РёС‚СЊ TWI */
 
-    *pTWI_CLKDIV = (hi << 8) | lo;	/* Делитель для CLK = 100 кГц ~ 100 */
-    *pTWI_MASTER_ADDR = addr;	/* адрес (7-бит + бит чтение/запись) */
-    *pTWI_MASTER_CTL = (count << 6) | MEN | MDIR;	/* Старт приема */
+    *pTWI_CLKDIV = (hi << 8) | lo;	/* Р”РµР»РёС‚РµР»СЊ РґР»СЏ CLK = 100 РєР“С† ~ 100 */
+    *pTWI_MASTER_ADDR = addr;	/* Р°РґСЂРµСЃ (7-Р±РёС‚ + Р±РёС‚ С‡С‚РµРЅРёРµ/Р·Р°РїРёСЃСЊ) */
+    *pTWI_MASTER_CTL = (count << 6) | MEN | MDIR;	/* РЎС‚Р°СЂС‚ РїСЂРёРµРјР° */
     ssync();
 
 
-    /* for each item. Ставим таймаут на 5 мс */
+    /* for each item. РЎС‚Р°РІРёРј С‚Р°Р№РјР°СѓС‚ РЅР° 5 РјСЃ */
     for (i = 0; i < count; i++) {
 	t0 = get_msec_ticks();
 
@@ -180,7 +180,7 @@ bool TWI_read_pack(u16 addr, u8 reg, u8 * pointer, u16 count, const void* par)
 	ssync();
     }
 
-    res = true;			/* Все прочитали  */
+    res = true;			/* Р’СЃРµ РїСЂРѕС‡РёС‚Р°Р»Рё  */
   met:
     /* service TWI for next transmission */
     *pTWI_INT_STAT = RCVSERV | MCOMP;
@@ -190,8 +190,8 @@ bool TWI_read_pack(u16 addr, u8 reg, u8 * pointer, u16 count, const void* par)
 
 
 /**
- * Читаем 2 байта из датчика
- * Передаем команду, что мы хотим прочитать регистра reg
+ * Р§РёС‚Р°РµРј 2 Р±Р°Р№С‚Р° РёР· РґР°С‚С‡РёРєР°
+ * РџРµСЂРµРґР°РµРј РєРѕРјР°РЅРґСѓ, С‡С‚Рѕ РјС‹ С…РѕС‚РёРј РїСЂРѕС‡РёС‚Р°С‚СЊ СЂРµРіРёСЃС‚СЂР° reg
  */
 #pragma section("FLASH_code")
 u8 TWI_read_byte(u16 addr, u8 reg, const void* par)
@@ -210,11 +210,11 @@ u8 TWI_read_byte(u16 addr, u8 reg, const void* par)
 
      _twi_reset();
     *pTWI_FIFO_CTL = 0;
-    *pTWI_CONTROL = TWI_ENA | PRESCALER_VALUE;	/* Регистр TWI_CONTROL, прескалер = 48 MHz / 10 MHz + разрешить TWI */
+    *pTWI_CONTROL = TWI_ENA | PRESCALER_VALUE;	/* Р РµРіРёСЃС‚СЂ TWI_CONTROL, РїСЂРµСЃРєР°Р»РµСЂ = 48 MHz / 10 MHz + СЂР°Р·СЂРµС€РёС‚СЊ TWI */
 
-    *pTWI_CLKDIV = (hi << 8) | lo;	/* Делитель для CLK = 100 кГц ~ 25 */
-    *pTWI_MASTER_ADDR = addr;	/* адрес (7-бит + бит чтение/запись) */
-    *pTWI_MASTER_CTL = (1 << 6) | MEN;	/* Старт передачи */
+    *pTWI_CLKDIV = (hi << 8) | lo;	/* Р”РµР»РёС‚РµР»СЊ РґР»СЏ CLK = 100 РєР“С† ~ 25 */
+    *pTWI_MASTER_ADDR = addr;	/* Р°РґСЂРµСЃ (7-Р±РёС‚ + Р±РёС‚ С‡С‚РµРЅРёРµ/Р·Р°РїРёСЃСЊ) */
+    *pTWI_MASTER_CTL = (1 << 6) | MEN;	/* РЎС‚Р°СЂС‚ РїРµСЂРµРґР°С‡Рё */
      ssync();
 
     /* wait to load the next sample into the TX FIFO */
@@ -240,10 +240,10 @@ u8 TWI_read_byte(u16 addr, u8 reg, const void* par)
 
     _twi_reset();
     *pTWI_FIFO_CTL = 0;
-    *pTWI_CONTROL = TWI_ENA | PRESCALER_VALUE;	/* Регистр TWI_CONTROL, прескалер = 48 MHz / 10 MHz + разрешить TWI */
+    *pTWI_CONTROL = TWI_ENA | PRESCALER_VALUE;	/* Р РµРіРёСЃС‚СЂ TWI_CONTROL, РїСЂРµСЃРєР°Р»РµСЂ = 48 MHz / 10 MHz + СЂР°Р·СЂРµС€РёС‚СЊ TWI */
 
-    *pTWI_CLKDIV = (hi << 8) | lo;	/* Делитель для CLK = 100 кГц ~ 25 */
-    *pTWI_MASTER_ADDR = addr;	/* адрес (7-бит + бит чтение/запись) */
+    *pTWI_CLKDIV = (hi << 8) | lo;	/* Р”РµР»РёС‚РµР»СЊ РґР»СЏ CLK = 100 РєР“С† ~ 25 */
+    *pTWI_MASTER_ADDR = addr;	/* Р°РґСЂРµСЃ (7-Р±РёС‚ + Р±РёС‚ С‡С‚РµРЅРёРµ/Р·Р°РїРёСЃСЊ) */
     *pTWI_MASTER_CTL = (1 << 6) | MEN | MDIR;	/* start transmission */
     ssync();
 
@@ -270,7 +270,7 @@ u8 TWI_read_byte(u16 addr, u8 reg, const void* par)
 }
 
 
-/* Запись байта */
+/* Р—Р°РїРёСЃСЊ Р±Р°Р№С‚Р° */
 #pragma section("FLASH_code")
 void TWI_write_byte(u16 addr, u16 reg, u8 data, const void* par)
 {
@@ -285,13 +285,13 @@ void TWI_write_byte(u16 addr, u16 reg, u8 data, const void* par)
        hi = div->hi_div_clk;
     }
 
-    _twi_reset();			/* Сбрасываем интерфейс TWI */
+    _twi_reset();			/* РЎР±СЂР°СЃС‹РІР°РµРј РёРЅС‚РµСЂС„РµР№СЃ TWI */
     *pTWI_FIFO_CTL = 0;		/* clear the bit manually */
-    *pTWI_CONTROL = TWI_ENA | PRESCALER_VALUE;	/* Регистр TWI_CONTROL, прескалер = 48 MHz / 10 MHz + разрешить TWI */
+    *pTWI_CONTROL = TWI_ENA | PRESCALER_VALUE;	/* Р РµРіРёСЃС‚СЂ TWI_CONTROL, РїСЂРµСЃРєР°Р»РµСЂ = 48 MHz / 10 MHz + СЂР°Р·СЂРµС€РёС‚СЊ TWI */
 
-    *pTWI_CLKDIV = (hi << 8) | lo;	/* Делитель для CLK = 100 кГц ~ 25 */
-    *pTWI_MASTER_ADDR = addr;	/* адрес (7-бит + бит чтение/запись) */
-    *pTWI_MASTER_CTL = (2 << 6) | MEN;	/* Старт передачи (пока на малой скорости), 1 байт регистр + count передаем */
+    *pTWI_CLKDIV = (hi << 8) | lo;	/* Р”РµР»РёС‚РµР»СЊ РґР»СЏ CLK = 100 РєР“С† ~ 25 */
+    *pTWI_MASTER_ADDR = addr;	/* Р°РґСЂРµСЃ (7-Р±РёС‚ + Р±РёС‚ С‡С‚РµРЅРёРµ/Р·Р°РїРёСЃСЊ) */
+    *pTWI_MASTER_CTL = (2 << 6) | MEN;	/* РЎС‚Р°СЂС‚ РїРµСЂРµРґР°С‡Рё (РїРѕРєР° РЅР° РјР°Р»РѕР№ СЃРєРѕСЂРѕСЃС‚Рё), 1 Р±Р°Р№С‚ СЂРµРіРёСЃС‚СЂ + count РїРµСЂРµРґР°РµРј */
     ssync();
 
 
@@ -304,7 +304,7 @@ void TWI_write_byte(u16 addr, u16 reg, u8 data, const void* par)
 	    goto met;
     }
 
-    *pTWI_XMT_DATA8 = reg;	/* номер регистра */
+    *pTWI_XMT_DATA8 = reg;	/* РЅРѕРјРµСЂ СЂРµРіРёСЃС‚СЂР° */
     ssync();
 
     /* # of transfers before stop condition */
