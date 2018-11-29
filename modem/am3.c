@@ -11,33 +11,33 @@
 #include "utils.h"
 #include "ports.h"
 
-/* Проверить с JTAG почему это происходит!!! */
-#define		UART_AM3_MODEM_SPEED		57600	/* Скорость порта для модема  */
-#define 	WAIT_MODEM_TIME_MS		250	/* 200 мс - максимальное время ожыдания ответа по протоколу */
+/* РџСЂРѕРІРµСЂРёС‚СЊ СЃ JTAG РїРѕС‡РµРјСѓ СЌС‚Рѕ РїСЂРѕРёСЃС…РѕРґРёС‚!!! */
+#define		UART_AM3_MODEM_SPEED		57600	/* РЎРєРѕСЂРѕСЃС‚СЊ РїРѕСЂС‚Р° РґР»СЏ РјРѕРґРµРјР°  */
+#define 	WAIT_MODEM_TIME_MS		250	/* 200 РјСЃ - РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ РІСЂРµРјСЏ РѕР¶С‹РґР°РЅРёСЏ РѕС‚РІРµС‚Р° РїРѕ РїСЂРѕС‚РѕРєРѕР»Сѓ */
 
 /************************************************************************
- * 	Статические переменные
+ * 	РЎС‚Р°С‚РёС‡РµСЃРєРёРµ РїРµСЂРµРјРµРЅРЅС‹Рµ
  ************************************************************************/
-/* Обмен с модемам - указатель */
+/* РћР±РјРµРЅ СЃ РјРѕРґРµРјР°Рј - СѓРєР°Р·Р°С‚РµР»СЊ */
 static struct MODEM_XCHG_STRUCT{
     u8 rx_buf[MODEM_BUF_LEN];
-    u8 rx_beg;			/* Начало пакета */
-    u8 rx_cnt;			/* Счетчик принятого */
-    u8 rx_fin;			/* Конец приема */
-    u8 tx_len;			/* Сколько передавать  */
+    u8 rx_beg;			/* РќР°С‡Р°Р»Рѕ РїР°РєРµС‚Р° */
+    u8 rx_cnt;			/* РЎС‡РµС‚С‡РёРє РїСЂРёРЅСЏС‚РѕРіРѕ */
+    u8 rx_fin;			/* РљРѕРЅРµС† РїСЂРёРµРјР° */
+    u8 tx_len;			/* РЎРєРѕР»СЊРєРѕ РїРµСЂРµРґР°РІР°С‚СЊ  */
 } *pModem_xchg_buf;
 
 /************************************************************************
- * 	Статические функции
+ * 	РЎС‚Р°С‚РёС‡РµСЃРєРёРµ С„СѓРЅРєС†РёРё
  ************************************************************************/
-static void am3_modem_read_ISR(u8);	/* Чтение из модема */
+static void am3_modem_read_ISR(u8);	/* Р§С‚РµРЅРёРµ РёР· РјРѕРґРµРјР° */
 static int am3_write_data(char *, int);
 static int am3_get_data(char *, int);
 static void am3_wait_reply(int);
 
 
 /**
- * Инициализация с проверкой
+ * РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ СЃ РїСЂРѕРІРµСЂРєРѕР№
  */
 #pragma section("FLASH_code")
 int am3_init(void)
@@ -46,7 +46,7 @@ int am3_init(void)
     int res = -1;
 
     do {
-	/* Для обслуживания обмена создаем буфер на прием */
+	/* Р”Р»СЏ РѕР±СЃР»СѓР¶РёРІР°РЅРёСЏ РѕР±РјРµРЅР° СЃРѕР·РґР°РµРј Р±СѓС„РµСЂ РЅР° РїСЂРёРµРј */
 	if (pModem_xchg_buf == NULL) {
 	    pModem_xchg_buf = calloc(1, sizeof(struct MODEM_XCHG_STRUCT));
 	    if (pModem_xchg_buf == NULL) {
@@ -59,15 +59,15 @@ int am3_init(void)
 
 	log_write_log_file("INFO: alloc buf for am3 OK\n");
 
-	/* Вызываем UART1 init */
+	/* Р’С‹Р·С‹РІР°РµРј UART1 init */
 	com_par.baud = UART_AM3_MODEM_SPEED;
 	com_par.rx_call_back_func = am3_modem_read_ISR;
-	com_par.tx_call_back_func = NULL;	/* Нет  */
+	com_par.tx_call_back_func = NULL;	/* РќРµС‚  */
 
 	if (UART1_init(&com_par) == false)
 	    break;
 
-	/* Переключаем селектор на аналоговый модем  */
+	/* РџРµСЂРµРєР»СЋС‡Р°РµРј СЃРµР»РµРєС‚РѕСЂ РЅР° Р°РЅР°Р»РѕРіРѕРІС‹Р№ РјРѕРґРµРј  */
 	select_modem_module();
 	res = 0;
     } while (0);
@@ -76,7 +76,7 @@ int am3_init(void)
 }
 
 
-/* Закрыть UART  */
+/* Р—Р°РєСЂС‹С‚СЊ UART  */
 #pragma section("FLASH_code")
 void am3_close(void)
 {
@@ -84,34 +84,34 @@ void am3_close(void)
 
 
     if (pModem_xchg_buf) {
-	free(pModem_xchg_buf);	/* Освобождаем буфер  */
+	free(pModem_xchg_buf);	/* РћСЃРІРѕР±РѕР¶РґР°РµРј Р±СѓС„РµСЂ  */
 	pModem_xchg_buf = NULL;
     }
 }
 
 
 /**
- * Обслуживание модема - прием ответа 
- * Ответ должен начинаться с $ASA
- * Можно из FLASH!!!
+ * РћР±СЃР»СѓР¶РёРІР°РЅРёРµ РјРѕРґРµРјР° - РїСЂРёРµРј РѕС‚РІРµС‚Р° 
+ * РћС‚РІРµС‚ РґРѕР»Р¶РµРЅ РЅР°С‡РёРЅР°С‚СЊСЃСЏ СЃ $ASA
+ * РњРѕР¶РЅРѕ РёР· FLASH!!!
  */
 section("L1_code")
 static void am3_modem_read_ISR(u8 rx_byte)
 {
-    /*  Первый байт */
-    if (0x24 == rx_byte) {	/* Начинается всегда с $ */
+    /*  РџРµСЂРІС‹Р№ Р±Р°Р№С‚ */
+    if (0x24 == rx_byte) {	/* РќР°С‡РёРЅР°РµС‚СЃСЏ РІСЃРµРіРґР° СЃ $ */
 	pModem_xchg_buf->rx_buf[0] = 0x24;
 	pModem_xchg_buf->rx_beg = 1;
 	pModem_xchg_buf->rx_cnt = 1;
 	pModem_xchg_buf->rx_fin = 0;
-    } else if (pModem_xchg_buf->rx_beg == 1) {	// Если уже есть начало
+    } else if (pModem_xchg_buf->rx_beg == 1) {	// Р•СЃР»Рё СѓР¶Рµ РµСЃС‚СЊ РЅР°С‡Р°Р»Рѕ
 	pModem_xchg_buf->rx_buf[pModem_xchg_buf->rx_cnt] = rx_byte;
 
-	/* Если перевод строки - считаем что набрали буфер */
+	/* Р•СЃР»Рё РїРµСЂРµРІРѕРґ СЃС‚СЂРѕРєРё - СЃС‡РёС‚Р°РµРј С‡С‚Рѕ РЅР°Р±СЂР°Р»Рё Р±СѓС„РµСЂ */
 	if (rx_byte == 0x0A && pModem_xchg_buf->rx_buf[pModem_xchg_buf->rx_cnt - 1] == 0x0d) {
 	    pModem_xchg_buf->rx_buf[pModem_xchg_buf->rx_cnt + 1] = 0;
 	    pModem_xchg_buf->rx_beg = 0;
-	    pModem_xchg_buf->rx_fin = 1;	/* FIN стоит до тех пока не начали принимать с $ */
+	    pModem_xchg_buf->rx_fin = 1;	/* FIN СЃС‚РѕРёС‚ РґРѕ С‚РµС… РїРѕРєР° РЅРµ РЅР°С‡Р°Р»Рё РїСЂРёРЅРёРјР°С‚СЊ СЃ $ */
 	} else {
 	    pModem_xchg_buf->rx_cnt++;
 	    pModem_xchg_buf->rx_cnt %= MODEM_BUF_LEN;
@@ -120,7 +120,7 @@ static void am3_modem_read_ISR(u8 rx_byte)
 }
 
 /**
- * Перетранслировать команду для модема, переключив порт
+ * РџРµСЂРµС‚СЂР°РЅСЃР»РёСЂРѕРІР°С‚СЊ РєРѕРјР°РЅРґСѓ РґР»СЏ РјРѕРґРµРјР°, РїРµСЂРµРєР»СЋС‡РёРІ РїРѕСЂС‚
  */
 #pragma section("FLASH_code")
 int am3_convey_buf(void *cmd, int size)
@@ -128,45 +128,45 @@ int am3_convey_buf(void *cmd, int size)
     int res = -1, t0, len;
     char str[MODEM_BUF_LEN];
     DEV_STATUS_STRUCT status;
-    DEV_UART_CMD uart_cmd;	/* Команда пришла с UART */
+    DEV_UART_CMD uart_cmd;	/* РљРѕРјР°РЅРґР° РїСЂРёС€Р»Р° СЃ UART */
 
-    comport_close();		/* закрываем отладочный порт */
+    comport_close();		/* Р·Р°РєСЂС‹РІР°РµРј РѕС‚Р»Р°РґРѕС‡РЅС‹Р№ РїРѕСЂС‚ */
 
-    cmd_get_dsp_status(&status);	/* получили статус */
-    status.st_test0 |= 0x10;	/* ставим "GNS неисправен" */
-    status.st_main |= 0x02;	/* ставим "Ошибка модема"  */
+    cmd_get_dsp_status(&status);	/* РїРѕР»СѓС‡РёР»Рё СЃС‚Р°С‚СѓСЃ */
+    status.st_test0 |= 0x10;	/* СЃС‚Р°РІРёРј "GNS РЅРµРёСЃРїСЂР°РІРµРЅ" */
+    status.st_main |= 0x02;	/* СЃС‚Р°РІРёРј "РћС€РёР±РєР° РјРѕРґРµРјР°"  */
 
     do {
 
-	/* Установка порта на акустический модем */
+	/* РЈСЃС‚Р°РЅРѕРІРєР° РїРѕСЂС‚Р° РЅР° Р°РєСѓСЃС‚РёС‡РµСЃРєРёР№ РјРѕРґРµРј */
 	if (am3_init() < 0) {
 	    break;
 	}
 
-	status.st_test0 &= ~0x10;	/* уберем "GNS неисправен" */
+	status.st_test0 &= ~0x10;	/* СѓР±РµСЂРµРј "GNS РЅРµРёСЃРїСЂР°РІРµРЅ" */
 	memset(&uart_cmd, 0, sizeof(uart_cmd));
 
-	am3_write_data((char *) cmd, size);	/* Посылаем команду из буфера ДЛЯ модема  */
-	am3_wait_reply(WAIT_MODEM_TIME_MS);	/* Ждем ответ  */
+	am3_write_data((char *) cmd, size);	/* РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ РёР· Р±СѓС„РµСЂР° Р”Р›РЇ РјРѕРґРµРјР°  */
+	am3_wait_reply(WAIT_MODEM_TIME_MS);	/* Р–РґРµРј РѕС‚РІРµС‚  */
 
 	len = am3_get_data(str, MODEM_BUF_LEN);
 	len %= MODEM_BUF_LEN;
 	if (len > 0) {
-	    res = 0;		/* успех - если в этом мусоре появились данные! */
-	    status.st_main &= ~0x08;	/* снимаем "не вовремя" */
-	    status.st_main &= ~0x02;	/* снимаем "Ошибка модема" */
-	    memcpy(uart_cmd.u.cPar, str, len);	/* Что приняли */
+	    res = 0;		/* СѓСЃРїРµС… - РµСЃР»Рё РІ СЌС‚РѕРј РјСѓСЃРѕСЂРµ РїРѕСЏРІРёР»РёСЃСЊ РґР°РЅРЅС‹Рµ! */
+	    status.st_main &= ~0x08;	/* СЃРЅРёРјР°РµРј "РЅРµ РІРѕРІСЂРµРјСЏ" */
+	    status.st_main &= ~0x02;	/* СЃРЅРёРјР°РµРј "РћС€РёР±РєР° РјРѕРґРµРјР°" */
+	    memcpy(uart_cmd.u.cPar, str, len);	/* Р§С‚Рѕ РїСЂРёРЅСЏР»Рё */
 	    uart_cmd.len = len;
 	}
 
-	set_uart_cmd_buf(&uart_cmd);	/* Передали буфер */
-	am3_close();		/* Закроем модемный порт */
+	set_uart_cmd_buf(&uart_cmd);	/* РџРµСЂРµРґР°Р»Рё Р±СѓС„РµСЂ */
+	am3_close();		/* Р—Р°РєСЂРѕРµРј РјРѕРґРµРјРЅС‹Р№ РїРѕСЂС‚ */
 
     } while (0);
 
-    cmd_set_dsp_status(&status);	/* восстановили статус */
+    cmd_set_dsp_status(&status);	/* РІРѕСЃСЃС‚Р°РЅРѕРІРёР»Рё СЃС‚Р°С‚СѓСЃ */
 
-    /* Возвращаем назад порт отладки */
+    /* Р’РѕР·РІСЂР°С‰Р°РµРј РЅР°Р·Р°Рґ РїРѕСЂС‚ РѕС‚Р»Р°РґРєРё */
     if (comport_init() < 0) {
 	res = -1;
     }
@@ -176,7 +176,7 @@ int am3_convey_buf(void *cmd, int size)
 
 
 /**
- * Пограммирование модема с проверкой
+ * РџРѕРіСЂР°РјРјРёСЂРѕРІР°РЅРёРµ РјРѕРґРµРјР° СЃ РїСЂРѕРІРµСЂРєРѕР№
  */
 #pragma section("FLASH_code")
 int am3_prg_modem(void *par)
@@ -184,7 +184,7 @@ int am3_prg_modem(void *par)
     int t0, t1, i, k;
     char str[MODEM_BUF_LEN];
     u8 h0, m0, h1, m1;
-    int res = -1;		/* Сразу поставим ошибка. Если все выполнится ОК-ставим 0 */
+    int res = -1;		/* РЎСЂР°Р·Сѓ РїРѕСЃС‚Р°РІРёРј РѕС€РёР±РєР°. Р•СЃР»Рё РІСЃРµ РІС‹РїРѕР»РЅРёС‚СЃСЏ РћРљ-СЃС‚Р°РІРёРј 0 */
     TIME_DATE td;
     GNS110_PARAM_STRUCT *time;
 
@@ -192,29 +192,29 @@ int am3_prg_modem(void *par)
     if (par == NULL)
 	return -1;
 
-    time = (GNS110_PARAM_STRUCT *) par;	/* Переданное время */
+    time = (GNS110_PARAM_STRUCT *) par;	/* РџРµСЂРµРґР°РЅРЅРѕРµ РІСЂРµРјСЏ */
 
     log_write_log_file(">>>>>>>>>>>>>>>>>>>> Init modem AM3 <<<<<<<<<<<<<<<<<<<\n");
 
     modem_on();
 
-    /* Ждем ~8 секунд после включения */
+    /* Р–РґРµРј ~8 СЃРµРєСѓРЅРґ РїРѕСЃР»Рµ РІРєР»СЋС‡РµРЅРёСЏ */
     t0 = get_sec_ticks();
     while (get_sec_ticks() - t0 < MODEM_POWERON_TIME_SEC)
 	LED_blink();
 
 
     do {
-	/* Установка акустического модема - только подстройка времени */
+	/* РЈСЃС‚Р°РЅРѕРІРєР° Р°РєСѓСЃС‚РёС‡РµСЃРєРѕРіРѕ РјРѕРґРµРјР° - С‚РѕР»СЊРєРѕ РїРѕРґСЃС‚СЂРѕР№РєР° РІСЂРµРјРµРЅРё */
 	if (am3_init() < 0) {
 	    break;
 	}
 
 	i = 1;
 	log_write_log_file("Acoustic modem AM3 init OK, number got from log: %d\n", time->gns110_modem_num);
-	if (time->gns110_modem_num > 0) {	/* Если '0' - номер модема не изменяем - ставим то что у него уже записано */
+	if (time->gns110_modem_num > 0) {	/* Р•СЃР»Рё '0' - РЅРѕРјРµСЂ РјРѕРґРµРјР° РЅРµ РёР·РјРµРЅСЏРµРј - СЃС‚Р°РІРёРј С‚Рѕ С‡С‚Рѕ Сѓ РЅРµРіРѕ СѓР¶Рµ Р·Р°РїРёСЃР°РЅРѕ */
 	    log_write_log_file("%d)------------------------------------------------\n", i++);
-	    delay_ms(WAIT_MODEM_TIME_MS);	/* Задержка перед посылкой команды */
+	    delay_ms(WAIT_MODEM_TIME_MS);	/* Р—Р°РґРµСЂР¶РєР° РїРµСЂРµРґ РїРѕСЃС‹Р»РєРѕР№ РєРѕРјР°РЅРґС‹ */
 	    LED_blink();
 
 	    if (am3_set_dev_num(time->gns110_modem_num) == 0) {
@@ -223,11 +223,11 @@ int am3_prg_modem(void *par)
 		log_write_log_file("FAIL: Set modem number %d\n", time->gns110_modem_num);
 		break;
 	    }
-	    delay_ms(WAIT_MODEM_TIME_MS);	// Задержка перед посылкой команды
+	    delay_ms(WAIT_MODEM_TIME_MS);	// Р—Р°РґРµСЂР¶РєР° РїРµСЂРµРґ РїРѕСЃС‹Р»РєРѕР№ РєРѕРјР°РЅРґС‹
 	    LED_blink();
 	} else {
   	     log_write_log_file("We don't have to change Acoustic modem number\n");
-	    // Читаем из модема
+	    // Р§РёС‚Р°РµРј РёР· РјРѕРґРµРјР°
 	    t0 = am3_get_dev_num();
 	    if (t0 == 99 || t0 == 0) {
 		log_write_log_file("FAIL: Modem number can't be %d\n", t0);
@@ -241,11 +241,11 @@ int am3_prg_modem(void *par)
 		log_write_log_file("FAIL: Set modem number %d\n", time->gns110_modem_num);
 		break;
 	    }
-	    delay_ms(WAIT_MODEM_TIME_MS);	// Задержка перед посылкой команды
+	    delay_ms(WAIT_MODEM_TIME_MS);	// Р—Р°РґРµСЂР¶РєР° РїРµСЂРµРґ РїРѕСЃС‹Р»РєРѕР№ РєРѕРјР°РЅРґС‹
 	    LED_blink();
 	}
 
-	/* Установим время модема */
+	/* РЈСЃС‚Р°РЅРѕРІРёРј РІСЂРµРјСЏ РјРѕРґРµРјР° */
 	log_write_log_file("%d)------------------------------------------------\n", i++);
 	delay_ms(WAIT_MODEM_TIME_MS);
 	LED_blink();
@@ -259,7 +259,7 @@ int am3_prg_modem(void *par)
 	}
 
 
-	/* Установим аварийное время всплытия */
+	/* РЈСЃС‚Р°РЅРѕРІРёРј Р°РІР°СЂРёР№РЅРѕРµ РІСЂРµРјСЏ РІСЃРїР»С‹С‚РёСЏ */
 	log_write_log_file("%d)------------------------------------------------\n", i++);
 	sec_to_td(time->gns110_modem_alarm_time, &td);
 	delay_ms(WAIT_MODEM_TIME_MS);
@@ -271,9 +271,9 @@ int am3_prg_modem(void *par)
 	    log_write_log_file("FAIL: Set alarm popup time\n");
 	    break;
 	}
-	res = -1;		/* Поставим снова */
+	res = -1;		/* РџРѕСЃС‚Р°РІРёРј СЃРЅРѕРІР° */
 
-	/* Установим светлое время суток */
+	/* РЈСЃС‚Р°РЅРѕРІРёРј СЃРІРµС‚Р»РѕРµ РІСЂРµРјСЏ СЃСѓС‚РѕРє */
 	log_write_log_file("%d)------------------------------------------------\n", i++);
 	delay_ms(WAIT_MODEM_TIME_MS);
 	LED_blink();
@@ -284,11 +284,11 @@ int am3_prg_modem(void *par)
 	    break;
 	}
 
-	/* Длительность всплытия: получаем в секундах, передаем в минутах */
+	/* Р”Р»РёС‚РµР»СЊРЅРѕСЃС‚СЊ РІСЃРїР»С‹С‚РёСЏ: РїРѕР»СѓС‡Р°РµРј РІ СЃРµРєСѓРЅРґР°С…, РїРµСЂРµРґР°РµРј РІ РјРёРЅСѓС‚Р°С… */
 	log_write_log_file("%d)------------------------------------------------\n", i++);
 	t0 = time->gns110_gps_time - time->gns110_burn_off_time;
 	t0 /= 60;
-	delay_ms(WAIT_MODEM_TIME_MS);	// Задержка перед посылкой команды
+	delay_ms(WAIT_MODEM_TIME_MS);	// Р—Р°РґРµСЂР¶РєР° РїРµСЂРµРґ РїРѕСЃС‹Р»РєРѕР№ РєРѕРјР°РЅРґС‹
 	LED_blink();
 	if (am3_set_popup_len(t0) == 0) {
 	    log_write_log_file("SUCCESS: Set popup len: %d min\n", t0);
@@ -298,9 +298,9 @@ int am3_prg_modem(void *par)
 	}
 
 
-	/* Длительность пережига в секундах */
+	/* Р”Р»РёС‚РµР»СЊРЅРѕСЃС‚СЊ РїРµСЂРµР¶РёРіР° РІ СЃРµРєСѓРЅРґР°С… */
 	log_write_log_file("%d)------------------------------------------------\n", i++);
-	delay_ms(WAIT_MODEM_TIME_MS);	// Задержка перед посылкой команды
+	delay_ms(WAIT_MODEM_TIME_MS);	// Р—Р°РґРµСЂР¶РєР° РїРµСЂРµРґ РїРѕСЃС‹Р»РєРѕР№ РєРѕРјР°РЅРґС‹
 	LED_blink();
 	if (am3_set_burn_len(time->gns110_modem_burn_len_sec) == 0) {
 	    log_write_log_file("SUCCESS: Set burn len: %d sec\n", time->gns110_modem_burn_len_sec);
@@ -310,7 +310,7 @@ int am3_prg_modem(void *par)
 	}
 
 
-	/* Применить все параметры */
+	/* РџСЂРёРјРµРЅРёС‚СЊ РІСЃРµ РїР°СЂР°РјРµС‚СЂС‹ */
 	log_write_log_file("%d)------------------------------------------------\n", i++);
 	delay_ms(WAIT_MODEM_TIME_MS);
 	LED_blink();
@@ -323,10 +323,10 @@ int am3_prg_modem(void *par)
 
 
 	/***********************************************************************************************
-	 * Проверка того, что мы записали
+	 * РџСЂРѕРІРµСЂРєР° С‚РѕРіРѕ, С‡С‚Рѕ РјС‹ Р·Р°РїРёСЃР°Р»Рё
 	 ***********************************************************************************************/
 
-	/* Получить номер устройства - если номер 0 - ошибка! */
+	/* РџРѕР»СѓС‡РёС‚СЊ РЅРѕРјРµСЂ СѓСЃС‚СЂРѕР№СЃС‚РІР° - РµСЃР»Рё РЅРѕРјРµСЂ 0 - РѕС€РёР±РєР°! */
 	for (k = 0; k < 3; k++) {
 	    log_write_log_file("%d)------------------------------------------------\n", i++);
 	    t0 = am3_get_dev_num();
@@ -345,7 +345,7 @@ int am3_prg_modem(void *par)
 	    break;
 	}
 
-	/* Еще раз проверим! */
+	/* Р•С‰Рµ СЂР°Р· РїСЂРѕРІРµСЂРёРј! */
 	if (k >= 2 && t0 != time->gns110_modem_num && time->gns110_modem_num != 0) {
 	    log_write_log_file("FAIL: Get modem number: %d\n", t0);
 	    break;
@@ -353,11 +353,11 @@ int am3_prg_modem(void *par)
 
 
 
-	/* Получить время с модема  */
+	/* РџРѕР»СѓС‡РёС‚СЊ РІСЂРµРјСЏ СЃ РјРѕРґРµРјР°  */
 	log_write_log_file("%d)------------------------------------------------\n", i++);
 	delay_ms(WAIT_MODEM_TIME_MS);
 	LED_blink();
-	t0 = get_sec_ticks();	/* Наше время  */
+	t0 = get_sec_ticks();	/* РќР°С€Рµ РІСЂРµРјСЏ  */
 	t1 = am3_get_curr_time(&td);
 	if (t1 != -1 && abs(t1 - t0) < 120) {
 	    log_write_log_file("SUCCESS: Get modem time: %02d.%02d.%02d %02d:%02d:%02d\n", td.day, td.mon, td.year - 2000, td.hour, td.min, td.sec);
@@ -366,7 +366,7 @@ int am3_prg_modem(void *par)
 	    break;
 	}
 
-	/* Получить аварийное время всплытия - проверить что мы записали туда менее 2 минут разницы д.б.!!! */
+	/* РџРѕР»СѓС‡РёС‚СЊ Р°РІР°СЂРёР№РЅРѕРµ РІСЂРµРјСЏ РІСЃРїР»С‹С‚РёСЏ - РїСЂРѕРІРµСЂРёС‚СЊ С‡С‚Рѕ РјС‹ Р·Р°РїРёСЃР°Р»Рё С‚СѓРґР° РјРµРЅРµРµ 2 РјРёРЅСѓС‚ СЂР°Р·РЅРёС†С‹ Рґ.Р±.!!! */
 	log_write_log_file("%d)------------------------------------------------\n", i++);
 	delay_ms(WAIT_MODEM_TIME_MS);
 	LED_blink();
@@ -376,7 +376,7 @@ int am3_prg_modem(void *par)
 	    break;
 	}
 	log_write_log_file("SUCCESS: Get modem alarm time: %02d.%02d.%02d - %02d:%02d:%02d\n", td.day, td.mon, td.year - 2000, td.hour, td.min, td.sec);
-	/* Получить светлое время суток */
+	/* РџРѕР»СѓС‡РёС‚СЊ СЃРІРµС‚Р»РѕРµ РІСЂРµРјСЏ СЃСѓС‚РѕРє */
 	log_write_log_file("%d)------------------------------------------------\n", i++);
 	if (am3_get_cal_time(&h0, &m0, &h1, &m1) == 0) {
 	    if (h0 == time->gns110_modem_h0_time && m0 == time->gns110_modem_m0_time && h1 == time->gns110_modem_h1_time && m1 == time->gns110_modem_m1_time) {
@@ -390,12 +390,12 @@ int am3_prg_modem(void *par)
 	}
 
 
-	/* Длительность всплытия в минутах */
+	/* Р”Р»РёС‚РµР»СЊРЅРѕСЃС‚СЊ РІСЃРїР»С‹С‚РёСЏ РІ РјРёРЅСѓС‚Р°С… */
 	log_write_log_file("%d)------------------------------------------------\n", i++);
 	delay_ms(WAIT_MODEM_TIME_MS);
 	LED_blink();
 	t0 = am3_get_popup_len();
-	t0 *= 60;		// в секунды перевели
+	t0 *= 60;		// РІ СЃРµРєСѓРЅРґС‹ РїРµСЂРµРІРµР»Рё
 	if (t0 == time->gns110_gps_time - time->gns110_burn_off_time) {
 	    log_write_log_file("SUCCESS: Get popup len\n");
 	} else {
@@ -404,7 +404,7 @@ int am3_prg_modem(void *par)
 	}
 
 
-	/* Длительность пережыга в секундах */
+	/* Р”Р»РёС‚РµР»СЊРЅРѕСЃС‚СЊ РїРµСЂРµР¶С‹РіР° РІ СЃРµРєСѓРЅРґР°С… */
 	log_write_log_file("%d)------------------------------------------------\n", i++);
 	delay_ms(WAIT_MODEM_TIME_MS);
 	LED_blink();
@@ -416,7 +416,7 @@ int am3_prg_modem(void *par)
 	    break;
 	}
 
-	res = 0;		// Все OK
+	res = 0;		// Р’СЃРµ OK
 	log_write_log_file("---------------------------------------------------\n");
     } while (0);
     am3_close();
@@ -424,7 +424,7 @@ int am3_prg_modem(void *par)
 }
 
 /**
- * Опрос модема. Перевести время всплытия на сутки вперед от наших часов, пока он не запрограммирован.
+ * РћРїСЂРѕСЃ РјРѕРґРµРјР°. РџРµСЂРµРІРµСЃС‚Рё РІСЂРµРјСЏ РІСЃРїР»С‹С‚РёСЏ РЅР° СЃСѓС‚РєРё РІРїРµСЂРµРґ РѕС‚ РЅР°С€РёС… С‡Р°СЃРѕРІ, РїРѕРєР° РѕРЅ РЅРµ Р·Р°РїСЂРѕРіСЂР°РјРјРёСЂРѕРІР°РЅ.
  */
 #pragma section("FLASH_code")
 int am3_check_modem(void *v)
@@ -438,12 +438,12 @@ int am3_check_modem(void *v)
 
 	run = (GNS110_PARAM_STRUCT *) v;
 
-	/* Установка акустического модема - только подстройка времени */
+	/* РЈСЃС‚Р°РЅРѕРІРєР° Р°РєСѓСЃС‚РёС‡РµСЃРєРѕРіРѕ РјРѕРґРµРјР° - С‚РѕР»СЊРєРѕ РїРѕРґСЃС‚СЂРѕР№РєР° РІСЂРµРјРµРЅРё */
 	if (am3_init() < 0) {
 	    break;
 	}
 
-	/* Получить номер устройства */
+	/* РџРѕР»СѓС‡РёС‚СЊ РЅРѕРјРµСЂ СѓСЃС‚СЂРѕР№СЃС‚РІР° */
 	delay_ms(WAIT_MODEM_TIME_MS);
 	LED_blink();
 	temp = am3_get_dev_num();
@@ -452,20 +452,20 @@ int am3_check_modem(void *v)
 	}
 	run->gns110_modem_num = temp;
 
-	/* Получить время с модема  */
+	/* РџРѕР»СѓС‡РёС‚СЊ РІСЂРµРјСЏ СЃ РјРѕРґРµРјР°  */
 	delay_ms(WAIT_MODEM_TIME_MS);
 	LED_blink();
 	run->gns110_modem_rtc_time = am3_get_curr_time(&td);
 	if (run->gns110_modem_rtc_time < 0) {
 	    run->gns110_modem_rtc_time = 1577836800;	// 01-01-20
 	}
-	//-------------------- Установим номер модема
+	//-------------------- РЈСЃС‚Р°РЅРѕРІРёРј РЅРѕРјРµСЂ РјРѕРґРµРјР°
 	delay_ms(WAIT_MODEM_TIME_MS);
 	LED_blink();
 	if (am3_set_dev_num(run->gns110_modem_num) < 0) {
 	    break;
 	}
-	//-------------------- Установим время модема по часам GNS110
+	//-------------------- РЈСЃС‚Р°РЅРѕРІРёРј РІСЂРµРјСЏ РјРѕРґРµРјР° РїРѕ С‡Р°СЃР°Рј GNS110
 	delay_ms(WAIT_MODEM_TIME_MS);
 	LED_blink();
 	t0 = get_sec_ticks();
@@ -473,7 +473,7 @@ int am3_check_modem(void *v)
 	if (am3_set_curr_time(&td) != 0) {
 	    break;
 	}
-	//----------------------- Время аварийного всплытия на сутки вперед
+	//----------------------- Р’СЂРµРјСЏ Р°РІР°СЂРёР№РЅРѕРіРѕ РІСЃРїР»С‹С‚РёСЏ РЅР° СЃСѓС‚РєРё РІРїРµСЂРµРґ
 	delay_ms(WAIT_MODEM_TIME_MS);
 	LED_blink();
 	t0 += 86400;
@@ -485,25 +485,25 @@ int am3_check_modem(void *v)
 	if (am3_set_alarm_time(&td) != 0) {
 	    break;
 	}
-	//----------------------- Светлое время
+	//----------------------- РЎРІРµС‚Р»РѕРµ РІСЂРµРјСЏ
 	delay_ms(WAIT_MODEM_TIME_MS);
 	LED_blink();
 	if (am3_set_cal_time(6, 0, 20, 0) < 0) {
 	    break;
 	}
-	//-----------------------Время подъема-всплытия
+	//-----------------------Р’СЂРµРјСЏ РїРѕРґСЉРµРјР°-РІСЃРїР»С‹С‚РёСЏ
 	delay_ms(WAIT_MODEM_TIME_MS);
 	LED_blink();
 	if (am3_set_popup_len(1) < 0) {
 	    break;
 	}
-	//-----------------------Время пережига
+	//-----------------------Р’СЂРµРјСЏ РїРµСЂРµР¶РёРіР°
 	delay_ms(WAIT_MODEM_TIME_MS);
 	LED_blink();
 	if (am3_set_burn_len(5) < 0) {
 	    break;
 	}
-	// Установить все параметры
+	// РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РІСЃРµ РїР°СЂР°РјРµС‚СЂС‹
 	delay_ms(WAIT_MODEM_TIME_MS);
 	LED_blink();
 	if (am3_set_all_params() != 0) {
@@ -511,13 +511,13 @@ int am3_check_modem(void *v)
 	}
 	res = 0;
     } while (0);
-    comport_init();		/* заново инициализируем отладочный порт */
+    comport_init();		/* Р·Р°РЅРѕРІРѕ РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј РѕС‚Р»Р°РґРѕС‡РЅС‹Р№ РїРѕСЂС‚ */
     return res;
 }
 
 
 /**
- * Включить радиопередачу
+ * Р’РєР»СЋС‡РёС‚СЊ СЂР°РґРёРѕРїРµСЂРµРґР°С‡Сѓ
  */
 #pragma section("FLASH_code")
 int am3_set_radio(void *v)
@@ -526,19 +526,19 @@ int am3_set_radio(void *v)
     GNS110_PARAM_STRUCT *par;
     if (v == NULL)
 	return -1;
-    par = (GNS110_PARAM_STRUCT *) v;	/* Переданное число */
-    modem_on();			/* Включаем реле Акуст модема  */
+    par = (GNS110_PARAM_STRUCT *) v;	/* РџРµСЂРµРґР°РЅРЅРѕРµ С‡РёСЃР»Рѕ */
+    modem_on();			/* Р’РєР»СЋС‡Р°РµРј СЂРµР»Рµ РђРєСѓСЃС‚ РјРѕРґРµРјР°  */
 
-    /* Установка акустического модема - только подстройка времени */
+    /* РЈСЃС‚Р°РЅРѕРІРєР° Р°РєСѓСЃС‚РёС‡РµСЃРєРѕРіРѕ РјРѕРґРµРјР° - С‚РѕР»СЊРєРѕ РїРѕРґСЃС‚СЂРѕР№РєР° РІСЂРµРјРµРЅРё */
     if (am3_init() < 0) {
 	return -1;
     }
 
-    /* Включаем радиопередачу */
+    /* Р’РєР»СЋС‡Р°РµРј СЂР°РґРёРѕРїРµСЂРµРґР°С‡Сѓ */
     if (am3_set_gps_radio() == 0) {
 	log_write_log_file("SUCCESS: Set modem GPS radio \n");
     } else {
-	// еще раз
+	// РµС‰Рµ СЂР°Р·
 	if (am3_set_gps_radio() < 0) {
 	    log_write_log_file("FAIL: Set modem GPS radio \n");
 	    am3_close();
@@ -546,12 +546,12 @@ int am3_set_radio(void *v)
 	}
     }
 
-    /* Не выключать UART */
+    /* РќРµ РІС‹РєР»СЋС‡Р°С‚СЊ UART */
     return 0;
 }
 
 /**
- *  Установить номер устройства 
+ *  РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РЅРѕРјРµСЂ СѓСЃС‚СЂРѕР№СЃС‚РІР° 
  */
 #pragma section("FLASH_code")
 int am3_set_dev_num(short num)
@@ -562,12 +562,12 @@ int am3_set_dev_num(short num)
     int t0;
     if (num > 9999)
 	num = 9999;
-    snprintf(str, sizeof(str), "$RSANM,%04d,*%04x\r\n", num, 0);	// 1 шаг - Мы должны послать эту команду (без 2-х нулей)
-    crc16 = check_crc16((u8 *) str + 1, 11);	// шаг 2 - Определяем контрольную сумму до звездочки 
-    snprintf(str, sizeof(str), "$RSANM,%04d,*%04x\r\n", num, crc16);	// 3 шаг - Команда с контрольной суммой 
-    am3_write_data(str, strlen(str));	/* Посылаем команду */
+    snprintf(str, sizeof(str), "$RSANM,%04d,*%04x\r\n", num, 0);	// 1 С€Р°Рі - РњС‹ РґРѕР»Р¶РЅС‹ РїРѕСЃР»Р°С‚СЊ СЌС‚Сѓ РєРѕРјР°РЅРґСѓ (Р±РµР· 2-С… РЅСѓР»РµР№)
+    crc16 = check_crc16((u8 *) str + 1, 11);	// С€Р°Рі 2 - РћРїСЂРµРґРµР»СЏРµРј РєРѕРЅС‚СЂРѕР»СЊРЅСѓСЋ СЃСѓРјРјСѓ РґРѕ Р·РІРµР·РґРѕС‡РєРё 
+    snprintf(str, sizeof(str), "$RSANM,%04d,*%04x\r\n", num, crc16);	// 3 С€Р°Рі - РљРѕРјР°РЅРґР° СЃ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјРѕР№ 
+    am3_write_data(str, strlen(str));	/* РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ */
     log_write_log_file("TX: am3_set_dev_num: %s", str);
-    /* Ждем ответ */
+    /* Р–РґРµРј РѕС‚РІРµС‚ */
     am3_wait_reply(WAIT_MODEM_TIME_MS);
     if (am3_get_data(str, MODEM_BUF_LEN) > 0) {
 	log_write_log_file("RX: am3_set_dev_num: %s", str);
@@ -582,7 +582,7 @@ int am3_set_dev_num(short num)
 }
 
 
-/* Установить время аналогового модема */
+/* РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РІСЂРµРјСЏ Р°РЅР°Р»РѕРіРѕРІРѕРіРѕ РјРѕРґРµРјР° */
 #pragma section("FLASH_code")
 int am3_set_curr_time(TIME_DATE * td)
 {
@@ -590,13 +590,13 @@ int am3_set_curr_time(TIME_DATE * td)
     int res = -1;
     u16 crc16;
     int t0;
-    /* Мы должны послать эту команду (без 2-х нулей) */
+    /* РњС‹ РґРѕР»Р¶РЅС‹ РїРѕСЃР»Р°С‚СЊ СЌС‚Сѓ РєРѕРјР°РЅРґСѓ (Р±РµР· 2-С… РЅСѓР»РµР№) */
     snprintf(str, sizeof(str), "$RSACL,%02d.%02d.%02d,%02d:%02d,*%04x\r\n", td->day, td->mon, td->year - 2000, td->hour, td->min, 0x0000);
-    crc16 = check_crc16((u8 *) str + 1, 21);	/* Определяем контрольную сумму до звездочки */
-    snprintf(str, sizeof(str), "$RSACL,%02d.%02d.%02d,%02d:%02d,*%04x\r\n", td->day, td->mon, td->year - 2000, td->hour, td->min, crc16);	/* Команды с контрольной суммой */
-    am3_write_data(str, strlen(str));	/* Посылаем команду  */
+    crc16 = check_crc16((u8 *) str + 1, 21);	/* РћРїСЂРµРґРµР»СЏРµРј РєРѕРЅС‚СЂРѕР»СЊРЅСѓСЋ СЃСѓРјРјСѓ РґРѕ Р·РІРµР·РґРѕС‡РєРё */
+    snprintf(str, sizeof(str), "$RSACL,%02d.%02d.%02d,%02d:%02d,*%04x\r\n", td->day, td->mon, td->year - 2000, td->hour, td->min, crc16);	/* РљРѕРјР°РЅРґС‹ СЃ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјРѕР№ */
+    am3_write_data(str, strlen(str));	/* РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ  */
     log_write_log_file("TX: am3_set_curr_time: %s", str);
-    /* Ждем ответ */
+    /* Р–РґРµРј РѕС‚РІРµС‚ */
     am3_wait_reply(WAIT_MODEM_TIME_MS);
     if (am3_get_data(str, MODEM_BUF_LEN)) {
 	log_write_log_file("RX: am3_set_curr_time: %s", str);
@@ -611,7 +611,7 @@ int am3_set_curr_time(TIME_DATE * td)
 }
 
 
-/* Установить аварийное время всплытия */
+/* РЈСЃС‚Р°РЅРѕРІРёС‚СЊ Р°РІР°СЂРёР№РЅРѕРµ РІСЂРµРјСЏ РІСЃРїР»С‹С‚РёСЏ */
 #pragma section("FLASH_code")
 int am3_set_alarm_time(TIME_DATE * td)
 {
@@ -619,16 +619,16 @@ int am3_set_alarm_time(TIME_DATE * td)
     int res = -1;
     u16 crc16;
     int t0;
-    /* Мы должны послать эту команду (без 2-х нулей) */
-    snprintf(str, sizeof(str), "$RSAAL,%02d.%02d.%02d,%02d:%02d,*%04x\r\n", td->day, td->mon, td->year - 2000, td->hour, td->min, 0x0000);	// 1 шаг
-    /* Определяем контрольную сумму до звездочки */
-    crc16 = check_crc16((u8 *) str + 1, 21);	// шаг 2
-    /* Команды с контрольной суммой */
-    snprintf(str, sizeof(str), "$RSAAL,%02d.%02d.%02d,%02d:%02d,*%04x\r\n", td->day, td->mon, td->year - 2000, td->hour, td->min, crc16);	// 3 шаг
-    /* Посылаем команду  */
+    /* РњС‹ РґРѕР»Р¶РЅС‹ РїРѕСЃР»Р°С‚СЊ СЌС‚Сѓ РєРѕРјР°РЅРґСѓ (Р±РµР· 2-С… РЅСѓР»РµР№) */
+    snprintf(str, sizeof(str), "$RSAAL,%02d.%02d.%02d,%02d:%02d,*%04x\r\n", td->day, td->mon, td->year - 2000, td->hour, td->min, 0x0000);	// 1 С€Р°Рі
+    /* РћРїСЂРµРґРµР»СЏРµРј РєРѕРЅС‚СЂРѕР»СЊРЅСѓСЋ СЃСѓРјРјСѓ РґРѕ Р·РІРµР·РґРѕС‡РєРё */
+    crc16 = check_crc16((u8 *) str + 1, 21);	// С€Р°Рі 2
+    /* РљРѕРјР°РЅРґС‹ СЃ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјРѕР№ */
+    snprintf(str, sizeof(str), "$RSAAL,%02d.%02d.%02d,%02d:%02d,*%04x\r\n", td->day, td->mon, td->year - 2000, td->hour, td->min, crc16);	// 3 С€Р°Рі
+    /* РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ  */
     am3_write_data(str, strlen(str));
     log_write_log_file("TX: am3_set_alarm_time: %s", str);
-    /* Ждем ответ */
+    /* Р–РґРµРј РѕС‚РІРµС‚ */
     am3_wait_reply(WAIT_MODEM_TIME_MS);
     if (am3_get_data(str, MODEM_BUF_LEN)) {
 	log_write_log_file("RX: am3_set_alarm_time: %s", str);
@@ -643,7 +643,7 @@ int am3_set_alarm_time(TIME_DATE * td)
 }
 
 /**
- * Установить локальный календарь. Светлое время суток 
+ * РЈСЃС‚Р°РЅРѕРІРёС‚СЊ Р»РѕРєР°Р»СЊРЅС‹Р№ РєР°Р»РµРЅРґР°СЂСЊ. РЎРІРµС‚Р»РѕРµ РІСЂРµРјСЏ СЃСѓС‚РѕРє 
  */
 #pragma section("FLASH_code")
 int am3_set_cal_time(u8 h0, u8 m0, u8 h1, u8 m1)
@@ -652,13 +652,13 @@ int am3_set_cal_time(u8 h0, u8 m0, u8 h1, u8 m1)
     int res = -1;
     u16 crc16;
     int t0;
-    /* Мы должны послать эту команду (без 2-х нулей) */
-    snprintf(str, sizeof(str), "$RSAST,%02d:%02d-%02d:%02d,*%04x\r\n", h0, m0, h1, m1, 0x0000);	// 1 шаг
-    /* Определяем контрольную сумму до звездочки */
-    crc16 = check_crc16((u8 *) str + 1, 18);	// шаг 2
-    /* Команды с контрольной суммой */
-    snprintf(str, sizeof(str), "$RSAST,%02d:%02d-%02d:%02d,*%04x\r\n", h0, m0, h1, m1, crc16);	// 3 шаг
-    /* Посылаем команду  */
+    /* РњС‹ РґРѕР»Р¶РЅС‹ РїРѕСЃР»Р°С‚СЊ СЌС‚Сѓ РєРѕРјР°РЅРґСѓ (Р±РµР· 2-С… РЅСѓР»РµР№) */
+    snprintf(str, sizeof(str), "$RSAST,%02d:%02d-%02d:%02d,*%04x\r\n", h0, m0, h1, m1, 0x0000);	// 1 С€Р°Рі
+    /* РћРїСЂРµРґРµР»СЏРµРј РєРѕРЅС‚СЂРѕР»СЊРЅСѓСЋ СЃСѓРјРјСѓ РґРѕ Р·РІРµР·РґРѕС‡РєРё */
+    crc16 = check_crc16((u8 *) str + 1, 18);	// С€Р°Рі 2
+    /* РљРѕРјР°РЅРґС‹ СЃ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјРѕР№ */
+    snprintf(str, sizeof(str), "$RSAST,%02d:%02d-%02d:%02d,*%04x\r\n", h0, m0, h1, m1, crc16);	// 3 С€Р°Рі
+    /* РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ  */
     am3_write_data(str, strlen(str));
     log_write_log_file("TX: am3_set_cal_time: %s\n", str);
     am3_wait_reply(WAIT_MODEM_TIME_MS);
@@ -675,7 +675,7 @@ int am3_set_cal_time(u8 h0, u8 m0, u8 h1, u8 m1)
 }
 
 
-/* Установить продолжительность всплытия */
+/* РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РїСЂРѕРґРѕР»Р¶РёС‚РµР»СЊРЅРѕСЃС‚СЊ РІСЃРїР»С‹С‚РёСЏ */
 #pragma section("FLASH_code")
 int am3_set_popup_len(u16 min)
 {
@@ -685,13 +685,13 @@ int am3_set_popup_len(u16 min)
     int t0;
     if (min > 999)
 	min = 999;
-    /* Мы должны послать эту команду (без 2-х нулей) */
-    snprintf(str, sizeof(str), "$RSATZ,%03d,*%04x\r\n", min, 0x0000);	// 1 шаг
-    /* Определяем контрольную сумму до звездочки */
-    crc16 = check_crc16((u8 *) str + 1, 10);	// шаг 2
-    /* Команды с контрольной суммой */
-    snprintf(str, sizeof(str), "$RSATZ,%03d,*%04x\r\n", min, crc16);	// 3 шаг
-    /* Посылаем команду  */
+    /* РњС‹ РґРѕР»Р¶РЅС‹ РїРѕСЃР»Р°С‚СЊ СЌС‚Сѓ РєРѕРјР°РЅРґСѓ (Р±РµР· 2-С… РЅСѓР»РµР№) */
+    snprintf(str, sizeof(str), "$RSATZ,%03d,*%04x\r\n", min, 0x0000);	// 1 С€Р°Рі
+    /* РћРїСЂРµРґРµР»СЏРµРј РєРѕРЅС‚СЂРѕР»СЊРЅСѓСЋ СЃСѓРјРјСѓ РґРѕ Р·РІРµР·РґРѕС‡РєРё */
+    crc16 = check_crc16((u8 *) str + 1, 10);	// С€Р°Рі 2
+    /* РљРѕРјР°РЅРґС‹ СЃ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјРѕР№ */
+    snprintf(str, sizeof(str), "$RSATZ,%03d,*%04x\r\n", min, crc16);	// 3 С€Р°Рі
+    /* РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ  */
     am3_write_data(str, strlen(str));
     log_write_log_file("TX: am3_set_popup_len: %s", str);
     am3_wait_reply(WAIT_MODEM_TIME_MS);
@@ -708,7 +708,7 @@ int am3_set_popup_len(u16 min)
     return res;
 }
 
-/* Установить продолжительность пережига проволоки в секундах */
+/* РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РїСЂРѕРґРѕР»Р¶РёС‚РµР»СЊРЅРѕСЃС‚СЊ РїРµСЂРµР¶РёРіР° РїСЂРѕРІРѕР»РѕРєРё РІ СЃРµРєСѓРЅРґР°С… */
 #pragma section("FLASH_code")
 int am3_set_burn_len(u16 sec)
 {
@@ -720,10 +720,10 @@ int am3_set_burn_len(u16 sec)
 	sec = 1;
     if (sec > 9999)
 	sec = 9999;
-    snprintf(str, sizeof(str), "$RSABT,%04d,*%04x\r\n", sec, 0x0000);	/* Мы должны послать эту команду (без 2-х нулей) */
-    crc16 = check_crc16((u8 *) str + 1, 11);	/* Определяем контрольную сумму до звездочки */
-    snprintf(str, sizeof(str), "$RSABT,%04d,*%04x\r\n", sec, crc16);	/* Команды с контрольной суммой */
-    am3_write_data(str, strlen(str));	/* Посылаем команду  */
+    snprintf(str, sizeof(str), "$RSABT,%04d,*%04x\r\n", sec, 0x0000);	/* РњС‹ РґРѕР»Р¶РЅС‹ РїРѕСЃР»Р°С‚СЊ СЌС‚Сѓ РєРѕРјР°РЅРґСѓ (Р±РµР· 2-С… РЅСѓР»РµР№) */
+    crc16 = check_crc16((u8 *) str + 1, 11);	/* РћРїСЂРµРґРµР»СЏРµРј РєРѕРЅС‚СЂРѕР»СЊРЅСѓСЋ СЃСѓРјРјСѓ РґРѕ Р·РІРµР·РґРѕС‡РєРё */
+    snprintf(str, sizeof(str), "$RSABT,%04d,*%04x\r\n", sec, crc16);	/* РљРѕРјР°РЅРґС‹ СЃ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјРѕР№ */
+    am3_write_data(str, strlen(str));	/* РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ  */
     log_write_log_file("TX: am3_set_burn_len: %s", str);
     am3_wait_reply(WAIT_MODEM_TIME_MS);
     if (am3_get_data(str, MODEM_BUF_LEN)) {
@@ -738,7 +738,7 @@ int am3_set_burn_len(u16 sec)
     return res;
 }
 
-/* Установить размер файла данных */
+/* РЈСЃС‚Р°РЅРѕРІРёС‚СЊ СЂР°Р·РјРµСЂ С„Р°Р№Р»Р° РґР°РЅРЅС‹С… */
 #pragma section("FLASH_code")
 int am3_set_file_len(u32 num)
 {
@@ -746,13 +746,13 @@ int am3_set_file_len(u32 num)
     int res = -1;
     u16 crc16;
     int t0;
-    /* Мы должны послать эту команду (без 2-х нулей) */
-    snprintf(str, sizeof(str), "$RSASZ,%08d,*%04x\r\n", num, 0x0000);	// 1 шаг
-    /* Определяем контрольную сумму до звездочки */
-    crc16 = check_crc16((u8 *) str + 1, 15);	// шаг 2
-    /* Команды с контрольной суммой */
-    snprintf(str, sizeof(str), "$RSASZ,%03d,*%04x\r\n", num, crc16);	// 3 шаг
-    /* Посылаем команду  */
+    /* РњС‹ РґРѕР»Р¶РЅС‹ РїРѕСЃР»Р°С‚СЊ СЌС‚Сѓ РєРѕРјР°РЅРґСѓ (Р±РµР· 2-С… РЅСѓР»РµР№) */
+    snprintf(str, sizeof(str), "$RSASZ,%08d,*%04x\r\n", num, 0x0000);	// 1 С€Р°Рі
+    /* РћРїСЂРµРґРµР»СЏРµРј РєРѕРЅС‚СЂРѕР»СЊРЅСѓСЋ СЃСѓРјРјСѓ РґРѕ Р·РІРµР·РґРѕС‡РєРё */
+    crc16 = check_crc16((u8 *) str + 1, 15);	// С€Р°Рі 2
+    /* РљРѕРјР°РЅРґС‹ СЃ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјРѕР№ */
+    snprintf(str, sizeof(str), "$RSASZ,%03d,*%04x\r\n", num, crc16);	// 3 С€Р°Рі
+    /* РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ  */
     am3_write_data(str, strlen(str));
     log_write_log_file("TX: am3_set_file_len: %s", str);
     am3_wait_reply(WAIT_MODEM_TIME_MS);
@@ -768,7 +768,7 @@ int am3_set_file_len(u32 num)
 }
 
 
-/* Включение GPS и радиопередачи */
+/* Р’РєР»СЋС‡РµРЅРёРµ GPS Рё СЂР°РґРёРѕРїРµСЂРµРґР°С‡Рё */
 #pragma section("FLASH_code")
 int am3_set_gps_radio(void)
 {
@@ -776,13 +776,13 @@ int am3_set_gps_radio(void)
     int res = -1;
     u16 crc16;
     int t0;
-    /* Мы должны послать эту команду (без 2-х нулей) */
-    snprintf(str, sizeof(str), "$RSAGR,,*%04x\r\n", 0x0000);	// 1 шаг
-    /* Определяем контрольную сумму до звездочки */
-    crc16 = check_crc16((u8 *) str + 1, 7);	// шаг 2
-    /* Команды с контрольной суммой */
-    snprintf(str, sizeof(str), "$RSAGR,,*%04x\r\n", crc16);	// 3 шаг
-    /* Посылаем команду  */
+    /* РњС‹ РґРѕР»Р¶РЅС‹ РїРѕСЃР»Р°С‚СЊ СЌС‚Сѓ РєРѕРјР°РЅРґСѓ (Р±РµР· 2-С… РЅСѓР»РµР№) */
+    snprintf(str, sizeof(str), "$RSAGR,,*%04x\r\n", 0x0000);	// 1 С€Р°Рі
+    /* РћРїСЂРµРґРµР»СЏРµРј РєРѕРЅС‚СЂРѕР»СЊРЅСѓСЋ СЃСѓРјРјСѓ РґРѕ Р·РІРµР·РґРѕС‡РєРё */
+    crc16 = check_crc16((u8 *) str + 1, 7);	// С€Р°Рі 2
+    /* РљРѕРјР°РЅРґС‹ СЃ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјРѕР№ */
+    snprintf(str, sizeof(str), "$RSAGR,,*%04x\r\n", crc16);	// 3 С€Р°Рі
+    /* РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ  */
     am3_write_data(str, strlen(str));
     log_write_log_file("TX: am3_set_gps_radio: %s", str);
     am3_wait_reply(WAIT_MODEM_TIME_MS);
@@ -797,7 +797,7 @@ int am3_set_gps_radio(void)
     return res;
 }
 
-/* Установить все введенные параметры */
+/* РЈСЃС‚Р°РЅРѕРІРёС‚СЊ РІСЃРµ РІРІРµРґРµРЅРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ */
 #pragma section("FLASH_code")
 int am3_set_all_params(void)
 {
@@ -805,10 +805,10 @@ int am3_set_all_params(void)
     int res = -1, pos;
     u16 crc16;
     int t0;
-    snprintf(str, sizeof(str), "$RSAPR,,*\r\n");	/* 1 шаг. Мы должны послать команду RGAST */
-    crc16 = check_crc16((u8 *) str + 1, 7);	/* шаг 2. Определяем контрольную сумму до звездочки */
-    snprintf(str, sizeof(str), "$RSAPR,,*%04x\r\n", crc16);	/* 3 шаг     Команды с контрольной суммой */
-    am3_write_data(str, strlen(str));	/* Посылаем команду  */
+    snprintf(str, sizeof(str), "$RSAPR,,*\r\n");	/* 1 С€Р°Рі. РњС‹ РґРѕР»Р¶РЅС‹ РїРѕСЃР»Р°С‚СЊ РєРѕРјР°РЅРґСѓ RGAST */
+    crc16 = check_crc16((u8 *) str + 1, 7);	/* С€Р°Рі 2. РћРїСЂРµРґРµР»СЏРµРј РєРѕРЅС‚СЂРѕР»СЊРЅСѓСЋ СЃСѓРјРјСѓ РґРѕ Р·РІРµР·РґРѕС‡РєРё */
+    snprintf(str, sizeof(str), "$RSAPR,,*%04x\r\n", crc16);	/* 3 С€Р°Рі     РљРѕРјР°РЅРґС‹ СЃ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјРѕР№ */
+    am3_write_data(str, strlen(str));	/* РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ  */
     log_write_log_file("TX: am3_set_all_params: %s", str);
     am3_wait_reply(WAIT_MODEM_TIME_MS);
     if (am3_get_data(str, MODEM_BUF_LEN)) {
@@ -822,7 +822,7 @@ int am3_set_all_params(void)
     return res;
 }
 
-/*  Получить номер устройства */
+/*  РџРѕР»СѓС‡РёС‚СЊ РЅРѕРјРµСЂ СѓСЃС‚СЂРѕР№СЃС‚РІР° */
 #pragma section("FLASH_code")
 s16 am3_get_dev_num(void)
 {
@@ -831,16 +831,16 @@ s16 am3_get_dev_num(void)
     short res = -1;
     u16 crc16;
     int t0, pos = 0;
-    /* Команда с контрольной суммой */
-    snprintf(str, sizeof(str), "$RGANM,,*d05c\r\n");	// 3 шаг
-    /* Посылаем команду  */
+    /* РљРѕРјР°РЅРґР° СЃ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјРѕР№ */
+    snprintf(str, sizeof(str), "$RGANM,,*d05c\r\n");	// 3 С€Р°Рі
+    /* РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ  */
     am3_write_data(str, strlen(str));
     log_write_log_file("TX: am3_get_dev_num: %s", str);
     am3_wait_reply(WAIT_MODEM_TIME_MS);
-    /* Ждем ответ */
+    /* Р–РґРµРј РѕС‚РІРµС‚ */
     if (am3_get_data(str, MODEM_BUF_LEN)) {
 	log_write_log_file("RX: am3_get_dev_num: %s", str);
-	/* ищем 1-ю запятую: $AGANM,0021,00*6327 - не до конца буфера!!! */
+	/* РёС‰РµРј 1-СЋ Р·Р°РїСЏС‚СѓСЋ: $AGANM,0021,00*6327 - РЅРµ РґРѕ РєРѕРЅС†Р° Р±СѓС„РµСЂР°!!! */
 	for (pos = 0; pos < MODEM_BUF_LEN - 16; pos++) {
 	    if (str[pos] == 0x2c) {
 		pos += 1;
@@ -848,7 +848,7 @@ s16 am3_get_dev_num(void)
 	    }
 	}
 
-	/* копируем 4 символа после запятой */
+	/* РєРѕРїРёСЂСѓРµРј 4 СЃРёРјРІРѕР»Р° РїРѕСЃР»Рµ Р·Р°РїСЏС‚РѕР№ */
 	if (MODEM_BUF_LEN - 16) {
 	    strncpy(buf, str + pos, 4);
 	    buf[4] = 0;
@@ -861,7 +861,7 @@ s16 am3_get_dev_num(void)
     return res;
 }
 
-/*  Получить часы реального времени */
+/*  РџРѕР»СѓС‡РёС‚СЊ С‡Р°СЃС‹ СЂРµР°Р»СЊРЅРѕРіРѕ РІСЂРµРјРµРЅРё */
 #pragma section("FLASH_code")
 int am3_get_curr_time(TIME_DATE * td)
 {
@@ -874,14 +874,14 @@ int am3_get_curr_time(TIME_DATE * td)
 
     if (td == NULL)
 	return res;
-    snprintf(str, sizeof(str), "$RGACL,,*a13c\r\n");	/* 1 шаг. Мы должны послать команду RGACL */
-    am3_write_data(str, strlen(str));	/* Посылаем команду  */
+    snprintf(str, sizeof(str), "$RGACL,,*a13c\r\n");	/* 1 С€Р°Рі. РњС‹ РґРѕР»Р¶РЅС‹ РїРѕСЃР»Р°С‚СЊ РєРѕРјР°РЅРґСѓ RGACL */
+    am3_write_data(str, strlen(str));	/* РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ  */
     log_write_log_file("TX: am3_get_curr_time: %s", str);
     am3_wait_reply(WAIT_MODEM_TIME_MS);
-    /* Найдем подстроку $AGACL в этом мусоре $AGACL,21.05.13,11:07,00*7cdd - может быть не с начала */
+    /* РќР°Р№РґРµРј РїРѕРґСЃС‚СЂРѕРєСѓ $AGACL РІ СЌС‚РѕРј РјСѓСЃРѕСЂРµ $AGACL,21.05.13,11:07,00*7cdd - РјРѕР¶РµС‚ Р±С‹С‚СЊ РЅРµ СЃ РЅР°С‡Р°Р»Р° */
     if (am3_get_data(str, MODEM_BUF_LEN)) {
 	log_write_log_file("RX: am3_get_curr_time: %s", str);
-	// ищем 1-ю запятую: $AGACL,21.05.13,11:07,00*7cdd
+	// РёС‰РµРј 1-СЋ Р·Р°РїСЏС‚СѓСЋ: $AGACL,21.05.13,11:07,00*7cdd
 	for (pos = 0; pos < MODEM_BUF_LEN - 16; pos++) {
 	    if (str[pos] == 0x2c) {
 		pos += 1;
@@ -892,39 +892,39 @@ int am3_get_curr_time(TIME_DATE * td)
 
 	do {
 	    res = -1;
-	    /* Разбираем буфер прям здесь! */
-	    memmove(str, str + pos, 14);	// от запятой
-	    // день [1,31]
+	    /* Р Р°Р·Р±РёСЂР°РµРј Р±СѓС„РµСЂ РїСЂСЏРј Р·РґРµСЃСЊ! */
+	    memmove(str, str + pos, 14);	// РѕС‚ Р·Р°РїСЏС‚РѕР№
+	    // РґРµРЅСЊ [1,31]
 	    memcpy(buf, str, 2);
 	    buf[2] = 0;
 	    td->day = atoi(buf);
 	    if (td->day == 0 || td->day > 31)
 		break;
-	    // месец 
+	    // РјРµСЃРµС† 
 	    memcpy(buf, str + 3, 2);
 	    buf[2] = 0;
 	    td->mon = atoi(buf);
 	    if (td->mon == 0 || td->mon > 12)
 		break;
-	    // Год
+	    // Р“РѕРґ
 	    memcpy(buf, str + 6, 2);
 	    buf[2] = 0;
 	    td->year = atoi(buf) + 2000;
-	    // Чисы      
+	    // Р§РёСЃС‹      
 	    memcpy(buf, str + 9, 2);
 	    buf[2] = 0;
 	    td->hour = atoi(buf);
 	    if (td->hour > 24)
 		break;
-	    // минуты
+	    // РјРёРЅСѓС‚С‹
 	    memcpy(buf, str + 12, 2);
 	    buf[2] = 0;
 	    td->min = atoi(buf);
 	    if (td->min > 60)
 		break;
-	    // Секунд нету
+	    // РЎРµРєСѓРЅРґ РЅРµС‚Сѓ
 	    td->sec = 0;
-	    // Для проверки пробуем преобразовать
+	    // Р”Р»СЏ РїСЂРѕРІРµСЂРєРё РїСЂРѕР±СѓРµРј РїСЂРµРѕР±СЂР°Р·РѕРІР°С‚СЊ
 	    res = td_to_sec(td);
 	} while (0);
     } else {
@@ -933,7 +933,7 @@ int am3_get_curr_time(TIME_DATE * td)
     return res;
 }
 
-/* Получить аварийное время всплытия */
+/* РџРѕР»СѓС‡РёС‚СЊ Р°РІР°СЂРёР№РЅРѕРµ РІСЂРµРјСЏ РІСЃРїР»С‹С‚РёСЏ */
 #pragma section("FLASH_code")
 int am3_get_alarm_time(TIME_DATE * td)
 {
@@ -943,11 +943,11 @@ int am3_get_alarm_time(TIME_DATE * td)
     u16 crc16;
     int t0;
     if (td != NULL) {
-	snprintf(str, sizeof(str), "$RGAAL,,*cf5c\r\n");	/* 1 шаг. Мы должны послать команду RGACL */
-	am3_write_data(str, strlen(str));	/* Посылаем команду  */
+	snprintf(str, sizeof(str), "$RGAAL,,*cf5c\r\n");	/* 1 С€Р°Рі. РњС‹ РґРѕР»Р¶РЅС‹ РїРѕСЃР»Р°С‚СЊ РєРѕРјР°РЅРґСѓ RGACL */
+	am3_write_data(str, strlen(str));	/* РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ  */
 	log_write_log_file("TX: am3_get_alarm_time: %s", str);
 	am3_wait_reply(WAIT_MODEM_TIME_MS);
-	/* Найдем подстроку $AGACL в этом мусоре  $AGAAL,02.07.13,10:20,00*583c - может быть не с начала */
+	/* РќР°Р№РґРµРј РїРѕРґСЃС‚СЂРѕРєСѓ $AGACL РІ СЌС‚РѕРј РјСѓСЃРѕСЂРµ  $AGAAL,02.07.13,10:20,00*583c - РјРѕР¶РµС‚ Р±С‹С‚СЊ РЅРµ СЃ РЅР°С‡Р°Р»Р° */
 	if (am3_get_data(str, MODEM_BUF_LEN)) {
 
 	    log_write_log_file("RX: am3_get_alarm_time: %s", str);
@@ -958,31 +958,31 @@ int am3_get_alarm_time(TIME_DATE * td)
 		}
 	    }
 
-	    /* Разбираем буфер прям здесь! */
-	    memmove(str, str + pos, 14);	// от запятой
-	    // день [1,31]
+	    /* Р Р°Р·Р±РёСЂР°РµРј Р±СѓС„РµСЂ РїСЂСЏРј Р·РґРµСЃСЊ! */
+	    memmove(str, str + pos, 14);	// РѕС‚ Р·Р°РїСЏС‚РѕР№
+	    // РґРµРЅСЊ [1,31]
 	    memcpy(buf, str, 2);
 	    buf[2] = 0;
 	    td->day = atoi(buf);
-	    // месец 
+	    // РјРµСЃРµС† 
 	    memcpy(buf, str + 3, 2);
 	    buf[2] = 0;
 	    td->mon = atoi(buf);
-	    // Год
+	    // Р“РѕРґ
 	    memcpy(buf, str + 6, 2);
 	    buf[2] = 0;
 	    td->year = atoi(buf) + 2000;
-	    // Чясы      
+	    // Р§СЏСЃС‹      
 	    memcpy(buf, str + 9, 2);
 	    buf[2] = 0;
 	    td->hour = atoi(buf);
-	    // минуты
+	    // РјРёРЅСѓС‚С‹
 	    memcpy(buf, str + 12, 2);
 	    buf[2] = 0;
 	    td->min = atoi(buf);
-	    // Секунд нету
+	    // РЎРµРєСѓРЅРґ РЅРµС‚Сѓ
 	    td->sec = 0;
-	    // Для проверки пробуем преобразовать
+	    // Р”Р»СЏ РїСЂРѕРІРµСЂРєРё РїСЂРѕР±СѓРµРј РїСЂРµРѕР±СЂР°Р·РѕРІР°С‚СЊ
 	    res = td_to_sec(td);
 	} else {
 	    log_write_log_file("RX: am3_get_alarm_time: got nothing\n");
@@ -991,7 +991,7 @@ int am3_get_alarm_time(TIME_DATE * td)
     return res;
 }
 
-/* Получить светлое время суток */
+/* РџРѕР»СѓС‡РёС‚СЊ СЃРІРµС‚Р»РѕРµ РІСЂРµРјСЏ СЃСѓС‚РѕРє */
 #pragma section("FLASH_code")
 int am3_get_cal_time(u8 * h0, u8 * m0, u8 * h1, u8 * m1)
 {
@@ -1000,13 +1000,13 @@ int am3_get_cal_time(u8 * h0, u8 * m0, u8 * h1, u8 * m1)
     int res = -1, pos;
     u16 crc16;
     int t0;
-    snprintf(str, sizeof(str), "$RGAST,,*\r\n");	/* 1 шаг. Мы должны послать команду RGAST */
-    crc16 = check_crc16((u8 *) str + 1, 7);	/* шаг 2. Определяем контрольную сумму до звездочки */
-    snprintf(str, sizeof(str), "$RGAST,,*%04x\r\n", crc16);	/* 3 шаг     Команды с контрольной суммой */
-    am3_write_data(str, strlen(str));	/* Посылаем команду  */
+    snprintf(str, sizeof(str), "$RGAST,,*\r\n");	/* 1 С€Р°Рі. РњС‹ РґРѕР»Р¶РЅС‹ РїРѕСЃР»Р°С‚СЊ РєРѕРјР°РЅРґСѓ RGAST */
+    crc16 = check_crc16((u8 *) str + 1, 7);	/* С€Р°Рі 2. РћРїСЂРµРґРµР»СЏРµРј РєРѕРЅС‚СЂРѕР»СЊРЅСѓСЋ СЃСѓРјРјСѓ РґРѕ Р·РІРµР·РґРѕС‡РєРё */
+    snprintf(str, sizeof(str), "$RGAST,,*%04x\r\n", crc16);	/* 3 С€Р°Рі     РљРѕРјР°РЅРґС‹ СЃ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјРѕР№ */
+    am3_write_data(str, strlen(str));	/* РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ  */
     log_write_log_file("TX: am3_get_cal_time: %s", str);
     am3_wait_reply(WAIT_MODEM_TIME_MS);
-    /* Найдем подстроку $AGACL в этом мусоре  $AGAST,06:00-18.00,00*7c2b\r\n - может быть не с начала */
+    /* РќР°Р№РґРµРј РїРѕРґСЃС‚СЂРѕРєСѓ $AGACL РІ СЌС‚РѕРј РјСѓСЃРѕСЂРµ  $AGAST,06:00-18.00,00*7c2b\r\n - РјРѕР¶РµС‚ Р±С‹С‚СЊ РЅРµ СЃ РЅР°С‡Р°Р»Р° */
     if (am3_get_data(str, MODEM_BUF_LEN)) {
 
 	log_write_log_file("RX: am3_get_alarm_time: %s", str);
@@ -1017,21 +1017,21 @@ int am3_get_cal_time(u8 * h0, u8 * m0, u8 * h1, u8 * m1)
 	    }
 	}
 
-	/* Разбираем буфер прям здесь! */
-	memmove(str, str + pos, 14);	// от запятой
-	// часы
+	/* Р Р°Р·Р±РёСЂР°РµРј Р±СѓС„РµСЂ РїСЂСЏРј Р·РґРµСЃСЊ! */
+	memmove(str, str + pos, 14);	// РѕС‚ Р·Р°РїСЏС‚РѕР№
+	// С‡Р°СЃС‹
 	memcpy(buf, str, 2);
 	buf[2] = 0;
 	*h0 = atoi(buf);
-	// минуты
+	// РјРёРЅСѓС‚С‹
 	memcpy(buf, str + 3, 2);
 	buf[2] = 0;
 	*m0 = atoi(buf);
-	// Чясы      
+	// Р§СЏСЃС‹      
 	memcpy(buf, str + 6, 2);
 	buf[2] = 0;
 	*h1 = atoi(buf);
-	// минуты
+	// РјРёРЅСѓС‚С‹
 	memcpy(buf, str + 9, 2);
 	buf[2] = 0;
 	*m1 = atoi(buf);
@@ -1045,7 +1045,7 @@ int am3_get_cal_time(u8 * h0, u8 * m0, u8 * h1, u8 * m1)
 
 
 /**
- *  Получить время на всплытие в минутах 
+ *  РџРѕР»СѓС‡РёС‚СЊ РІСЂРµРјСЏ РЅР° РІСЃРїР»С‹С‚РёРµ РІ РјРёРЅСѓС‚Р°С… 
  */
 #pragma section("FLASH_code")
 u16 am3_get_popup_len(void)
@@ -1054,15 +1054,15 @@ u16 am3_get_popup_len(void)
     short res = -1;
     u16 crc16;
     int t0, pos = 0;
-    snprintf(str, sizeof(str), "$RGATZ,,*ce1a\r\n");	/* Команда с контрольной суммой */
-    am3_write_data(str, strlen(str));	/* Посылаем команду  */
+    snprintf(str, sizeof(str), "$RGATZ,,*ce1a\r\n");	/* РљРѕРјР°РЅРґР° СЃ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјРѕР№ */
+    am3_write_data(str, strlen(str));	/* РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ  */
     log_write_log_file("TX: am3_get_popup_len: %s", str);
     am3_wait_reply(WAIT_MODEM_TIME_MS);
-    // Принято: $AGATZ,010,00*f78a
+    // РџСЂРёРЅСЏС‚Рѕ: $AGATZ,010,00*f78a
     if (am3_get_data(str, MODEM_BUF_LEN)) {
 
 	log_write_log_file("RX: am3_get_popup_len: %s", str);
-	// ищем 1-ю запятую:  $AGATZ,010,00*f78a
+	// РёС‰РµРј 1-СЋ Р·Р°РїСЏС‚СѓСЋ:  $AGATZ,010,00*f78a
 	for (pos = 0; pos < MODEM_BUF_LEN - 16; pos++) {
 	    if (str[pos] == 0x2c) {
 		pos += 1;
@@ -1070,7 +1070,7 @@ u16 am3_get_popup_len(void)
 	    }
 	}
 
-	// копируем 3 символа после запятой
+	// РєРѕРїРёСЂСѓРµРј 3 СЃРёРјРІРѕР»Р° РїРѕСЃР»Рµ Р·Р°РїСЏС‚РѕР№
 	if (MODEM_BUF_LEN - 16) {
 	    memmove(str, str + pos, 3);
 	    str[3] = 0;
@@ -1084,7 +1084,7 @@ u16 am3_get_popup_len(void)
 
 
 /**
- * Получить время пережига проволоки в секундах 
+ * РџРѕР»СѓС‡РёС‚СЊ РІСЂРµРјСЏ РїРµСЂРµР¶РёРіР° РїСЂРѕРІРѕР»РѕРєРё РІ СЃРµРєСѓРЅРґР°С… 
  */
 #pragma section("FLASH_code")
 u16 am3_get_burn_len(void)
@@ -1093,14 +1093,14 @@ u16 am3_get_burn_len(void)
     short res = -1;
     u16 crc16;
     int t0, pos = 0;
-    snprintf(str, sizeof(str), "$RGABT,,*1cd6\r\n");	/* Команда с контрольной суммой */
-    am3_write_data(str, strlen(str));	/* Посылаем команду  */
+    snprintf(str, sizeof(str), "$RGABT,,*1cd6\r\n");	/* РљРѕРјР°РЅРґР° СЃ РєРѕРЅС‚СЂРѕР»СЊРЅРѕР№ СЃСѓРјРјРѕР№ */
+    am3_write_data(str, strlen(str));	/* РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ  */
     log_write_log_file("TX: am3_get_burn_len: %s", str);
     am3_wait_reply(WAIT_MODEM_TIME_MS);
-    // Принято: $AGABT,0002,00
+    // РџСЂРёРЅСЏС‚Рѕ: $AGABT,0002,00
     if (am3_get_data(str, MODEM_BUF_LEN)) {
 	log_write_log_file("RX: am3_get_burn_len: %s", str);
-	// ищем 1-ю запятую:  $AGABT,0002,00*
+	// РёС‰РµРј 1-СЋ Р·Р°РїСЏС‚СѓСЋ:  $AGABT,0002,00*
 	for (pos = 0; pos < MODEM_BUF_LEN - 16; pos++) {
 	    if (str[pos] == 0x2c) {
 		pos += 1;
@@ -1108,7 +1108,7 @@ u16 am3_get_burn_len(void)
 	    }
 	}
 
-	// копируем 4 символа после запятой
+	// РєРѕРїРёСЂСѓРµРј 4 СЃРёРјРІРѕР»Р° РїРѕСЃР»Рµ Р·Р°РїСЏС‚РѕР№
 	if (pos < MODEM_BUF_LEN - 16) {
 	    memmove(str, str + pos, 4);
 	    str[4] = 0;
@@ -1121,7 +1121,7 @@ u16 am3_get_burn_len(void)
     return res;
 }
 
-/* Ожидать ответа ms миллисекунд */
+/* РћР¶РёРґР°С‚СЊ РѕС‚РІРµС‚Р° ms РјРёР»Р»РёСЃРµРєСѓРЅРґ */
 #pragma section("FLASH_code")
 static void am3_wait_reply(int ms)
 {
@@ -1135,13 +1135,13 @@ static void am3_wait_reply(int ms)
 }
 
 /**
- * Перекачать из буфера приема модема в буфер функции
+ * РџРµСЂРµРєР°С‡Р°С‚СЊ РёР· Р±СѓС„РµСЂР° РїСЂРёРµРјР° РјРѕРґРµРјР° РІ Р±СѓС„РµСЂ С„СѓРЅРєС†РёРё
  */
 #pragma section("FLASH_code")
 static int am3_get_data(char *buf, int size)
 {
     int res = 0;
-    /* Найдем подстроку в этом мусоре */
+    /* РќР°Р№РґРµРј РїРѕРґСЃС‚СЂРѕРєСѓ РІ СЌС‚РѕРј РјСѓСЃРѕСЂРµ */
     if (pModem_xchg_buf->rx_fin) {
 	memset(buf, 0, size);
 	res = (size > pModem_xchg_buf->rx_cnt) ? pModem_xchg_buf->rx_cnt : size;
@@ -1154,13 +1154,13 @@ static int am3_get_data(char *buf, int size)
 }
 
 /**
- * Посылаем команду в модем
+ * РџРѕСЃС‹Р»Р°РµРј РєРѕРјР°РЅРґСѓ РІ РјРѕРґРµРј
  */
 #pragma section("FLASH_code")
 int am3_write_data(char *buf, int size)
 {
     int res = 0;
-    pModem_xchg_buf->rx_fin = 0;	/* сбросим приемный буфер */
+    pModem_xchg_buf->rx_fin = 0;	/* СЃР±СЂРѕСЃРёРј РїСЂРёРµРјРЅС‹Р№ Р±СѓС„РµСЂ */
     pModem_xchg_buf->rx_buf[0] = 0;
     res = UART1_write_str(buf, size);
     return res;
