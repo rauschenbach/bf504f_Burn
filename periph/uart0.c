@@ -1,7 +1,7 @@
 /*******************************************************************
- * UART0 прием строки NMEA из GPS, используем два буфера
- * Убрать лишние сообщения!!!
- * Реагируем только на строку $GPRMC!!!
+ * UART0 РїСЂРёРµРј СЃС‚СЂРѕРєРё NMEA РёР· GPS, РёСЃРїРѕР»СЊР·СѓРµРј РґРІР° Р±СѓС„РµСЂР°
+ * РЈР±СЂР°С‚СЊ Р»РёС€РЅРёРµ СЃРѕРѕР±С‰РµРЅРёСЏ!!!
+ * Р РµР°РіРёСЂСѓРµРј С‚РѕР»СЊРєРѕ РЅР° СЃС‚СЂРѕРєСѓ $GPRMC!!!
 *******************************************************************/
 #include <string.h>
 #include "uart0.h"
@@ -11,15 +11,15 @@
 #include "pll.h"
 
 /************************************************************************
- * 	Статические переменные
+ * 	РЎС‚Р°С‚РёС‡РµСЃРєРёРµ РїРµСЂРµРјРµРЅРЅС‹Рµ
  ************************************************************************/
 static DEV_UART_STRUCT uart0_xchg_struct;
 
 
 
 /**
- * Function:    UART_init - запускается сразу же 
- * Убрал делитель EDBO
+ * Function:    UART_init - Р·Р°РїСѓСЃРєР°РµС‚СЃСЏ СЃСЂР°Р·Сѓ Р¶Рµ 
+ * РЈР±СЂР°Р» РґРµР»РёС‚РµР»СЊ EDBO
  */
 #pragma section("FLASH_code")
 bool UART0_init(void *dev)
@@ -39,11 +39,11 @@ bool UART0_init(void *dev)
 	    break;
 	}
 
-	*pPORTG_FER |= (PG12 | PG13);	/* Разрешаем функции на портах Rx и Tx - они находятся на PG12 и PG13 */
-	*pPORTG_MUX &= ~(PG12 | PG13);	/* Включаем 3-ю функцию 00 на 12:13 */
+	*pPORTG_FER |= (PG12 | PG13);	/* Р Р°Р·СЂРµС€Р°РµРј С„СѓРЅРєС†РёРё РЅР° РїРѕСЂС‚Р°С… Rx Рё Tx - РѕРЅРё РЅР°С…РѕРґСЏС‚СЃСЏ РЅР° PG12 Рё PG13 */
+	*pPORTG_MUX &= ~(PG12 | PG13);	/* Р’РєР»СЋС‡Р°РµРј 3-СЋ С„СѓРЅРєС†РёСЋ 00 РЅР° 12:13 */
 	ssync();
 
-	/* часы UART clock + делитель-прескалер = 1 + rerout на обычное прерывание - без EDBO */
+	/* С‡Р°СЃС‹ UART clock + РґРµР»РёС‚РµР»СЊ-РїСЂРµСЃРєР°Р»РµСЂ = 1 + rerout РЅР° РѕР±С‹С‡РЅРѕРµ РїСЂРµСЂС‹РІР°РЅРёРµ - Р±РµР· EDBO */
 	*pUART0_GCTL = EGLSI | UCEN | EDBO;
 	ssync();
 
@@ -58,15 +58,15 @@ bool UART0_init(void *dev)
 	temp = *pUART0_LSR;
 
 	*pUART0_IER_CLEAR = 0xff;
-	*pUART0_IER_SET = ERBFI | ELSI;	/* приемный буфер полон + Ошибки */
+	*pUART0_IER_SET = ERBFI | ELSI;	/* РїСЂРёРµРјРЅС‹Р№ Р±СѓС„РµСЂ РїРѕР»РѕРЅ + РћС€РёР±РєРё */
 	ssync();
 
-	uart0_xchg_struct.rx_call_back_func = (void (*)(u8)) comm->rx_call_back_func;	/* Указатель на функцыю чтения */
-	uart0_xchg_struct.tx_call_back_func = (void (*)(void)) comm->tx_call_back_func;	/* Указатель на функцыю записи */
-	IRQ_register_vector(NMEA_VECTOR_NUM);	/* Регистрируем прерывание UART0 */
+	uart0_xchg_struct.rx_call_back_func = (void (*)(u8)) comm->rx_call_back_func;	/* РЈРєР°Р·Р°С‚РµР»СЊ РЅР° С„СѓРЅРєС†С‹СЋ С‡С‚РµРЅРёСЏ */
+	uart0_xchg_struct.tx_call_back_func = (void (*)(void)) comm->tx_call_back_func;	/* РЈРєР°Р·Р°С‚РµР»СЊ РЅР° С„СѓРЅРєС†С‹СЋ Р·Р°РїРёСЃРё */
+	IRQ_register_vector(NMEA_VECTOR_NUM);	/* Р РµРіРёСЃС‚СЂРёСЂСѓРµРј РїСЂРµСЂС‹РІР°РЅРёРµ UART0 */
 
-	*pSIC_IMASK0 |= IRQ_UART0_ERR;	/* чтение по статусу для UART0 */
-	*pSIC_IAR0 &= 0xFF0FFFFF;	/* 5-й полубайт  (с нуля) */
+	*pSIC_IMASK0 |= IRQ_UART0_ERR;	/* С‡С‚РµРЅРёРµ РїРѕ СЃС‚Р°С‚СѓСЃСѓ РґР»СЏ UART0 */
+	*pSIC_IAR0 &= 0xFF0FFFFF;	/* 5-Р№ РїРѕР»СѓР±Р°Р№С‚  (СЃ РЅСѓР»СЏ) */
 	*pSIC_IAR0 |= 0x00200000;	/* STATUS IRQ: IVG09 */
 	ssync();
 
@@ -78,7 +78,7 @@ bool UART0_init(void *dev)
 }
 
 /**
- * Выключаем UART0, освободим буферы 
+ * Р’С‹РєР»СЋС‡Р°РµРј UART0, РѕСЃРІРѕР±РѕРґРёРј Р±СѓС„РµСЂС‹ 
  */
 #pragma section("FLASH_code")
 void UART0_close(void)
@@ -90,15 +90,15 @@ void UART0_close(void)
 }
 
 /**
- * Посылка строки через UART0
- * Когда можно послать. Можно передавать или в отладке или в модеме 
+ * РџРѕСЃС‹Р»РєР° СЃС‚СЂРѕРєРё С‡РµСЂРµР· UART0
+ * РљРѕРіРґР° РјРѕР¶РЅРѕ РїРѕСЃР»Р°С‚СЊ. РњРѕР¶РЅРѕ РїРµСЂРµРґР°РІР°С‚СЊ РёР»Рё РІ РѕС‚Р»Р°РґРєРµ РёР»Рё РІ РјРѕРґРµРјРµ 
  */
 #pragma section("FLASH_code")
 int UART0_write_str(char *str, int len)
 {
     int i = -1;
 
-    /* Если открыт */
+    /* Р•СЃР»Рё РѕС‚РєСЂС‹С‚ */
     if (uart0_xchg_struct.is_open) {
 ////	IRQ_unregister_vector(NMEA_VECTOR_NUM);	
 	for (i = 0; i < len; i++) {
@@ -106,13 +106,13 @@ int UART0_write_str(char *str, int len)
 	    *pUART0_THR = str[i];
 	    ssync();
 	}
-////	IRQ_register_vector(NMEA_VECTOR_NUM);	/* Регистрируем прерывание UART0 */
+////	IRQ_register_vector(NMEA_VECTOR_NUM);	/* Р РµРіРёСЃС‚СЂРёСЂСѓРµРј РїСЂРµСЂС‹РІР°РЅРёРµ UART0 */
     }
     return i;
 }
 
 /**
- * Причина прерывания - приемный буфер готов - реагируем только на $GPRMC!
+ * РџСЂРёС‡РёРЅР° РїСЂРµСЂС‹РІР°РЅРёСЏ - РїСЂРёРµРјРЅС‹Р№ Р±СѓС„РµСЂ РіРѕС‚РѕРІ - СЂРµР°РіРёСЂСѓРµРј С‚РѕР»СЊРєРѕ РЅР° $GPRMC!
  */
 #pragma section("FLASH_code")
 //#pragma section("L1_code")
@@ -120,27 +120,27 @@ void UART0_STATUS_ISR(void)
 {
     volatile c8 byte;
 
-    register volatile u16 stat = *pUART0_LSR;	/* Приняли... */
+    register volatile u16 stat = *pUART0_LSR;	/* РџСЂРёРЅСЏР»Рё... */
     ssync();
 
-    /* Сначала проверим ошибки - биты 1..4 */
+    /* РЎРЅР°С‡Р°Р»Р° РїСЂРѕРІРµСЂРёРј РѕС€РёР±РєРё - Р±РёС‚С‹ 1..4 */
     if (stat & 0x1E) {
 	*pUART0_LSR = stat & 0x1E;
-	byte = *pUART0_RBR;	// Читаем из буфера
+	byte = *pUART0_RBR;	// Р§РёС‚Р°РµРј РёР· Р±СѓС„РµСЂР°
 	ssync();
     }
 
 
     if (stat & DR) {
-	byte = *pUART0_RBR;	/* Принятый байт */
+	byte = *pUART0_RBR;	/* РџСЂРёРЅСЏС‚С‹Р№ Р±Р°Р№С‚ */
 	ssync();
 
-	/* Вызываем функцию callback */
+	/* Р’С‹Р·С‹РІР°РµРј С„СѓРЅРєС†РёСЋ callback */
 	if (uart0_xchg_struct.rx_call_back_func != NULL) {
 	    uart0_xchg_struct.rx_call_back_func(byte);
 	}
 
-    } else if (stat & THRE) {	/*  Передаем буфер */
+    } else if (stat & THRE) {	/*  РџРµСЂРµРґР°РµРј Р±СѓС„РµСЂ */
 	if (uart0_xchg_struct.tx_call_back_func != NULL) {
 	    uart0_xchg_struct.tx_call_back_func();
 	}
