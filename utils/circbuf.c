@@ -6,7 +6,7 @@
 
 
 
-/* Инициализация буфера, если его нет!  */
+/* РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Р±СѓС„РµСЂР°, РµСЃР»Рё РµРіРѕ РЅРµС‚!  */
 #pragma section("L1_code")
 int cb_init(CircularBuffer * cb, int size)
 {
@@ -17,14 +17,14 @@ int cb_init(CircularBuffer * cb, int size)
     if (cb->elems == NULL) {
 	cb->elems = (ElemType *) calloc(cb->size, sizeof(ElemType));
 
-	if (cb->elems == NULL)	/* Не смог выделить память */
+	if (cb->elems == NULL)	/* РќРµ СЃРјРѕРі РІС‹РґРµР»РёС‚СЊ РїР°РјСЏС‚СЊ */
 	    return -1;
     }
    return 0;
 }
 
 
-/* Удалить буфер, если он существует! */
+/* РЈРґР°Р»РёС‚СЊ Р±СѓС„РµСЂ, РµСЃР»Рё РѕРЅ СЃСѓС‰РµСЃС‚РІСѓРµС‚! */
 #pragma section("L1_code")
 void cb_free(CircularBuffer * cb)
 {
@@ -35,7 +35,7 @@ void cb_free(CircularBuffer * cb)
 }
 
 /**
- * Буфер полный?
+ * Р‘СѓС„РµСЂ РїРѕР»РЅС‹Р№?
  */
 #pragma section("L1_code")
 int cb_is_full(CircularBuffer * cb)
@@ -44,7 +44,7 @@ int cb_is_full(CircularBuffer * cb)
 }
 
 /**
- * Буфер пустой?
+ * Р‘СѓС„РµСЂ РїСѓСЃС‚РѕР№?
  */
 #pragma section("L1_code")
 int cb_is_empty(CircularBuffer * cb)
@@ -53,7 +53,7 @@ int cb_is_empty(CircularBuffer * cb)
 }
 
 /**
- * Очистить буфер
+ * РћС‡РёСЃС‚РёС‚СЊ Р±СѓС„РµСЂ
  */
 #pragma section("L1_code")
 void cb_clear(CircularBuffer * cb)
