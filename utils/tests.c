@@ -22,7 +22,7 @@
 
 
 /**
- * Тест всех АЦП
+ * РўРµСЃС‚ РІСЃРµС… РђР¦Рџ
  */
 #pragma section("FLASH_code")
 bool test_adc(void *in)
@@ -39,43 +39,43 @@ bool test_adc(void *in)
     do {
 	if (in != NULL) {
 	    status = (DEV_STATUS_STRUCT *) in;
-	    status->st_main |= 0x10;	// регистратор неисправен 
-	    status->st_adc = 0;	// не тестировали
+	    status->st_main |= 0x10;	// СЂРµРіРёСЃС‚СЂР°С‚РѕСЂ РЅРµРёСЃРїСЂР°РІРµРЅ 
+	    status->st_adc = 0;	// РЅРµ С‚РµСЃС‚РёСЂРѕРІР°Р»Рё
 
-	    par.mode = TEST_MODE;	/* Тестовый режим */
-	    par.res = 1;		/* Энергопотребление */
+	    par.mode = TEST_MODE;	/* РўРµСЃС‚РѕРІС‹Р№ СЂРµР¶РёРј */
+	    par.res = 1;		/* Р­РЅРµСЂРіРѕРїРѕС‚СЂРµР±Р»РµРЅРёРµ */
 	    par.chop = 1;
 	    par.sps = SPS500;
 	    par.pga = PGA2;
 	    par.hpf = 0;
 
-	     /* тест не прошел  */
+	     /* С‚РµСЃС‚ РЅРµ РїСЂРѕС€РµР»  */
 	    if (ADS1282_config(&par) == false) {
 		ADS1282_get_error_count(&err);
 		for (i = 0; i < ADC_CHAN; i++) {
 		    if (err.adc[i].cfg0_wr != err.adc[i].cfg0_rd || err.adc[i].cfg1_wr != err.adc[i].cfg1_rd)
-			status->st_adc |= (1 << i);	// В каком канале ошибка
+			status->st_adc |= (1 << i);	// Р’ РєР°РєРѕРј РєР°РЅР°Р»Рµ РѕС€РёР±РєР°
 		}
 		break;
 	    }
 
-	    ADS1282_start();	/* Запускаем АЦП с PGA  */
-	    ADS1282_start_irq();	/* Разрешаем IRQ  */
-	    delay_ms(250);	/* задержка чтобы подсчитать IRQ*/
-	    ADS1282_stop();	/* Стоп АЦП */
+	    ADS1282_start();	/* Р—Р°РїСѓСЃРєР°РµРј РђР¦Рџ СЃ PGA  */
+	    ADS1282_start_irq();	/* Р Р°Р·СЂРµС€Р°РµРј IRQ  */
+	    delay_ms(250);	/* Р·Р°РґРµСЂР¶РєР° С‡С‚РѕР±С‹ РїРѕРґСЃС‡РёС‚Р°С‚СЊ IRQ*/
+	    ADS1282_stop();	/* РЎС‚РѕРї РђР¦Рџ */
 
-	    /* Считаем прерывания  */
+	    /* РЎС‡РёС‚Р°РµРј РїСЂРµСЂС‹РІР°РЅРёСЏ  */
 	    i = ADS1282_get_irq_count();
 
 
-/* пока не выходить на 8 МГц кварце - разобраться!!!  */
+/* РїРѕРєР° РЅРµ РІС‹С…РѕРґРёС‚СЊ РЅР° 8 РњР“С† РєРІР°СЂС†Рµ - СЂР°Р·РѕР±СЂР°С‚СЊСЃСЏ!!!  */
 #if QUARTZ_CLK_FREQ==(19200000)
 	    if (i < 50) {
 		break;
 	    }
 #endif
 	    res = true;
-	    status->st_main &= ~0x10;	// регистратор исправен 
+	    status->st_main &= ~0x10;	// СЂРµРіРёСЃС‚СЂР°С‚РѕСЂ РёСЃРїСЂР°РІРµРЅ 
 	}
     } while (0);
     LED_set_state(l1, l2, l3, l4);
@@ -85,7 +85,7 @@ bool test_adc(void *in)
 
 
 /**
- * Тест EEPROM, возвращает результат и устанавливает биты в статусе
+ * РўРµСЃС‚ EEPROM, РІРѕР·РІСЂР°С‰Р°РµС‚ СЂРµР·СѓР»СЊС‚Р°С‚ Рё СѓСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ Р±РёС‚С‹ РІ СЃС‚Р°С‚СѓСЃРµ
  */
 #pragma section("FLASH_code")
 bool eeprom_test(void *par)
@@ -99,12 +99,12 @@ bool eeprom_test(void *par)
 
     if (par != NULL) {
 	status = (DEV_STATUS_STRUCT *) par;
-	status->st_test1 |= 0x08;	/* Ошибка данных в eeprom */
+	status->st_test1 |= 0x08;	/* РћС€РёР±РєР° РґР°РЅРЅС‹С… РІ eeprom */
 
-	status->eeprom = read_all_data_from_eeprom();	/* Обновили все данные с eeprom  */
+	status->eeprom = read_all_data_from_eeprom();	/* РћР±РЅРѕРІРёР»Рё РІСЃРµ РґР°РЅРЅС‹Рµ СЃ eeprom  */
 
 	if (status->eeprom == 0) {
-	    status->st_test1 &= ~0x08;	/* Нет ошибки */
+	    status->st_test1 &= ~0x08;	/* РќРµС‚ РѕС€РёР±РєРё */
 	    res = true;
 	}
     }
@@ -114,10 +114,10 @@ bool eeprom_test(void *par)
 
 
 /**
- * Тест часов RTC.
- * Пишем / читаем время из RTC, если ошибка - не используем 
- * Проверяем разницу - это означает, что часы перевелись  
- * Время компиляции должно быть ДО текущего времени
+ * РўРµСЃС‚ С‡Р°СЃРѕРІ RTC.
+ * РџРёС€РµРј / С‡РёС‚Р°РµРј РІСЂРµРјСЏ РёР· RTC, РµСЃР»Рё РѕС€РёР±РєР° - РЅРµ РёСЃРїРѕР»СЊР·СѓРµРј 
+ * РџСЂРѕРІРµСЂСЏРµРј СЂР°Р·РЅРёС†Сѓ - СЌС‚Рѕ РѕР·РЅР°С‡Р°РµС‚, С‡С‚Рѕ С‡Р°СЃС‹ РїРµСЂРµРІРµР»РёСЃСЊ  
+ * Р’СЂРµРјСЏ РєРѕРјРїРёР»СЏС†РёРё РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ Р”Рћ С‚РµРєСѓС‰РµРіРѕ РІСЂРµРјРµРЅРё
  */
 #pragma section("FLASH_code")
 bool rtc_test(void *par)
@@ -131,50 +131,50 @@ bool rtc_test(void *par)
     LED_get_state(&l1, &l2, &l3, &l4);
 
     do {
-	diff = 10 * 3;		/* на 30 секунд вперед, поотм назад */
-	tc = get_comp_time();	/* Время компиляции */
+	diff = 10 * 3;		/* РЅР° 30 СЃРµРєСѓРЅРґ РІРїРµСЂРµРґ, РїРѕРѕС‚Рј РЅР°Р·Р°Рґ */
+	tc = get_comp_time();	/* Р’СЂРµРјСЏ РєРѕРјРїРёР»СЏС†РёРё */
 
-	/* Ждем 1.5 секунды */
+	/* Р–РґРµРј 1.5 СЃРµРєСѓРЅРґС‹ */
 	t0 = get_msec_ticks();
 	while (get_msec_ticks() - t0 < 1500) {
 	    LED_test();
 	}
 
-	t0 = get_rtc_sec_ticks();	/* Получаем секунды */
+	t0 = get_rtc_sec_ticks();	/* РџРѕР»СѓС‡Р°РµРј СЃРµРєСѓРЅРґС‹ */
 
-	/* если ошибка часов */
+	/* РµСЃР»Рё РѕС€РёР±РєР° С‡Р°СЃРѕРІ */
 	if (t0 < 0)
 	    break;
 
-	set_rtc_sec_ticks(t0 + diff);	/* Пишем время вперед */
+	set_rtc_sec_ticks(t0 + diff);	/* РџРёС€РµРј РІСЂРµРјСЏ РІРїРµСЂРµРґ */
 
 
-	t1 = get_rtc_sec_ticks();	/* Получаем секунды снова */
+	t1 = get_rtc_sec_ticks();	/* РџРѕР»СѓС‡Р°РµРј СЃРµРєСѓРЅРґС‹ СЃРЅРѕРІР° */
 
 	if (par != NULL) {
 	    status = (DEV_STATUS_STRUCT *) par;
-	    status->st_test0 |= 0x01;	/* Неисправность часов  */
-	    status->temper1 = 0;	/* Потом прочитаем данные */
+	    status->st_test0 |= 0x01;	/* РќРµРёСЃРїСЂР°РІРЅРѕСЃС‚СЊ С‡Р°СЃРѕРІ  */
+	    status->temper1 = 0;	/* РџРѕС‚РѕРј РїСЂРѕС‡РёС‚Р°РµРј РґР°РЅРЅС‹Рµ */
 	    status->press = 0;
 
-	    /* пока не выясниться с часовыми поясами */
+	    /* РїРѕРєР° РЅРµ РІС‹СЏСЃРЅРёС‚СЊСЃСЏ СЃ С‡Р°СЃРѕРІС‹РјРё РїРѕСЏСЃР°РјРё */
 	    if (abs(t1 - t0) < (diff + 5) && tc - 3600 * 24 < t0) {
-		status->st_test0 &= ~0x01;	/* Неисправность часов - снять */
-		status->st_main &= ~0x01;	/* Убираем "нет времени"  */
+		status->st_test0 &= ~0x01;	/* РќРµРёСЃРїСЂР°РІРЅРѕСЃС‚СЊ С‡Р°СЃРѕРІ - СЃРЅСЏС‚СЊ */
+		status->st_main &= ~0x01;	/* РЈР±РёСЂР°РµРј "РЅРµС‚ РІСЂРµРјРµРЅРё"  */
 		res = true;
 	    }
 	}
     } while (0);
 
     if (t0 > 0)
-	set_rtc_sec_ticks(t0);	/* Пишем время */
+	set_rtc_sec_ticks(t0);	/* РџРёС€РµРј РІСЂРµРјСЏ */
     LED_set_state(l1, l2, l3, l4);
     return res;
 }
 
 
 /**
- * Test Датчик температуры и давления:  Прочитаем коэффициенты из bmp085 
+ * Test Р”Р°С‚С‡РёРє С‚РµРјРїРµСЂР°С‚СѓСЂС‹ Рё РґР°РІР»РµРЅРёСЏ:  РџСЂРѕС‡РёС‚Р°РµРј РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ РёР· bmp085 
  */
 #pragma section("FLASH_code")
 bool test_bmp085(void *par)
@@ -188,10 +188,10 @@ bool test_bmp085(void *par)
 
     if (par != NULL) {
 	status = (DEV_STATUS_STRUCT *) par;
-	status->st_test0 |= 0x02;	/* Ошибка датчика температуры и давления */
+	status->st_test0 |= 0x02;	/* РћС€РёР±РєР° РґР°С‚С‡РёРєР° С‚РµРјРїРµСЂР°С‚СѓСЂС‹ Рё РґР°РІР»РµРЅРёСЏ */
 
 	if (bmp085_init() && bmp085_data_get(&t, &p)) {
-	    status->st_test0 &= ~0x02;	/* Снимаем ошибку датчика */
+	    status->st_test0 &= ~0x02;	/* РЎРЅРёРјР°РµРј РѕС€РёР±РєСѓ РґР°С‚С‡РёРєР° */
 	    res = true;
 	}
     }
@@ -200,7 +200,7 @@ bool test_bmp085(void *par)
 }
 
 /**
- * Test Компаса
+ * Test РљРѕРјРїР°СЃР°
  */
 #pragma section("FLASH_code")
 bool test_cmps(void *par)
@@ -221,7 +221,7 @@ bool test_cmps(void *par)
 	status->st_test0 |= 0x08;
 
 
-	/* Ждем 2.5 секунды */
+	/* Р–РґРµРј 2.5 СЃРµРєСѓРЅРґС‹ */
 	t0 = get_msec_ticks();
 	while (get_msec_ticks() - t0 < 2500) {
 	    LED_test();
@@ -230,7 +230,7 @@ bool test_cmps(void *par)
 
 	if (lsm303_get_comp_data(&data) == true) {
 
-	    /* Все данные компаса сразу не могут быть == 0 */
+	    /* Р’СЃРµ РґР°РЅРЅС‹Рµ РєРѕРјРїР°СЃР° СЃСЂР°Р·Сѓ РЅРµ РјРѕРіСѓС‚ Р±С‹С‚СЊ == 0 */
 	    if ((data.x == 0 && data.y == 0 && data.z == 0) || (data.x == -1 && data.y == -1 && data.z == -1))
 		break;
 
@@ -244,7 +244,7 @@ bool test_cmps(void *par)
 
 
 /**
- * Test Акселерометра - биты одинаковые с компасом!
+ * Test РђРєСЃРµР»РµСЂРѕРјРµС‚СЂР° - Р±РёС‚С‹ РѕРґРёРЅР°РєРѕРІС‹Рµ СЃ РєРѕРјРїР°СЃРѕРј!
  */
 #pragma section("FLASH_code")
 bool test_acc(void *par)
@@ -264,13 +264,13 @@ bool test_acc(void *par)
 	status = (DEV_STATUS_STRUCT *) par;
 	status->st_test0 |= 0x04;
 
-	/* Ждем 2.5 секунды */
+	/* Р–РґРµРј 2.5 СЃРµРєСѓРЅРґС‹ */
 	t0 = get_msec_ticks();
 	while (get_msec_ticks() - t0 < 2500) {
 	    LED_test();
 	}
 
-	/* Все данные акселерометра сразу и температура не могут быть == 0 */
+	/* Р’СЃРµ РґР°РЅРЅС‹Рµ Р°РєСЃРµР»РµСЂРѕРјРµС‚СЂР° СЃСЂР°Р·Сѓ Рё С‚РµРјРїРµСЂР°С‚СѓСЂР° РЅРµ РјРѕРіСѓС‚ Р±С‹С‚СЊ == 0 */
 	if (lsm303_get_acc_data(&data) == true) {
 
 	    if ( /*(data.x == 0 && data.y == 0 && data.z == 0) || */ (data.x == -1 && data.y == -1 && data.z == -1))
@@ -286,7 +286,7 @@ bool test_acc(void *par)
 
 
 /**
- * Тест GPS. В течении 5-ти секунд патаемся получить NMEA
+ * РўРµСЃС‚ GPS. Р’ С‚РµС‡РµРЅРёРё 5-С‚Рё СЃРµРєСѓРЅРґ РїР°С‚Р°РµРјСЃСЏ РїРѕР»СѓС‡РёС‚СЊ NMEA
  */
 #pragma section("FLASH_code")
 bool test_gps(void *par)
@@ -303,19 +303,19 @@ bool test_gps(void *par)
 	    break;
 
 	status = (DEV_STATUS_STRUCT *) par;
-	status->st_test0 |= 0x10;	// Ошибка
+	status->st_test0 |= 0x10;	// РћС€РёР±РєР°
 
-	/* Одидаем запуска */
+	/* РћРґРёРґР°РµРј Р·Р°РїСѓСЃРєР° */
 	t0 = get_msec_ticks();
 	do {
 	    LED_test();
 	} while (get_msec_ticks() - t0 < 500);
 	gps_set_grmc();
 
-	/* Ждем пока буфер не начнет набираться */
+	/* Р–РґРµРј РїРѕРєР° Р±СѓС„РµСЂ РЅРµ РЅР°С‡РЅРµС‚ РЅР°Р±РёСЂР°С‚СЊСЃСЏ */
 	t0 = get_msec_ticks();
 	do {
-	    res = gps_nmea_exist();	/* выйдет при приеме 1 GSA */
+	    res = gps_nmea_exist();	/* РІС‹Р№РґРµС‚ РїСЂРё РїСЂРёРµРјРµ 1 GSA */
 	    if (res) {
 		status->st_test0 &= ~0x10;
 		break;
@@ -329,7 +329,7 @@ bool test_gps(void *par)
 }
 
 /**
- * Определить причину сброса
+ * РћРїСЂРµРґРµР»РёС‚СЊ РїСЂРёС‡РёРЅСѓ СЃР±СЂРѕСЃР°
  */
 #pragma section("FLASH_code")
 void test_reset(void *par)
@@ -343,7 +343,7 @@ void test_reset(void *par)
     if (par != NULL) {
 	status = (DEV_STATUS_STRUCT *) par;
 
-	// Получили причину сброса
+	// РџРѕР»СѓС‡РёР»Рё РїСЂРёС‡РёРЅСѓ СЃР±СЂРѕСЃР°
 	res = read_reset_cause_from_eeprom();
 	if (res == CAUSE_POWER_OFF) {
 	    status->st_reset = 1;
@@ -356,7 +356,7 @@ void test_reset(void *par)
 	} else if (res == CAUSE_NO_LINK) {
 	    status->st_reset = 16;
 	} else {
-	    status->st_reset = 32;	// непредвиденный сброс
+	    status->st_reset = 32;	// РЅРµРїСЂРµРґРІРёРґРµРЅРЅС‹Р№ СЃР±СЂРѕСЃ
 	}
     }
     LED_set_state(l1, l2, l3, l4);
@@ -364,8 +364,8 @@ void test_reset(void *par)
 
 
 /**
- * Тестировать DAC 4 и генератор
- * Должно запускаться в самом начале работы. Не позже!
+ * РўРµСЃС‚РёСЂРѕРІР°С‚СЊ DAC 4 Рё РіРµРЅРµСЂР°С‚РѕСЂ
+ * Р”РѕР»Р¶РЅРѕ Р·Р°РїСѓСЃРєР°С‚СЊСЃСЏ РІ СЃР°РјРѕРј РЅР°С‡Р°Р»Рµ СЂР°Р±РѕС‚С‹. РќРµ РїРѕР·Р¶Рµ!
  */
 #pragma section("FLASH_code")
 bool test_dac4(void *par)
@@ -386,22 +386,22 @@ bool test_dac4(void *par)
 
 	status = (DEV_STATUS_STRUCT *) par;
 
-	status->st_test1 |= 0x20;	// Ошибка генератора 4 МГц
-	status->st_test1 |= 0x80;	// Ошибка таймера T3
+	status->st_test1 |= 0x20;	// РћС€РёР±РєР° РіРµРЅРµСЂР°С‚РѕСЂР° 4 РњР“С†
+	status->st_test1 |= 0x80;	// РћС€РёР±РєР° С‚Р°Р№РјРµСЂР° T3
 
 
-	DAC_write(DAC_4MHZ, 0);	// Подаем на dac4 0
+	DAC_write(DAC_4MHZ, 0);	// РџРѕРґР°РµРј РЅР° dac4 0
 
-	TIMER3_init();		// Запустим 3-й таймер. Вектор на IRQ не ставим!
+	TIMER3_init();		// Р—Р°РїСѓСЃС‚РёРј 3-Р№ С‚Р°Р№РјРµСЂ. Р’РµРєС‚РѕСЂ РЅР° IRQ РЅРµ СЃС‚Р°РІРёРј!
 	IRQ_register_vector(TIM1_TIM3_VECTOR_NUM);
 
-	/* Ждем пока буфер не начнет набираться */
+	/* Р–РґРµРј РїРѕРєР° Р±СѓС„РµСЂ РЅРµ РЅР°С‡РЅРµС‚ РЅР°Р±РёСЂР°С‚СЊСЃСЏ */
 	t0 = get_msec_ticks();
 	while (get_msec_ticks() - t0 < 1500) {
 	    LED_test();
 	}
 
-	/* Ждем 2.5 секунды */
+	/* Р–РґРµРј 2.5 СЃРµРєСѓРЅРґС‹ */
 	t0 = get_msec_ticks();
 	t1 = t0;
 	while (t1 - t0 < 4500) {
@@ -417,16 +417,16 @@ bool test_dac4(void *par)
 
 	min = TIMER3_get_period();
 
-	DAC_write(DAC_4MHZ, 0x3ff0);	// Подаем на dac4 максимум
+	DAC_write(DAC_4MHZ, 0x3ff0);	// РџРѕРґР°РµРј РЅР° dac4 РјР°РєСЃРёРјСѓРј
 	res = false;
 
-	/* Ждем пока буфер не начнет набираться */
+	/* Р–РґРµРј РїРѕРєР° Р±СѓС„РµСЂ РЅРµ РЅР°С‡РЅРµС‚ РЅР°Р±РёСЂР°С‚СЊСЃСЏ */
 	t0 = get_msec_ticks();
 	while (get_msec_ticks() - t0 < 1500) {
 	    LED_test();
 	}
 
-	/* Ждем 1.5 секунды */
+	/* Р–РґРµРј 1.5 СЃРµРєСѓРЅРґС‹ */
 	t0 = get_msec_ticks();
 	t1 = t0;
 	while (t1 - t0 < 4500) {
@@ -441,10 +441,10 @@ bool test_dac4(void *par)
 	    break;
 
 	max = TIMER3_get_period();
-	status->st_test1 &= ~0x80;	// Снимаем ошибку таймера 3
+	status->st_test1 &= ~0x80;	// РЎРЅРёРјР°РµРј РѕС€РёР±РєСѓ С‚Р°Р№РјРµСЂР° 3
 
 	if (min > 0 && max > 0) {
-	    status->st_test1 &= ~0x20;	// Снимаем ошибку генератора 4.096 МГц
+	    status->st_test1 &= ~0x20;	// РЎРЅРёРјР°РµРј РѕС€РёР±РєСѓ РіРµРЅРµСЂР°С‚РѕСЂР° 4.096 РњР“С†
 	    res = true;
 	}
 
@@ -461,8 +461,8 @@ bool test_dac4(void *par)
 	    break;
 
 	status = (DEV_STATUS_STRUCT *) par;
-	status->st_test1 &= ~0x20;	// Ошибка генератора 4 МГц - сняли
-	status->st_test1 &= ~0x80;	// Ошибка таймера T3 - сняли
+	status->st_test1 &= ~0x20;	// РћС€РёР±РєР° РіРµРЅРµСЂР°С‚РѕСЂР° 4 РњР“С† - СЃРЅСЏР»Рё
+	status->st_test1 &= ~0x80;	// РћС€РёР±РєР° С‚Р°Р№РјРµСЂР° T3 - СЃРЅСЏР»Рё
 	res = true;
     } while (0);
 
@@ -475,8 +475,8 @@ bool test_dac4(void *par)
 
 
 /**
- * Тестировать DAC 19 и генератор
- * Должно запускаться в самом начале работы. Не позже!
+ * РўРµСЃС‚РёСЂРѕРІР°С‚СЊ DAC 19 Рё РіРµРЅРµСЂР°С‚РѕСЂ
+ * Р”РѕР»Р¶РЅРѕ Р·Р°РїСѓСЃРєР°С‚СЊСЃСЏ РІ СЃР°РјРѕРј РЅР°С‡Р°Р»Рµ СЂР°Р±РѕС‚С‹. РќРµ РїРѕР·Р¶Рµ!
  */
 #pragma section("FLASH_code")
 bool test_dac19(void *par)
@@ -496,19 +496,19 @@ bool test_dac19(void *par)
 	    break;
 
 	status = (DEV_STATUS_STRUCT *) par;
-	status->st_test1 |= 0x10;	// Ошибка генератора 19 МГц
-	status->st_test1 |= 0x40;	// Ошибка таймера T4
+	status->st_test1 |= 0x10;	// РћС€РёР±РєР° РіРµРЅРµСЂР°С‚РѕСЂР° 19 РњР“С†
+	status->st_test1 |= 0x40;	// РћС€РёР±РєР° С‚Р°Р№РјРµСЂР° T4
 
-	DAC_write(DAC_19MHZ, DAC19_MIN_DATA);	// Подаем на dac 0
+	DAC_write(DAC_19MHZ, DAC19_MIN_DATA);	// РџРѕРґР°РµРј РЅР° dac 0
 
-	TIMER4_config();	// Заводим счетный таймер
+	TIMER4_config();	// Р—Р°РІРѕРґРёРј СЃС‡РµС‚РЅС‹Р№ С‚Р°Р№РјРµСЂ
 	TIMER4_enable_irq();
-	TIMER4_del_vector();	// Удалим вектор - иначе не сможем опросить флажок
+	TIMER4_del_vector();	// РЈРґР°Р»РёРј РІРµРєС‚РѕСЂ - РёРЅР°С‡Рµ РЅРµ СЃРјРѕР¶РµРј РѕРїСЂРѕСЃРёС‚СЊ С„Р»Р°Р¶РѕРє
 
 
-	status->st_test1 |= 0x01;	// GPS включен
+	status->st_test1 |= 0x01;	// GPS РІРєР»СЋС‡РµРЅ
 
-	/* Ждем пока буфер не начнет набираться */
+	/* Р–РґРµРј РїРѕРєР° Р±СѓС„РµСЂ РЅРµ РЅР°С‡РЅРµС‚ РЅР°Р±РёСЂР°С‚СЊСЃСЏ */
 	t0 = get_msec_ticks();
 	while (get_msec_ticks() - t0 < 1500) {
 	    LED_test();
@@ -527,11 +527,11 @@ bool test_dac19(void *par)
 	}
 
 
-	status->st_test1 &= ~0x40;	// Снимаем ошибку таймера T4 - нет PPS
+	status->st_test1 &= ~0x40;	// РЎРЅРёРјР°РµРј РѕС€РёР±РєСѓ С‚Р°Р№РјРµСЂР° T4 - РЅРµС‚ PPS
 
 
 	t0 = get_msec_ticks();
-	DAC_write(DAC_19MHZ, DAC19_MAX_DATA);	// Подаем на dac max
+	DAC_write(DAC_19MHZ, DAC19_MAX_DATA);	// РџРѕРґР°РµРј РЅР° dac max
 	do {
 	    t1 = get_msec_ticks();
 	    ch1 = TIMER4_wait_for_irq();
@@ -543,14 +543,14 @@ bool test_dac19(void *par)
 	    LED_test();
 	} while (t1 - t0 < 4500);
 
-	/* Смотрим чтоб был максимум */
+	/* РЎРјРѕС‚СЂРёРј С‡С‚РѕР± Р±С‹Р» РјР°РєСЃРёРјСѓРј */
 	if (min == 0 || ch0 == false || min >= SCLK_VALUE || ch1 == false || max <= SCLK_VALUE) {
 	    res = false;
 	    break;
 	}
 
 
-	/* Снимаем ошибку генератора 19.2 МГц */
+	/* РЎРЅРёРјР°РµРј РѕС€РёР±РєСѓ РіРµРЅРµСЂР°С‚РѕСЂР° 19.2 РњР“С† */
 	if (abs(max - min) > 20) {
 	    status->st_test1 &= ~0x10;
 	    res = true;
@@ -559,11 +559,11 @@ bool test_dac19(void *par)
     }
     while (0);
 
-    // Что прочитали
+    // Р§С‚Рѕ РїСЂРѕС‡РёС‚Р°Р»Рё
     status->st_tim4[0] = min;
     status->st_tim4[1] = max;
 
-    TIMER4_disable();		/* Закрываем счетный таймер */
+    TIMER4_disable();		/* Р—Р°РєСЂС‹РІР°РµРј СЃС‡РµС‚РЅС‹Р№ С‚Р°Р№РјРµСЂ */
     TIMER4_disable_irq();
     LED_set_state(l1, l2, l3, l4);
     return res;
@@ -572,7 +572,7 @@ bool test_dac19(void *par)
 
 
 /**
- * Тестировать все модули
+ * РўРµСЃС‚РёСЂРѕРІР°С‚СЊ РІСЃРµ РјРѕРґСѓР»Рё
  */
 #pragma section("FLASH_code")
 void test_all(void *par)
@@ -580,49 +580,49 @@ void test_all(void *par)
     DEV_STATUS_STRUCT *status;
     int t0, i;
 
-    /* не могу открыть UART0 */
+    /* РЅРµ РјРѕРіСѓ РѕС‚РєСЂС‹С‚СЊ UART0 */
     if (par != NULL && gps_init() == 0) {
 	status = (DEV_STATUS_STRUCT *) par;
-	status->st_main |= 0x80;	/* Идет тестирование (с даками) */
+	status->st_main |= 0x80;	/* РРґРµС‚ С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ (СЃ РґР°РєР°РјРё) */
 
-	status->st_test1 |= 0x01;	/* GPS включен */
+	status->st_test1 |= 0x01;	/* GPS РІРєР»СЋС‡РµРЅ */
 
-	adc_init(status);	/* Инициализация атмеловских датчиков и вн. по I2C */
+	adc_init(status);	/* РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Р°С‚РјРµР»РѕРІСЃРєРёС… РґР°С‚С‡РёРєРѕРІ Рё РІРЅ. РїРѕ I2C */
 
-	test_gps(status);	/* Test GPS модуля */
-	DAC_init();		/* Все даки */
+	test_gps(status);	/* Test GPS РјРѕРґСѓР»СЏ */
+	DAC_init();		/* Р’СЃРµ РґР°РєРё */
 
-	eeprom_test(status);	/* Тест eeprom  */
-	test_reset(status);	/* Получили причину сброса */
+	eeprom_test(status);	/* РўРµСЃС‚ eeprom  */
+	test_reset(status);	/* РџРѕР»СѓС‡РёР»Рё РїСЂРёС‡РёРЅСѓ СЃР±СЂРѕСЃР° */
 
-	/* Test RTC: Прочитаем время из RTC, если ошибка - не используем */
+	/* Test RTC: РџСЂРѕС‡РёС‚Р°РµРј РІСЂРµРјСЏ РёР· RTC, РµСЃР»Рё РѕС€РёР±РєР° - РЅРµ РёСЃРїРѕР»СЊР·СѓРµРј */
 	for (i = 0; i < 3; i++) {
 	    if (rtc_test(status) == true) {
-		t0 = get_rtc_sec_ticks();	/* Если успех - поменяем время  */
+		t0 = get_rtc_sec_ticks();	/* Р•СЃР»Рё СѓСЃРїРµС… - РїРѕРјРµРЅСЏРµРј РІСЂРµРјСЏ  */
 		break;
 	    } else {
-		t0 = get_comp_time();	/* Время компиляции */
+		t0 = get_comp_time();	/* Р’СЂРµРјСЏ РєРѕРјРїРёР»СЏС†РёРё */
 		delay_ms(50);
 	    }
 	}
 
-	/* если test-dac4 здесь ... - ошибка? */
-	test_bmp085(status);	/* Test Датчик температуры и давления:  Прочитаем коэффициенты из bmp085 */
-	test_acc(status);	/* Test Акселерометра: */
-	test_cmps(status);	/* Test Компаса: */
-	test_adc(status);	/* Тест АЦП */
+	/* РµСЃР»Рё test-dac4 Р·РґРµСЃСЊ ... - РѕС€РёР±РєР°? */
+	test_bmp085(status);	/* Test Р”Р°С‚С‡РёРє С‚РµРјРїРµСЂР°С‚СѓСЂС‹ Рё РґР°РІР»РµРЅРёСЏ:  РџСЂРѕС‡РёС‚Р°РµРј РєРѕСЌС„С„РёС†РёРµРЅС‚С‹ РёР· bmp085 */
+	test_acc(status);	/* Test РђРєСЃРµР»РµСЂРѕРјРµС‚СЂР°: */
+	test_cmps(status);	/* Test РљРѕРјРїР°СЃР°: */
+	test_adc(status);	/* РўРµСЃС‚ РђР¦Рџ */
 
 	for (i = 0; i < 3; i++) {
-	    if (test_dac19(status))	/* Тест таймера4 и генератора 19.2 МГц */
+	    if (test_dac19(status))	/* РўРµСЃС‚ С‚Р°Р№РјРµСЂР°4 Рё РіРµРЅРµСЂР°С‚РѕСЂР° 19.2 РњР“С† */
 		break;
 	}
-	test_dac4(status);	/* Тест таймера3 и генератора 4.096 МГц */
+	test_dac4(status);	/* РўРµСЃС‚ С‚Р°Р№РјРµСЂР°3 Рё РіРµРЅРµСЂР°С‚РѕСЂР° 4.096 РњР“С† */
 
 
-	t0 = get_rtc_sec_ticks();	/* Если успех - поменяем время  */
-	set_sec_ticks(t0);	/* Установим часы */
+	t0 = get_rtc_sec_ticks();	/* Р•СЃР»Рё СѓСЃРїРµС… - РїРѕРјРµРЅСЏРµРј РІСЂРµРјСЏ  */
+	set_sec_ticks(t0);	/* РЈСЃС‚Р°РЅРѕРІРёРј С‡Р°СЃС‹ */
     }
-    status->st_main &= ~0x80;	/* Снимаем статус "тестирование" */
-    status->st_test1 &= ~0x01;	/* GPS вЫключен */
-    gps_close();		/* Закрываем UART0  */
+    status->st_main &= ~0x80;	/* РЎРЅРёРјР°РµРј СЃС‚Р°С‚СѓСЃ "С‚РµСЃС‚РёСЂРѕРІР°РЅРёРµ" */
+    status->st_test1 &= ~0x01;	/* GPS РІР«РєР»СЋС‡РµРЅ */
+    gps_close();		/* Р—Р°РєСЂС‹РІР°РµРј UART0  */
 }
